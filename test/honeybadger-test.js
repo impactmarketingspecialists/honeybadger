@@ -5,18 +5,32 @@ var vows = require('vows'),
 vows.describe('Honey Badger').addBatch({
     'When instantiating': {
         topic: function () {
-          
-          try {
-            var hb = new honeybadger();
-            var err = (hb) ? null : { error: 'Unable to instantiate' };
-          } catch (e) {
-            var err = e;
-          }
-
-          this.callback(err, hb);
+          var hb = new honeybadger();
+          this.callback(null, hb);
         },
         'we get an instance': function (err, res) {
+            assert.isNull(err);
             assert.instanceOf(res, honeybadger);
+        }
+    },
+    'When running main entry point': {
+        topic: function () {
+          honeybadger.main();
+          this.callback(null);
+        },
+        "we don't crash ;)": function (err, res) {
+            assert.isNull(err);
+        }
+    },
+    'When loading config from the default path': {
+        topic: function () {
+          var hb = new honeybadger();
+          var res = hb.loadConfig();
+          this.callback((res) ? null : { error: 'Unable to load config' }, res);
+        },
+        "we get a config object": function (err, res) {
+            assert.isNull(err);
+            assert.isObject(res);
         }
     },
  }).export(module);
