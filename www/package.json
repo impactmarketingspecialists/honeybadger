@@ -1,17 +1,13 @@
 {
-  "name": "honeybadger",
-  "description": "Batch and realtime ETL",
+  "name": "honeybadger-client-util",
+  "description": "Data Source Management and Utilities",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
     "express": "*",
     "ws": "*",
     "nano": "*",
-    "dnode": "*",
-    "rimraf": "*",
-    "async": "*",
-    "rets": "git://github.com/dermidgen/node-rets-client.git",
-    "MD5": "^1.2.0"
+    "async": "*"
   },
   "contributors": [
     {
