@@ -1,25 +1,34 @@
 var fs = require('fs');
+var path = require('path');
 var express = require('express');
 var app = new express();
 var http = require('http').createServer(app);
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ server: http });
 var async = require('async');
+var nano = require('nano')('http://localhost:5984');
+var db = nano.use('honeybadger');
+var feed = db.follow({since: "now"});
 
 var http_port = 8090;
 
 app.use(express.bodyParser());
+
+feed.on('change', function (change) {
+  console.log("change: ", change);
+});
+feed.follow();
 
 var DataManager = new (function(){
 
 });
 
 var baseURL = '/data-manager';
-app.use(baseURL+'/', express.static('www/data-manager.html'));
-app.use(baseURL+'/js', express.static('www/js'));
-app.use(baseURL+'/css', express.static('www/css'));
-app.use(baseURL+'/images', express.static('www/images'));
-app.use(baseURL+'/fonts', express.static('www/fonts'));
+app.use(baseURL+'/', express.static(path.resolve('./'))); // Path resolve clears forbidden exception
+app.use(baseURL+'/js', express.static('js/'));
+app.use(baseURL+'/css', express.static('css/'));
+app.use(baseURL+'/images', express.static('images/'));
+app.use(baseURL+'/fonts', express.static('fonts/'));
 
 // app.get(baseURL+'/',function(req, res){
 //     res.status(200).set('Content-Type', 'text/html').send('OK');
