@@ -1,6 +1,8 @@
 .git/**
 test/**
-www/**
+www/js/**
+www/css/**
+www/*.html
 tmp/**
 package.json
 README.md

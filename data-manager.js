@@ -24,11 +24,11 @@ var DataManager = new (function(){
 });
 
 var baseURL = '/data-manager';
-app.use(baseURL+'/', express.static(path.resolve('./'))); // Path resolve clears forbidden exception
-app.use(baseURL+'/js', express.static('js/'));
-app.use(baseURL+'/css', express.static('css/'));
-app.use(baseURL+'/images', express.static('images/'));
-app.use(baseURL+'/fonts', express.static('fonts/'));
+app.use(baseURL+'/', express.static(path.resolve('www/'))); // Path resolve clears forbidden exception
+app.use(baseURL+'/js', express.static('www/js/'));
+app.use(baseURL+'/css', express.static('www/css/'));
+app.use(baseURL+'/images', express.static('www/images/'));
+app.use(baseURL+'/fonts', express.static('www/fonts/'));
 
 // app.get(baseURL+'/',function(req, res){
 //     res.status(200).set('Content-Type', 'text/html').send('OK');
