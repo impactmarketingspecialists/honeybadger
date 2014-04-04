@@ -20,8 +20,36 @@ feed.on('change', function (change) {
 feed.follow();
 
 var DataManager = new (function(){
+    var sources = [];
+
+    db.view('sources', 'list', function(err, body) {
+        if(!err) {
+            sources = [];
+            body.rows.forEach(function(doc){
+                sources.push(doc);
+            });
+        } else console.trace(err);
+    });
+
+    Object.defineProperty(this, "sources", {
+        get: function() { return sources; }
+    });
+
+    this.sourceDetail = function(id) {
+        return sources.find(function(e) {
+            return e._id === id;
+        });
+    };
 
 });
+
+var WSAPI = {
+    list: function(callback){
+        process.nextTick(function(){
+            callback(DataManager.sources);
+        });
+    }
+}
 
 var baseURL = '/data-manager';
 app.use(baseURL+'/', express.static(path.resolve('www/'))); // Path resolve clears forbidden exception
@@ -62,7 +90,7 @@ wss.on('connection',function(ws) {
             return false; 
         }
 
-        if (DataManager[data.method]) {
+        if (WSAPI[data.method]) {
         	var args = [];
 			if(data.args) {
 				data.args.forEach(function(item){
@@ -73,7 +101,7 @@ wss.on('connection',function(ws) {
 			    ws.send(JSON.stringify({event: event, err:err,body:body}));
 			});
 			// console.dir(args);
-        	DataManager[data.method].apply(this, args);
+        	WSAPI[data.method].apply(this, args);
         } else {
             console.log('Method '+data.method+' does not exist');
             ws.send('Error: malformed request');
