@@ -98,7 +98,12 @@ wss.on('connection',function(ws) {
 				});
 			}
         	args.push(function(event, err, body){
-			    ws.send(JSON.stringify({event: event, err:err,body:body}));
+			    ws.send(JSON.stringify({
+                    event: event,
+                    msig: data.msig || null,
+                    err:err,
+                    body:body
+                }));
 			});
 			// console.dir(args);
         	WSAPI[data.method].apply(this, args);
