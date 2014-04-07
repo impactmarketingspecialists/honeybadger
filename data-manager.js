@@ -46,7 +46,7 @@ var DataManager = new (function(){
 var WSAPI = {
     list: function(callback){
         process.nextTick(function(){
-            callback(DataManager.sources);
+            callback('onlist', null, DataManager.sources);
         });
     }
 }

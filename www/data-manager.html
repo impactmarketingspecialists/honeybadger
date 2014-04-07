@@ -25,30 +25,30 @@
 		    <!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 		      <ul class="nav navbar-nav">
-		        <li class="active">
-		        	<a href="#">Dashboard</a>
+		        <li class="nav-item active">
+		        	<a href="#" data-toggle="page" data-target="dashboard">Dashboard</a>
 		        </li>
-		        <li class="dropdown">
+		        <li class="nav-item dropdown">
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manage <b class="caret"></b></a>
 		          <ul class="dropdown-menu">
+		            <li><a href="#sourceManager" data-toggle="page" data-target="sourceManager">Manage Data Sources</a></li>
 		            <li><a href="#" data-toggle="modal" data-target="#sourceEditor">New Data Source</a></li>
-		            <li><a href="#">Manage Data Sources</a></li>
 		            <li><a href="#" data-toggle="modal" data-target="#sourceExport">Export Source List</a></li>
 		            <li class="divider"></li>
 		            <li><a href="#">Data Utilities</a></li>
 		          </ul>
 		        </li>
-		        <li class="dropdown">
+		        <li class="nav-item dropdown">
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Reports <b class="caret"></b></a>
 		          <ul class="dropdown-menu">
-		            <li><a href="#" onclick="dataviz.reset();">Dashboard</a></li>
+		            <li><a href="#">Dashboard</a></li>
 		            <li><a href="#" data-toggle="modal" data-target="#open" onclick="openModal();">Custom Reports</a></li>
 		            <li><a href="#">Export Report</a></li>
 		            <li class="divider"></li>
 		            <li><a href="#">System Status</a></li>
 		          </ul>
 		        </li>
-		        <li>
+		        <li class="nav-item">
 		        	<a href="#">Monitor</a>
 		        </li>
 		      </ul>
@@ -65,46 +65,65 @@
 	<section>
 		<div id="body" class="container-fluid">
 			<header>
-				<h1>IMS Data<small> source management console</small></h1>
+				<h1 id="bodyTitle">IMS Data <small id="bodySubTitle">source management console</small></h1>
 			</header>
-			<div class="row">
-				<div class="col-md-6">
-					<h2>Active</h2>
-					<table id="activeSources" class="table table-striped table-hover table-condensed">
-					<thead>
-						<tr><th>Name</th><th>Type</th><th>Active Since</th></tr>
-					</thead>
-					<tbody>
-						<tr><td>CLAW (CARETS)</td><td>RETS</td><td>April 1, 2014</td></tr>
-						<tr><td>MRMLS</td><td>RETS</td><td>April 1, 2014</td></tr>
-						<tr><td>WFRMLS</td><td>SOAP</td><td>April 1, 2014</td></tr>
-						<tr><td>ECAOR</td><td>RETS</td><td>April 1, 2014</td></tr>
-						<tr><td>FIRSTTEAM</td><td>FTP</td><td>April 1, 2014</td></tr>
-						<tr><td>INTERO</td><td>FTP</td><td>April 1, 2014</td></tr>
-						<tr><td>WINMR</td><td>XML</td><td>April 1, 2014</td></tr>
-					</tbody>
-					</table>
+			<article id="bodyContent">
+				<div id="dashboard" class="row">
+					<div class="col-md-6">
+						<h2>Active</h2>
+						<table id="activeSources" class="table table-striped table-hover table-condensed">
+						<thead>
+							<tr><th>Name</th><th>Type</th><th>Active Since</th></tr>
+						</thead>
+						<tbody>
+						</tbody>
+						</table>
+					</div>
+					<div class="col-md-6">
+						<h2>Inactive</h2>
+						<table id="inactiveSources" class="table table-striped table-hover table-condensed">
+						<thead>
+							<tr><th>Name</th><th>Type</th><th>InActive Since</th></tr>
+						</thead>
+						<tbody>
+						</tbody>
+						</table>
+					</div>
 				</div>
-				<div class="col-md-6">
-					<h2>Inactive</h2>
-					<table id="inactiveSources" class="table table-striped table-hover table-condensed">
-					<thead>
-						<tr><th>Name</th><th>Type</th><th>InActive Since</th></tr>
-					</thead>
-					<tbody>
-						<tr><td>GSMLS</td><td>FTP</td><td>--</td></tr>
-						<tr><td>Sandicore</td><td>RETS</td><td>--</td></tr>
-						<tr><td>SAWMLS</td><td>RETS</td><td>--</td></tr>
-						<tr><td>ARMLS</td><td>RETS</td><td>--</td></tr>
-					</tbody>
-					</table>
+				<div id="sourceManager">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="btn-toolbar" role="toolbar">
+								<div class="btn-group">
+									<button type="button" class="btn btn-primary">New Data Source</button>
+								</div>
+								<div class="btn-group">
+									<button type="button" class="btn btn-default">Activate</button>
+									<button type="button" class="btn btn-default">Disable</button>
+									<button type="button" class="btn btn-default">Delete</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<table id="sourceList" class="table table-striped table-hover table-condensed">
+							<thead>
+								<tr><th>Name</th><th>Type</th><th>Status</th></tr>
+							</thead>
+							<tbody>
+							</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
-			</div>
+			</article>
 		</div>
 	</section>
 	<footer>
 		<div id="footer" class="container-fluid">
-			<div id="alerts"></div>
+			<div id="alerts" class="col-md-11"></div>
+			<div id="connection" class="col-md-1" class="alert"><span class="status">Disconnected</span></div>
 		</div>		
 	</footer>
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>

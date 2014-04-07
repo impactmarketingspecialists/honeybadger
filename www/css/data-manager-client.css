@@ -1,1 +1,14 @@
 body { padding-top: 50px; }
+
+#connection {
+	border-left: 2px solid #eaeaea;
+	text-align: right;
+}
+
+#connection.online {
+	border-left: 2px solid green;
+}
+
+#connection.offline {
+	border-left: 2px solid red;
+}
