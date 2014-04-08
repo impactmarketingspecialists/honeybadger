@@ -1,3 +1,4 @@
+html, body { height: 100%; }
 body { padding-top: 50px; }
 
 #connection {
@@ -11,4 +12,12 @@ body { padding-top: 50px; }
 
 #connection.offline {
 	border-left: 2px solid red;
+}
+
+#wrap {min-height:100%;}
+#body {padding-bottom: 5em;}
+footer {
+	position:relative;
+	height: 5em;
+	margin-top: -5em;
 }

@@ -31,10 +31,13 @@
 		        <li class="nav-item dropdown">
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manage <b class="caret"></b></a>
 		          <ul class="dropdown-menu">
-		            <li><a href="#sourceManager" data-toggle="page" data-target="sourceManager">Manage Data Sources</a></li>
-		            <li><a href="#" data-toggle="modal" data-target="#sourceEditor">New Data Source</a></li>
-		            <li><a href="#" data-toggle="modal" data-target="#sourceExport">Export Source List</a></li>
+		            <li><a href="#sourceManager" data-toggle="page" data-target="sourceManager">Sources</a></li>
+		            <li><a href="#extractorManager" data-toggle="page" data-target="extratorManager">Extrators</a></li>
 		            <li class="divider"></li>
+		            <li><a href="#" data-toggle="modal" data-target="#sourceEditor">New Data Source</a></li>
+		            <li><a href="#" data-toggle="modal" data-target="#extractorWizard">New Data Extractor</a></li>
+		            <li class="divider"></li>
+		            <li><a href="#" data-toggle="modal" data-target="#sourceExport">Export Source List</a></li>
 		            <li><a href="#">Data Utilities</a></li>
 		          </ul>
 		        </li>
@@ -62,7 +65,7 @@
 		  </div><!-- /.container-fluid -->
 		</nav>
 	</header>
-	<section>
+	<section id="wrap">
 		<div id="body" class="container-fluid">
 			<header>
 				<h1 id="bodyTitle">IMS Data <small id="bodySubTitle">source management console</small></h1>
@@ -95,7 +98,7 @@
 						<div class="col-md-12">
 							<div class="btn-toolbar" role="toolbar">
 								<div class="btn-group">
-									<button type="button" class="btn btn-primary">New Data Source</button>
+									<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#sourceEditor">New Data Source</button>
 								</div>
 								<div class="btn-group">
 									<button type="button" class="btn btn-default">Activate</button>
@@ -138,31 +141,110 @@
 	        <h4 class="modal-title" id="myModalLabel">Source Editor</h4>
 	      </div>
 	      <div class="modal-body">
-	        <h4 id="sourceEditorTitle">New Source</h4>
 			<form class="form" role="form" id="sourceEditorForm">
 				<fieldset>
 					<legend>Create a new data source</legend>
 					<div class="row">
-					<div class="col-md-8">
-						<div class="form-group">
-							<label for="sourcename">Source Name</label>
-							<input type="text" class="form-control" placeholder="MLS Name" name="sourcename" id="sourcename"/>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="sourcename">Source Name</label>
+								<input type="text" class="form-control" placeholder="MLS Name" name="sourcename" id="sourcename"/>
+							</div>
 						</div>
+						<div class="col-md-6">						
+							<div class="form-group">
+								<label for="sourcetype">Source Type</label>
+								<select class="form-control" id="sourcetype" name="sourcetype">
+									<option value="RETS">(CA)RETS</option>
+									<option value="FTP">FTP</option>
+									<option value="SOAP">SOAP</option>
+									<option value="REST">REST</option>
+									<option value="XML">XML</option>
+								</select>
+							</div>
 
-						<div class="form-group">
-							<label for="sourcetype">Source Type</label>
-							<select class="form-control" id="sourcetype" name="sourcetype">
-								<option value="RETS">(CA)RETS</option>
-								<option value="FTP">FTP</option>
-								<option value="SOAP">SOAP</option>
-								<option value="REST">REST</option>
-								<option value="XML">XML</option>
-							</select>
 						</div>
 					</div>
+					<div class="row" id="sourceTypeOptions">
+						<div class="col-md-12">
+							<div class="form-group option-group" id="source_RETS">
+								<h4>RETS Authentication Info</h4>
+								<div class="row form-group">
+									<div class="col-md-12">
+										<label for="sourceuri">Login URL</label>
+										<input type="text" class="form-control" placeholder="https://rets.server.com:3934/auth/Login.aspx" name="sourceuri" id="sourceuri"/>
+									</div>
+								</div>
+								<div class="row form-group">
+									<div class="col-md-6">
+										<label for="sourceuser">Username</label>
+										<input type="text" class="form-control" placeholder="CARETSIMPACT" name="sourceuser" id="sourceuser"/>
+									</div>
+									<div class="col-md-6">
+										<label for="sourcepassword">Password</label>
+										<input type="password" class="form-control" placeholder="CARETSIMPACT" name="sourcepassword" id="sourcepassword"/>
+									</div>
+								</div>
+								<div class="row form-group">
+									<div class="col-md-6">
+										<label for="sourceua">User-Agent</label>
+										<input type="text" class="form-control" placeholder="RETS-1.0" name="sourceua" id="sourceua"/>
+									</div>
+									<div class="col-md-6">
+										<label for="sourceuapw">User-Agent Password</label>
+										<input type="password" class="form-control" placeholder="IMS-1.0" name="sourceuapw" id="sourceuapw"/>
+									</div>
+								</div>
+							</div>
+							<div class="form-group option-group" id="source_FTP">
+								<h4>FTP Source Options</h4>
+								<div class="row form-group">
+									<div class="col-md-12">
+										<label for="ftphost">FTP Host</label>
+										<input type="text" class="form-control" placeholder="ftp.hosts.com" name="ftphost" id="ftphost"/>
+									</div>
+								</div>
+								<div class="row form-group">
+									<div class="col-md-6">
+										<label for="ftpuser">Username</label>
+										<input type="text" class="form-control" placeholder="CARETSIMPACT" name="ftpuser" id="ftpuser"/>
+									</div>
+									<div class="col-md-6">
+										<label for="ftpauth">Password</label>
+										<input type="password" class="form-control" placeholder="CARETSIMPACT" name="ftpauth" id="ftpauth"/>
+									</div>
+								</div>
+							</div>							
+							<div class="row form-group">
+								<div class="col-md-12">
+									<button type="button" class="btn btn-primary" onclick="DataManager.validateSource();">Validate Connection</button>
+									<span id="sourceValidationStatus"></span>
+								</div>
+							</div>
+						</div>
 					</div>
 				</fieldset>
 			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button id="sourceEditorSave" type="button" class="btn btn-primary" data-dismiss="modal" disabled="disabled">Save</button>
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="modal fade" id="extractorWizard" tabindex="-1" role="dialog" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title" id="extractorWizardTitle">Extractor Wizard</h4>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="well" style="max-width: 400px; margin: 0 auto">
+
+	      	</div>
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

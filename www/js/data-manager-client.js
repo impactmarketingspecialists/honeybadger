@@ -137,6 +137,27 @@ var DataManager = new (function(){
 		if (confirm('Are you sure?')) socket.send(JSON.stringify({method:'destroy',args:[id,rev]}));
 	};
 
+	this.validateSource = function() {
+		var source = {
+			type: $('#sourcetype').val(),
+			host: $('#ftphost').val(),
+			port: 21,
+			user: $('#ftpuser').val(),
+			password: $('#ftpauth').val()
+		};
+		send('validate',[source],function(e){
+			console.log(e);
+			$('#sourceValidationStatus').removeClass('alert alert-success glyphicon glyphicon-ok-sign alert-danger glyphicon-exclamation-sign');
+			if (!e.err) {
+				$('#sourceValidationStatus').addClass('alert alert-success glyphicon glyphicon-ok-sign');
+				$('#sourceEditorSave').prop('disabled',false);
+			} else {
+				$('#sourceValidationStatus').addClass('alert alert-danger glyphicon glyphicon-exclamation-sign');
+				$('#sourceEditorSave').prop('disabled',true);
+			}
+		});
+	};
+
 	this.save = function(){
 	};
 
@@ -153,10 +174,22 @@ var DataManager = new (function(){
 		$(item).click(function(){
 			DataManager.navigate($(this).attr('data-target'));
 		});
-	})
+	});
 
 })();
 
 connect();
 if (document.location.hash) DataManager.navigate(document.location.hash.replace('#',''));
 else DataManager.navigate('dashboard');
+
+$(document).ready(function(){
+
+	$('#sourcetype').change(function(){
+		$('#sourceTypeOptions .option-group').hide();
+		if ($(this).val() == 'RETS') $('#source_RETS').show();
+		else if ($(this).val() == 'FTP') $('#source_FTP').show();
+		else if ($(this).val() == 'SOAP') $('#source_SOAP').show();
+		else if ($(this).val() == 'REST') $('#source_REST').show();
+		else if ($(this).val() == 'XML') $('#source_XML').show();
+	}).change();
+})

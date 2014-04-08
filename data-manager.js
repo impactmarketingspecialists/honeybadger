@@ -48,6 +48,43 @@ var WSAPI = {
         process.nextTick(function(){
             callback('onlist', null, DataManager.sources);
         });
+    },
+    validate: function(source, callback) {
+        if (source.type == 'FTP') {
+            console.log('FTP Client Test');
+            var client = require('ftp');
+            var c = new client();
+
+            c.on('ready', function() {
+                c.list(function(err, list) {
+                  if (err) {
+                    process.nextTick(function(){
+                        callback('onvalidate',err,null);
+                    });
+                    return;
+                  }
+                  c.end();
+                  process.nextTick(function(){
+                    callback('onvalidate',null,{success:true})
+                  })
+                });
+            });
+
+            c.on('error', function(e) {
+                console.trace(e);
+                process.nextTick(function(){
+                    callback('onvalidate',e,null);
+                });
+            });
+
+            c.connect({
+                host: source.host,
+                port: source.port,
+                user: source.user,
+                password: source.password
+            });
+
+        }
     }
 }
 
