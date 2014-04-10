@@ -77,7 +77,6 @@ var DataManager = new (function(){
 			sourceManager: $('#sourceManager').hide()
 		};
 
-
 	var receive = function(e) {
 		// console.log(e.data);
 		var d = JSON.parse(e.data);
@@ -117,9 +116,6 @@ var DataManager = new (function(){
 		}));
 	};
 
-	this.reset = function(){
-	};
-
 	this.list = function(id){
 		send('list',null,function(e){
 			if (!e.err) {
@@ -129,37 +125,34 @@ var DataManager = new (function(){
 		});
 	};
 
-	this.load = function(id){
-		socket.send(JSON.stringify({method:'load',args:[id]}));
-	};
+	this.source = {
+		validate: function(){
 
-	this.destroy = function(id,rev){
-		if (confirm('Are you sure?')) socket.send(JSON.stringify({method:'destroy',args:[id,rev]}));
-	};
+			var src = {
+				type: $('#sourcetype').val(),
+				host: $('#ftphost').val(),
+				port: 21,
+				user: $('#ftpuser').val(),
+				password: $('#ftpauth').val()
+			};
 
-	this.validateSource = function() {
-		var source = {
-			type: $('#sourcetype').val(),
-			host: $('#ftphost').val(),
-			port: 21,
-			user: $('#ftpuser').val(),
-			password: $('#ftpauth').val()
-		};
-		send('validate',[source],function(e){
-			console.log(e);
-			$('#sourceValidationStatus').removeClass('alert alert-success glyphicon glyphicon-ok-sign alert-danger glyphicon-exclamation-sign');
-			if (!e.err) {
-				$('#sourceValidationStatus').addClass('alert alert-success glyphicon glyphicon-ok-sign');
-				$('#sourceEditorSave').prop('disabled',false);
-			} else {
-				$('#sourceValidationStatus').addClass('alert alert-danger glyphicon glyphicon-exclamation-sign');
-				$('#sourceEditorSave').prop('disabled',true);
-			}
-		});
-	};
-
-	this.save = function(){
-	};
+			send('validate',[src],function(e){
+				console.log(e);
+				$('#sourceValidationStatus').removeClass('alert alert-success glyphicon glyphicon-ok-sign alert-danger glyphicon-exclamation-sign');
+				if (!e.err) {
+					$('#sourceValidationStatus').addClass('alert alert-success glyphicon glyphicon-ok-sign');
+					$('#sourceEditorSave').prop('disabled',false);
+				} else {
+					$('#sourceValidationStatus').addClass('alert alert-danger glyphicon glyphicon-exclamation-sign');
+					$('#sourceEditorSave').prop('disabled',true);
+				}
+			});
+		},
+		save: function(){
+			$('#sourceEditor').modal('hide');
+			return false;
+		}
+	}
 
 	this.navigate = function(page, callback){
 		if (typeof pages[page] == 'undefined') return false;
@@ -179,11 +172,11 @@ var DataManager = new (function(){
 })();
 
 connect();
+
 if (document.location.hash) DataManager.navigate(document.location.hash.replace('#',''));
 else DataManager.navigate('dashboard');
 
 $(document).ready(function(){
-
 	$('#sourcetype').change(function(){
 		$('#sourceTypeOptions .option-group').hide();
 		if ($(this).val() == 'RETS') $('#source_RETS').show();

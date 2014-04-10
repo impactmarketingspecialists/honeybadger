@@ -217,7 +217,7 @@
 							</div>							
 							<div class="row form-group">
 								<div class="col-md-12">
-									<button type="button" class="btn btn-primary" onclick="DataManager.validateSource();">Validate Connection</button>
+									<button type="button" class="btn btn-primary" onclick="DataManager.source.validate();">Validate Connection</button>
 									<span id="sourceValidationStatus"></span>
 								</div>
 							</div>
@@ -227,7 +227,7 @@
 			</form>
 	      </div>
 	      <div class="modal-footer">
-	        <button id="sourceEditorSave" type="button" class="btn btn-primary" data-dismiss="modal" disabled="disabled">Save</button>
+	        <button id="sourceEditorSave" type="button" class="btn btn-primary" onclick="DataManager.source.save()" disabled="disabled">Save</button>
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 	      </div>
 	    </div>
