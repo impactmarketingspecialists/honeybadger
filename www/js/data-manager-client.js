@@ -133,13 +133,30 @@ var DataManager = new (function(){
 
 	this.source.validate = function(src){
 
-		var src = {
-			type: $('#sourcetype').val(),
-			host: $('#ftphost').val(),
-			port: 21,
-			user: $('#ftpuser').val(),
-			password: $('#ftpauth').val()
-		};
+		var src = {},
+			type = $('#sourcetype').val();
+
+		switch(type) {
+			case "RETS":
+				src.uri = $('#sourceuri').val();
+				src.type = type;
+				src.auth = {
+					username: $('#sourceuser').val(),
+					password: $('#sourcepassword').val(),
+					userAgentHeader: $('#sourceua').val(),
+					userAgentPassword: $('#sourceuapw').val()
+				};
+			break;
+			case "FTP":
+				src.uri = $('#ftphost').val();
+				src.type = type;
+				src.port = 21;
+				src.auth = {
+					username: $('#ftpuser').val(),
+					password: $('#ftpauth').val()
+				};
+			break;
+		}
 
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
 		$('#validateBtn').attr('disabled','disabled');
@@ -162,14 +179,24 @@ var DataManager = new (function(){
 		if (!$('#sourcename').val()) return false;
 
 		var type = $('#sourcetype').val(),
-			src = {};
+			src = {	name: $('#sourcename').val() };
 
 		switch(type)
 		{
 			case "RETS":
+				src.source = {
+					uri: $('#sourceuri').val(),
+					type: type,
+					version: '1.5',
+					auth: {
+						username: $('#sourceuser').val(),
+						password: $('#sourcepassword').val(),
+						userAgentHeader: $('#sourceua').val(),
+						userAgentPassword: $('#sourceuapw').val()
+					}
+				};
 			break;
 			case "FTP":
-				src.name = $('#sourcename').val();
 				src.source = {
 					uri: $('#ftphost').val(),
 					type: type,

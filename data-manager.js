@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
 var express = require('express');
 var app = new express();
 var http = require('http').createServer(app);
@@ -78,40 +79,68 @@ var WSAPI = {
         });
     },
     validateSource: function(source, callback) {
-        if (source.type == 'FTP') {
-            console.log('FTP Client Test');
-            var client = require('ftp');
-            var c = new client();
 
-            c.on('ready', function() {
-                c.list(function(err, list) {
-                  if (err) {
-                    process.nextTick(function(){
-                        callback('onvalidate',err,null);
+        switch(source.type)
+        {
+            case "FTP":
+                console.log('FTP Client Test');
+                var client = require('ftp');
+                var c = new client();
+
+                c.on('ready', function() {
+                    c.list(function(err, list) {
+                      if (err) {
+                        process.nextTick(function(){
+                            callback('onvalidate',err,null);
+                        });
+                        return;
+                      }
+                      c.end();
+                      process.nextTick(function(){
+                        callback('onvalidate',null,{success:true})
+                      })
                     });
-                    return;
-                  }
-                  c.end();
-                  process.nextTick(function(){
-                    callback('onvalidate',null,{success:true})
-                  })
                 });
-            });
 
-            c.on('error', function(e) {
-                console.trace(e);
-                process.nextTick(function(){
-                    callback('onvalidate',e,null);
+                c.on('error', function(e) {
+                    console.trace(e);
+                    process.nextTick(function(){
+                        callback('onvalidate',e,null);
+                    });
                 });
-            });
 
-            c.connect({
-                host: source.host,
-                port: source.port,
-                user: source.user,
-                password: source.password
-            });
+                c.connect({
+                    host: source.uri,
+                    port: source.port,
+                    user: source.auth.username,
+                    password: source.auth.password
+                });
+            break;
+            case "RETS":
+                var librets = require('rets-client');
 
+                var uri = url.parse(source.uri);
+
+                var client = librets.createConnection({
+                    host: uri.hostname,
+                    port: uri.port,
+                    path: uri.path,
+                    user: source.auth.username,
+                    pass: source.auth.password,
+                    version: source.version || '1.5',
+                    agent: { user: source.auth.userAgentHeader }
+                });
+
+                client.once('connection.success',function(client){
+                    console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                    callback('onvalidate',null,{success:true});
+                });
+
+                client.once('connection.error',function(error, client){
+                    console.error( 'Connection failed: %s.', error.message );
+                    callback('onvalidate',error, null);
+                });
+            break;
         }
     },
     saveSource: function(source, callback) {
