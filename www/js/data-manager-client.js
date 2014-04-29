@@ -125,34 +125,61 @@ var DataManager = new (function(){
 		});
 	};
 
-	this.source = {
-		validate: function(){
+	this.source = function(name, type, properties){
 
-			var src = {
-				type: $('#sourcetype').val(),
-				host: $('#ftphost').val(),
-				port: 21,
-				user: $('#ftpuser').val(),
-				password: $('#ftpauth').val()
-			};
+	};
 
-			send('validate',[src],function(e){
-				console.log(e);
-				$('#sourceValidationStatus').removeClass('alert alert-success glyphicon glyphicon-ok-sign alert-danger glyphicon-exclamation-sign');
-				if (!e.err) {
-					$('#sourceValidationStatus').addClass('alert alert-success glyphicon glyphicon-ok-sign');
-					$('#sourceEditorSave').prop('disabled',false);
-				} else {
-					$('#sourceValidationStatus').addClass('alert alert-danger glyphicon glyphicon-exclamation-sign');
-					$('#sourceEditorSave').prop('disabled',true);
-				}
-			});
-		},
-		save: function(){
-			$('#sourceEditor').modal('hide');
-			return false;
+	this.source.validate = function(src){
+
+		var src = {
+			type: $('#sourcetype').val(),
+			host: $('#ftphost').val(),
+			port: 21,
+			user: $('#ftpuser').val(),
+			password: $('#ftpauth').val()
+		};
+
+		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
+		$('#validateBtn').attr('disabled','disabled');
+
+		send('validate',[src],function(e){
+			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
+			if (!e.err) {
+				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
+				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+				$('#sourceEditorSave').prop('disabled',false);
+			} else {
+				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+				$('#sourceEditorSave').prop('disabled',true);
+			}
+		});
+	};
+	this.source.save = function(){
+
+		if (!$('#sourcename').val()) return false;
+
+		var type = $('#sourcetype').val(),
+			valid = false,
+			src = {};
+
+		switch(type)
+		{
+			case "RETS":
+			break;
+			case "FTP":
+			break;
+			case "SOAP":
+			break;
+			case "REST":
+			break;
+			case "XML":
+			break;
 		}
-	}
+
+		(valid) +$('#sourceEditor').modal('hide');
+		return valid;
+	};
 
 	this.navigate = function(page, callback){
 		if (typeof pages[page] == 'undefined') return false;
@@ -178,7 +205,11 @@ else DataManager.navigate('dashboard');
 
 $(document).ready(function(){
 	$('#sourcetype').change(function(){
+		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
+		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
 		$('#sourceTypeOptions .option-group').hide();
+		$('#sourceEditorSave').prop('disabled',true);
+
 		if ($(this).val() == 'RETS') $('#source_RETS').show();
 		else if ($(this).val() == 'FTP') $('#source_FTP').show();
 		else if ($(this).val() == 'SOAP') $('#source_SOAP').show();
