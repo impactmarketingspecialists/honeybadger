@@ -32,8 +32,8 @@ function update(element,data)
 		$('#sourceList > tbody').html('');
 		$(d).each(function(index, item){
 			$('#sourceList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>')
-			if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>--</td></tr>');
-			else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>--</td></tr>') ;
+			if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+			else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
 	};
 
@@ -70,6 +70,7 @@ function connect()
 
 var DataManager = new (function(){
 
+	var self = this;
 	var __cbqueue = {},
 		sources = [],
 		pages = {
@@ -119,6 +120,7 @@ var DataManager = new (function(){
 	this.list = function(id){
 		send('list',null,function(e){
 			if (!e.err) {
+				console.log(e);
 				sources = e.body;
 				update('sourceLists',sources);
 			}
@@ -142,7 +144,7 @@ var DataManager = new (function(){
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
 		$('#validateBtn').attr('disabled','disabled');
 
-		send('validate',[src],function(e){
+		send('validateSource',[src],function(e){
 			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
@@ -160,7 +162,6 @@ var DataManager = new (function(){
 		if (!$('#sourcename').val()) return false;
 
 		var type = $('#sourcetype').val(),
-			valid = false,
 			src = {};
 
 		switch(type)
@@ -168,6 +169,15 @@ var DataManager = new (function(){
 			case "RETS":
 			break;
 			case "FTP":
+				src.name = $('#sourcename').val();
+				src.source = {
+					uri: $('#ftphost').val(),
+					type: type,
+					auth: {
+						username: $('#ftpuser').val(),
+						password: $('#ftpauth').val()
+					}
+				};
 			break;
 			case "SOAP":
 			break;
@@ -177,8 +187,12 @@ var DataManager = new (function(){
 			break;
 		}
 
-		(valid) +$('#sourceEditor').modal('hide');
-		return valid;
+		send('saveSource',[src],function(e){
+			DataManager.list();
+		});
+
+		sourceModalReset();
+		$('#sourceEditor').modal('hide');
 	};
 
 	this.navigate = function(page, callback){
@@ -203,13 +217,16 @@ connect();
 if (document.location.hash) DataManager.navigate(document.location.hash.replace('#',''));
 else DataManager.navigate('dashboard');
 
+var sourceModalReset = function(){
+	$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
+	$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
+	$('#sourceTypeOptions .option-group').hide();
+	$('#sourceEditorSave').prop('disabled',true);
+};
+
 $(document).ready(function(){
 	$('#sourcetype').change(function(){
-		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
-		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
-		$('#sourceTypeOptions .option-group').hide();
-		$('#sourceEditorSave').prop('disabled',true);
-
+		sourceModalReset();
 		if ($(this).val() == 'RETS') $('#source_RETS').show();
 		else if ($(this).val() == 'FTP') $('#source_FTP').show();
 		else if ($(this).val() == 'SOAP') $('#source_SOAP').show();

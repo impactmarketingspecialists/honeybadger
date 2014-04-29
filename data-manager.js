@@ -14,31 +14,59 @@ var http_port = 8090;
 
 app.use(express.bodyParser());
 
-feed.on('change', function (change) {
-  console.log("change: ", change);
-});
-feed.follow();
-
 var DataManager = new (function(){
     var sources = [];
 
-    db.view('sources', 'list', function(err, body) {
-        if(!err) {
-            sources = [];
-            body.rows.forEach(function(doc){
-                sources.push(doc);
-            });
-        } else console.trace(err);
-    });
+    var refreshSources = function(){
+        db.view('sources', 'list', function(err, body) {
+            if(!err) {
+                sources = [];
+                body.rows.forEach(function(doc){
+                    sources.push(doc);
+               });
+            } else console.trace(err);
+        });
+    };
+
+    refreshSources();
 
     Object.defineProperty(this, "sources", {
         get: function() { return sources; }
     });
 
+    this.refresh = function(){
+        refreshSources();
+    };
+
     this.sourceDetail = function(id) {
         return sources.find(function(e) {
             return e._id === id;
         });
+    };
+
+    this.sourceSave = function(source, callback) {
+
+        var _updateSource = function(){
+            if (!source._rev) {
+                console.log('Document has no _rev; cannot update');
+                console.trace();
+                callback({err:true,body:'Document has no _rev; cannot update'});
+                return false;
+            }
+
+            db.insert(source, source._id, callback);
+        };
+
+        var _newSource = function(){
+            source.type = 'dsn'; // Set the document type to Data Source Name
+            source.status = 'active'; // Activate the source
+            source.activatedOn = Date.now();
+            db.insert(source, null, callback);
+            refreshSources();
+        };
+
+        if (source._id) _updateSource();
+        else _newSource();
     };
 
 });
@@ -49,7 +77,7 @@ var WSAPI = {
             callback('onlist', null, DataManager.sources);
         });
     },
-    validate: function(source, callback) {
+    validateSource: function(source, callback) {
         if (source.type == 'FTP') {
             console.log('FTP Client Test');
             var client = require('ftp');
@@ -85,6 +113,11 @@ var WSAPI = {
             });
 
         }
+    },
+    saveSource: function(source, callback) {
+        DataManager.sourceSave(source, function(err, body){
+            callback('onsave',err,body);
+        });
     }
 }
 
@@ -156,6 +189,12 @@ wss.on('connection',function(ws) {
         console.log('Websocket connection closed');
     });
 });
+
+
+feed.on('change', function (change) {
+    DataManager.refresh();
+});
+feed.follow();
 
 http.listen(http_port);
 
