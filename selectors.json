@@ -1,0 +1,13 @@
+{
+  "dsn": [{
+  	"key":"ims_selector_production",
+	"uri":"mysql://odbc_loader:imsodbc@192.168.6.230/ims_selector_production"
+  }],
+  "selectors": [
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qrymdAnnualSalePricePercentChangeGeo2Geo1",
+  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1"
+  	}
+  ]
+}

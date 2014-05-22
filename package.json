@@ -21,9 +21,10 @@
     }
   ],
   "devDependencies": {
-    "vows": "*",
     "grunt": "~0.4.1",
-    "grunt-contrib-watch": "~0.4.4"
+    "grunt-contrib-watch": "~0.4.4",
+    "mysql": "^2.3.0",
+    "vows": "*"
   },
   "scripts": {
     "test": "vows --spec"
