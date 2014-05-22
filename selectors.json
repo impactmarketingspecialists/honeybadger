@@ -6,8 +6,48 @@
   "selectors": [
   	{
   		"dsn":"ims_selector_production",
+  		"key":"qryAgentListingSoldGeoPrompt",
+  		"query":"SELECT * FROM qryAgentListingSoldGeoPrompt LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qryBrandListingsSoldGeoPrompt",
+  		"query":"SELECT * FROM qryBrandListingsSoldGeoPrompt LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qryFirmListingSoldGeoPrompt",
+  		"query":"SELECT * FROM qryFirmListingSoldGeoPrompt LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qrymdAnnualUnitsPercentChangeGeo2Geo1",
+  		"query":"SELECT * FROM qrymdAnnualUnitsPercentChangeGeo2Geo1 LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
   		"key":"qrymdAnnualSalePricePercentChangeGeo2Geo1",
-  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1"
+  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qrymdQuarterHistoryGeo1",
+  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qrymdQuarterHistoryGeo2",
+  		"query":"SELECT * FROM qrymdQuarterHistoryGeo2 LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qrymdQuarterHistoryMLS",
+  		"query":"SELECT * FROM qrymdQuarterHistoryMLS LIMIT 10"
+  	},
+  	{
+  		"dsn":"ims_selector_production",
+  		"key":"qryOfficeListingsSoldGeoPrompt",
+  		"query":"SELECT * FROM qryOfficeListingsSoldGeoPrompt LIMIT 10"
   	}
   ]
 }
