@@ -27,7 +27,35 @@
   	{
   		"dsn":"ims_selector_production",
   		"key":"qrymdAnnualSalePricePercentChangeGeo2Geo1",
-  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 LIMIT 10"
+      "modifiers": ["PropGeo1"],
+      "limit": 10,
+      "summary-row": true,
+      "columns": [{
+          "label":"12 Month Summary",
+          "format":"string",
+          "field":"PropGeo1"
+        },
+        {
+          "label":"Listings Sold",
+          "format":"number",
+          "field":"5QuarterListingsSoldVolume"
+        },
+        {
+          "label":"Avg List Price",
+          "format":"currency",
+          "field":"PrevQtr4AvgSalePrice"
+        },
+        {
+          "label":"Avg Sale Price",
+          "format":"currency",
+          "field":"PrevQtr4AvgSalePrice"
+        },
+        {
+          "label":"List to Sale Price Ratio",
+          "format":"percent",
+          "field":"4Qtr%ListingsSoldVolumeGain/Loss"
+      }],
+  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 WHERE PropGeo1 in (%s) LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",

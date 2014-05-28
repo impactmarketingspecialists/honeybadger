@@ -1,6 +1,6 @@
 var fs = require('fs');
+var util = require('util');
 var path = require('path');
-var url = require('url');
 var express = require('express');
 var app = new express();
 var http = require('http').createServer(app);
@@ -30,18 +30,34 @@ config.dsn.forEach(function(item){
 });
 
 config.selectors.forEach(function(item){
-	Select[item.key] = function(callback){
-		var res = connections[item.dsn].query(item.query,function(err,results){
-			callback(err,results);
+	Select[item.key] = function(options, callback){
+
+		// if (item.modifiers)
+		if (item.modifiers || item.limit) {
+			var q = util.format(item.query, options.PropGeo1, options.limit);
+			console.log(options);
+		} else var q = item.query;
+
+		console.log(q);
+		var res = connections[item.dsn].query(q,function(err,results){
+
+			var package = {
+				modifiers: item.modifiers,
+				columns: item.columns,
+				selection: results
+			};
+			callback(err,package);
 		});
 	};
 });
 
 
 app.use(function(req, res, next){
-  var url = req.url.replace('/','');
-  if (typeof Select[url] !== undefined) {
-  	Select[url](function(err,results){
+
+  var u = require('url').parse(req.url, true);
+  var c = u.pathname.replace('/','');
+  if (typeof Select[c] !== undefined) {
+  	Select[c](u.query, function(err,results){
   		if (err) {
   			res.send(JSON.stringify(err));
   		} else {
