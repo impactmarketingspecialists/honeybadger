@@ -38,7 +38,7 @@
         {
           "label":"Listings Sold",
           "format":"number",
-          "field":"5QuarterListingsSoldVolume"
+          "field":"Prev4QtrListingsSoldUnits"
         },
         {
           "label":"Avg List Price",
@@ -48,7 +48,7 @@
         {
           "label":"Avg Sale Price",
           "format":"currency",
-          "field":"PrevQtr4AvgSalePrice"
+          "field":"CurQtr4AvgSalePrice"
         },
         {
           "label":"List to Sale Price Ratio",
