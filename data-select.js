@@ -45,7 +45,7 @@ config.selectors.forEach(function(item){
 				modifiers: item.modifiers,
 				columns: item.columns,
 				selection: results,
-				summary: items.summary
+				summary: item.summary
 			};
 			callback(err,package);
 		});
