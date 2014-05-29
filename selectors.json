@@ -29,7 +29,7 @@
   		"key":"qrymdAnnualSalePricePercentChangeGeo2Geo1",
       "modifiers": ["PropGeo1"],
       "limit": 10,
-      "summary-row": true,
+      "summary": true,
       "columns": [{
           "label":"12 Month Summary",
           "format":"string",
@@ -62,7 +62,7 @@
   		"key":"qrymdQuarterHistoryGeo1",
       "modifiers": ["PropGeo1"],
       "limit": 10,
-      "summary-row": true,
+      "summary": true,
       "columns": [{
           "label":"12 Month Summary",
           "format":"string",
