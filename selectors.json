@@ -31,30 +31,21 @@
       "limit": 10,
       "summary": true,
       "columns": [{
-          "label":"12 Month Summary",
+          "label":"Q1 Avg Sale Price % Change",
           "format":"string",
           "field":"PropGeo1"
         },
         {
-          "label":"Listings Sold",
-          "format":"number",
-          "field":"Prev4QtrListingsSoldUnits"
+          "label":"1 Year",
+          "format":"percent",
+          "field":"4Qtr%AvgSalePriceGain/Loss"
         },
         {
-          "label":"Avg List Price",
-          "format":"currency",
-          "field":"PrevQtr4AvgSalePrice"
-        },
-        {
-          "label":"Avg Sale Price",
-          "format":"currency",
-          "field":"CurQtr4AvgSalePrice"
-        },
-        {
-          "label":"List to Sale Price Ratio",
+          "label":"2 Year",
           "format":"percent",
           "field":"4Qtr%ListingsSoldVolumeGain/Loss"
-      }],
+        }
+      ],
   		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 WHERE PropGeo1 in (%s) LIMIT %d"
   	},
   	{
