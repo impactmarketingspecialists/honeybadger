@@ -60,7 +60,35 @@
   	{
   		"dsn":"ims_selector_production",
   		"key":"qrymdQuarterHistoryGeo1",
-  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 LIMIT 10"
+      "modifiers": ["PropGeo1"],
+      "limit": 10,
+      "summary-row": true,
+      "columns": [{
+          "label":"12 Month Summary",
+          "format":"string",
+          "field":"PropGeo1"
+        },
+        {
+          "label":"Listings Sold",
+          "format":"number",
+          "field":"ListingsSoldVolume"
+        },
+        {
+          "label":"Avg List Price",
+          "format":"currency",
+          "field":"AvgListPrice"
+        },
+        {
+          "label":"Avg Sale Price",
+          "format":"currency",
+          "field":"AvgSalePrice"
+        },
+        {
+          "label":"List to Sale Price Ratio",
+          "format":"percent",
+          "field":"SaleOrigListPriceRatio"
+      }],
+  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 WHERE PropGeo1 in (%s) LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",
