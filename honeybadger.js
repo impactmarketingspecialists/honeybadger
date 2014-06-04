@@ -17,7 +17,7 @@ var honeybadger = function(){
 };
 
 honeybadger.main = function() {
-	// console.log('Starting Honey Badger Service');
+	console.log('Starting Honey Badger Service');
 	var hb = new honeybadger();
 	var config = hb.loadConfig();
 
@@ -28,10 +28,10 @@ honeybadger.main = function() {
 		var port = config.dnode_port || dnode_port;
 
 		dserver.listen(port);
-		// console.log('dnode started on:', port);
+		console.log('dnode started on:', port);
 	}
 
-	var extractor = new rets();
+	// var extractor = new rets();
 };
 
 honeybadger.main();

@@ -25,22 +25,7 @@ vows.describe('Honey Badger').addBatch({
             assert.isNull(err);
             assert.isObject(res);
         }
-    },
-    'When running main entry point': {
-        topic: function () {
-
-          assert.throws(honeybadger.main, Error);
-          honeybadger.main();
-          
-          this.callback(null);
-        },
-        "we don't crash ;)": function (err, res) {
-            assert.isNull(err);
-        },
-        // "dnode runs properly": function(err, res) {
-
-        // }
-    },
+    }
  }).export(module);
 
    // 'and passing some options': {

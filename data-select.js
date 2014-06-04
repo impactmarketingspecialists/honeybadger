@@ -8,6 +8,8 @@ var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({ server: http });
 var async = require('async');
 var mysql = require('mysql');
+var nano = require('nano')('http://localhost:5984');
+var products = nano.use('evdp_products');
 var dnode = require('dnode');
 
 var dnode_port = 8122;
@@ -17,7 +19,27 @@ var config = require("./selectors.json");
 
 var connections = {};
 
-var Select = {};
+var Select = {
+	product: function(opts, callback)
+	{
+		products.get(opts.id, { revs_info: true }, function(err, body){
+			if (err) {
+				console.trace(err);
+				callback(err, null);
+				return;
+			}
+
+			for (var key in body.selectors)	{
+				if (typeof Select[key] !== undefined) {
+					Select[key](opts, function(err, results){
+						console.log(err, results);
+					});
+				} 
+			}
+			callback(null, body);
+		});
+	}
+};
 
 config.dsn.forEach(function(item){
 	connections[item.key] = mysql.createConnection(item.uri);
@@ -51,7 +73,6 @@ config.selectors.forEach(function(item){
 		});
 	};
 });
-
 
 app.use(function(req, res, next){
 
