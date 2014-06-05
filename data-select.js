@@ -76,6 +76,7 @@ config.selectors.forEach(function(item){
 		var res = connections[item.dsn].query(q,function(err,results){
 
 			var package = {
+				selector: item.key,
 				modifiers: item.modifiers,
 				columns: item.columns,
 				selection: results,
