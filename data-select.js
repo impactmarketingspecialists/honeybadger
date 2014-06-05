@@ -29,14 +29,25 @@ var Select = {
 				return;
 			}
 
+			var selections = [];
+			var selects = [];
 			for (var key in body.selectors)	{
 				if (typeof Select[key] !== undefined) {
-					Select[key](opts, function(err, results){
-						console.log(err, results);
-					});
+					var task = function(_key) {
+						return function(_callback) {
+							Select[_key](opts, function(err, results){
+								_callback(null, results);
+							});
+						};
+					}(key);
+					selects.push(task);
 				} 
 			}
-			callback(null, body);
+
+			async.parallel(selects, function(err, res){
+				callback(err, res);	
+			});
+
 		});
 	}
 };
@@ -54,6 +65,7 @@ config.dsn.forEach(function(item){
 config.selectors.forEach(function(item){
 	Select[item.key] = function(options, callback){
 
+		console.log(item.key);
 		// if (item.modifiers)
 		if (item.modifiers || item.limit) {
 			var q = util.format(item.query, options.PropGeo1, options.limit);
