@@ -22,7 +22,26 @@
   	{
   		"dsn":"ims_selector_production",
   		"key":"qrymdAnnualUnitsPercentChangeGeo2Geo1",
-  		"query":"SELECT * FROM qrymdAnnualUnitsPercentChangeGeo2Geo1 LIMIT 10"
+      "modifiers": ["PropGeo1"],
+      "limit": 10,
+      "summary": true,
+      "columns": [{
+          "label":"Q1 Listings Sold % Change",
+          "format":"string",
+          "field":"PropGeo1"
+        },
+        {
+          "label":"1 Year",
+          "format":"percent",
+          "field":"4Qtr%AvgSalePriceGain/Loss"
+        },
+        {
+          "label":"2 Year",
+          "format":"percent",
+          "field":"4Qtr%ListingsSoldVolumeGain/Loss"
+        }
+      ],
+  		"query":"SELECT * FROM qrymdAnnualUnitsPercentChangeGeo2Geo1 WHERE PropGeo1 in (%s) LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",
@@ -95,6 +114,29 @@
   		"dsn":"ims_selector_production",
   		"key":"qryOfficeListingsSoldGeoPrompt",
   		"query":"SELECT * FROM qryOfficeListingsSoldGeoPrompt LIMIT 10"
-  	}
+  	},
+    {
+      "dsn":"ims_selector_production",
+      "key":"tblMarketDataGeo1Geo2Qtr",
+      "modifiers": ["PropGeo1"],
+      "limit": 10,
+      "summary": true,
+      "columns": [{
+          "label":"Price Range",
+          "format":"string",
+          "field":"PRange"
+        },
+        {
+          "label":"Units",
+          "format":"number",
+          "field":"ListingsSoldUnits"
+        },
+        {
+          "label":"Volume",
+          "format":"currency",
+          "field":"ListingsSoldVolume"
+        }],
+      "query":"SELECT * FROM tblMarketDataGeo1Geo2Qtr WHERE Year in (2013) AND Qtr in (3) AND PropGeo1 in (%s) GROUP BY PRange"
+    }
   ]
 }
