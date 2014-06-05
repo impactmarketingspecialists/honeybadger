@@ -65,7 +65,7 @@
           "field":"4Qtr%ListingsSoldVolumeGain/Loss"
         }
       ],
-  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 WHERE PropGeo1 in (%s) GROUP BY PropGeo1 LIMIT %d"
+  		"query":"SELECT * FROM qrymdAnnualSalePricePercentChangeGeo2Geo1 WHERE PropGeo1 in (%s) LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",
@@ -98,7 +98,7 @@
           "format":"percent",
           "field":"SaleOrigListPriceRatio"
       }],
-  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 WHERE PropGeo1 in (%s) LIMIT %d"
+  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 WHERE PropGeo1 in (%s) GROUP BY PropGeo 1 LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",
