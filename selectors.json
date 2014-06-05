@@ -142,12 +142,12 @@
       "dsn":"ims_selector_production",
       "key":"nineQtrTrend",
       "modifiers": ["PropGeo1"],
-      "limit": 1000,
+      "limit": null,
       "summary": true,
       "columns": [{
-          "label":"Qtr",
-          "format":"string",
-          "field":"Qtr"
+          "label":"Year/Qtr",
+          "format":"number",
+          "field":"YrQtr"
         },
         {
           "label":"LS Units",
@@ -162,10 +162,10 @@
         {
           "label":"Avg Sale Price",
           "format":"currency",
-          "field":"ListingsSoldVolume"
+          "field":"AvgListingsSoldVolume"
         }
       ],
-      "query":"SELECT * FROM tblMarketDataGeo1Geo2Qtr WHERE PropGeo1 in (%s)"
+      "query":"SELECT CONCAT(CAST(`Year` AS CHAR CHARACTER SET utf8), '/', Qtr) as YrQtr, ListingsSoldUnits, ListingsSoldVolume, AVG(ListingsSoldVolume) as AvgListingsSoldVolume FROM tblMarketDataGeo1Geo2Qtr WHERE PropGeo1 in (%s) GROUP BY (YrQtr)"
     }
   ]
 }

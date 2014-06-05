@@ -68,7 +68,7 @@ config.selectors.forEach(function(item){
 		console.log(item.key);
 		// if (item.modifiers)
 		if (item.modifiers || item.limit) {
-			var q = util.format(item.query, options.PropGeo1, options.limit);
+			var q = (item.limit && options.limit) ? util.format(item.query, options.PropGeo1, options.limit) : util.format(item.query, options.PropGeo1);
 			console.log(options);
 		} else var q = item.query;
 
