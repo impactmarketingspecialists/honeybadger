@@ -136,7 +136,7 @@
           "format":"currency",
           "field":"ListingsSoldVolume"
         }],
-      "query":"SELECT * FROM tblMarketDataGeo1Geo2Qtr WHERE Year in (2013) AND Qtr in (3) AND PropGeo1 in (%s) GROUP BY PRange"
+      "query":"SELECT * FROM ims_selector_production.tblMarketDataGeo1Geo2Qtr WHERE Year in (2013) AND Qtr in (3) AND PropGeo1 in (%s) GROUP BY PRange LIMIT %d"
     }
   ]
 }
