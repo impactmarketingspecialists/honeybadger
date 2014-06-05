@@ -98,7 +98,7 @@
           "format":"percent",
           "field":"SaleOrigListPriceRatio"
       }],
-  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 WHERE PropGeo1 in (%s) GROUP BY PropGeo 1 LIMIT %d"
+  		"query":"SELECT * FROM qrymdQuarterHistoryGeo1 WHERE PropGeo1 in (%s) GROUP BY PropGeo LIMIT %d"
   	},
   	{
   		"dsn":"ims_selector_production",
