@@ -142,7 +142,7 @@
       "dsn":"ims_selector_production",
       "key":"nineQtrTrend",
       "modifiers": ["PropGeo1"],
-      "limit": 10,
+      "limit": 1000,
       "summary": true,
       "columns": [{
           "label":"Qtr",
@@ -165,7 +165,7 @@
           "field":"ListingsSoldVolume"
         }
       ],
-      "query":"SELECT * FROM tblMarketDataGeo1Geo2Qtr WHERE PropGeo1 in (%s) LIMIT %d"
+      "query":"SELECT * FROM tblMarketDataGeo1Geo2Qtr WHERE PropGeo1 in (%s)"
     }
   ]
 }
