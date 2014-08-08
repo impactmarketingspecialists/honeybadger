@@ -94,6 +94,7 @@
 					</div>
 				</div>
 				<div id="sourceManager">
+					<h2>Sources</h2>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="btn-toolbar" role="toolbar">
@@ -111,6 +112,34 @@
 					<div class="row">
 						<div class="col-md-12">
 							<table id="sourceList" class="table table-striped table-hover table-condensed">
+							<thead>
+								<tr><th>Name</th><th>Type</th><th>Status</th></tr>
+							</thead>
+							<tbody>
+							</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div id="extractorManager">
+					<h2>Extractors</h2>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="btn-toolbar" role="toolbar">
+								<div class="btn-group">
+									<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#extractorWizard">New Extractor</button>
+								</div>
+								<div class="btn-group">
+									<button type="button" class="btn btn-default">Activate</button>
+									<button type="button" class="btn btn-default">Disable</button>
+									<button type="button" class="btn btn-default">Delete</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<table id="extractorList" class="table table-striped table-hover table-condensed">
 							<thead>
 								<tr><th>Name</th><th>Type</th><th>Status</th></tr>
 							</thead>
@@ -228,8 +257,8 @@
 			</form>
 	      </div>
 	      <div class="modal-footer">
-	        <button id="sourceEditorSave" type="button" class="btn btn-primary" onclick="DataManager.source.save()" disabled="disabled">Save</button>
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button id="sourceEditorSave" type="button" class="btn btn-primary" onclick="DataManager.source.save()" disabled="disabled">Save</button>
 	      </div>
 	    </div>
 	  </div>
@@ -242,13 +271,77 @@
 	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	        <h4 class="modal-title" id="extractorWizardTitle">Extractor Wizard</h4>
 	      </div>
-	      <div class="modal-body">
-	      	<div class="well" style="max-width: 400px; margin: 0 auto">
-
+	      <div class="modal-body wizard">
+	      	<div class="navigator">
+	      		<strong>Steps:</strong> 
+	      		<ul class="steps">
+	      			<li class="step bg-primary">Select Source</li>
+	      			<li class="step">Source Details</li>
+	      			<li class="step">Extraction Setup</li>
+	      		</ul>
 	      	</div>
+	      	<section id="ext-step-1" class="step">
+				<h4>Select Source</h4>
+				<div class="form-inline form-group">
+					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
+					<select id="ext-source-select" class="form-control">
+					</select>
+				</div>
+				<div class="source-options" id="ext-ftp-options">
+					<div class="form-group">
+						<label for="ftpRootPath">FTP Path</label>
+						<input type="text" class="form-control" placeholder="/data/" name="ftpRootPath" id="ftpRootPath"/>
+					</div>
+					<div class="form-inline">
+						<label for="ftpFileName">FTP Target File</label><br>
+						<input type="text" class="form-control" placeholder="data_dump.csv" name="ftpFileName" id="ftpFileName"/> 
+	        			<button id="findFTPFile" type="button" class="btn btn-primary" onclick="DataManager.findFTPFile()">Browse</button>
+					</div>
+				</div>
+	      	</section>
+	      	<section id="ext-step-2" class="step">
+				<h4>Source Details</h4>
+				<div class="form-inline form-group">
+					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
+					<select id="ext-source-select" class="form-control">
+						<option value="2349u2130125945">Impact Feeds</option>
+					</select>
+				</div>
+				<!-- <div class="row form-group">
+					<div class="col-md-6">
+						<label for="ftpuser">Username</label>
+						<input type="text" class="form-control" placeholder="CARETSIMPACT" name="ftpuser" id="ftpuser"/>
+					</div>
+					<div class="col-md-6">
+						<label for="ftpauth">Password</label>
+						<input type="password" class="form-control" placeholder="CARETSIMPACT" name="ftpauth" id="ftpauth"/>
+					</div>
+				</div> -->
+	      	</section>
+	      	<section id="ext-step-3" class="step">
+				<h4>Extraction Setup</h4>
+				<div class="form-inline form-group">
+					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
+					<select id="ext-source-select" class="form-control">
+						<option value="2349u2130125945">Impact Feeds</option>
+					</select>
+				</div>
+				<!-- <div class="row form-group">
+					<div class="col-md-6">
+						<label for="ftpuser">Username</label>
+						<input type="text" class="form-control" placeholder="CARETSIMPACT" name="ftpuser" id="ftpuser"/>
+					</div>
+					<div class="col-md-6">
+						<label for="ftpauth">Password</label>
+						<input type="password" class="form-control" placeholder="CARETSIMPACT" name="ftpauth" id="ftpauth"/>
+					</div>
+				</div> -->
+	      	</section>
 	      </div>
 	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button id="extractionWizardNext" type="button" class="btn btn-primary" disabled="disabled">Back</button>
+	        <button id="extractionWizardNext" type="button" class="btn btn-primary">Next</button>
 	      </div>
 	    </div>
 	  </div>

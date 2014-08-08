@@ -30,10 +30,23 @@ function update(element,data)
 		$('#activeSources > tbody').html('');
 		$('#inactiveSources > tbody').html('');
 		$('#sourceList > tbody').html('');
+		$('#ext-source-select').html('');
 		$(d).each(function(index, item){
 			$('#sourceList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>')
+			$('#ext-source-select').append('<option value="'+item.key+'">'+item.key+'</option>');
 			if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+		});
+	};
+
+	var extractorLists = function(d) {
+		// $('#activeSources > tbody').html('');
+		// $('#inactiveSources > tbody').html('');
+		$('#extractorList > tbody').html('');
+		$(d).each(function(index, item){
+			$('#extractorList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
+			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
 	};
 
@@ -45,6 +58,9 @@ function update(element,data)
 		case "sourceLists":
 			sourceLists(data);
 		break;
+		case "extractorLists":
+			extractorLists(data);
+		break;
 	}
 }
 
@@ -54,7 +70,7 @@ function connect()
 	socket = new WebSocket(host);
 	socket.onopen = function(){
 		update('connectionStatus',{online:true});
-		DataManager.list();
+		DataManager.refresh();
 		DataManager.alert('Connected to server.');
 		if (ts) clearInterval(ts);
 	};
@@ -73,9 +89,11 @@ var DataManager = new (function(){
 	var self = this;
 	var __cbqueue = {},
 		sources = [],
+		extractors = [],
 		pages = {
 			dashboard: $('#dashboard').hide(),
-			sourceManager: $('#sourceManager').hide()
+			sourceManager: $('#sourceManager').hide(),
+			extractorManager: $('#extractorManager').hide()
 		};
 
 	var receive = function(e) {
@@ -91,7 +109,7 @@ var DataManager = new (function(){
 
 	var send = function(method, args, callback){
 		var args = args || [];
-		msig = (callback) ? (new Date().getTime()).toString(36) : null;
+		msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
@@ -120,11 +138,33 @@ var DataManager = new (function(){
 	this.list = function(id){
 		send('list',null,function(e){
 			if (!e.err) {
-				console.log(e);
+				// console.log(e);
 				sources = e.body;
 				update('sourceLists',sources);
 			}
 		});
+	};
+
+	this.getExtractorList = function(){
+		send('getExtractorList',null,function(e){
+			if(!e.err) {
+				extractors = e.body;
+				update('extractorLists', extractors);
+			}
+		});
+	};
+
+	this.refresh = function(){
+		this.list();
+		this.getExtractorList();
+	};
+
+	this.getSources = function(){
+		return sources;
+	};
+
+	this.getExtractors = function(){
+		return extractors;
 	};
 
 	this.source = function(name, type, properties){
@@ -215,7 +255,7 @@ var DataManager = new (function(){
 		}
 
 		send('saveSource',[src],function(e){
-			DataManager.list();
+			DataManager.refresh();
 		});
 
 		sourceModalReset();
@@ -251,6 +291,10 @@ var sourceModalReset = function(){
 	$('#sourceEditorSave').prop('disabled',true);
 };
 
+var resetWizard = function(id){
+	$('#'+id+' section.step').hide().first().show();
+};
+
 $(document).ready(function(){
 	$('#sourcetype').change(function(){
 		sourceModalReset();
@@ -260,4 +304,27 @@ $(document).ready(function(){
 		else if ($(this).val() == 'REST') $('#source_REST').show();
 		else if ($(this).val() == 'XML') $('#source_XML').show();
 	}).change();
+
+	resetWizard('extractorWizard');
+	// $('.wizard section.step').first().show();
+
+	/**
+	 * When selecting a data source for an extractor let's do some logic
+	 * based on the type of source they've chosen
+	 */
+	$('#ext-source-select').change(function(){
+		var v = $(this).val();
+		var s = DataManager.getSources().filter(function(e){
+			if (e.key == v) return e;
+			else return null;
+		}).pop();
+
+		$('#extractorWizard .source-options').hide();
+		if (s.value.type === 'FTP') {
+			$('#ext-ftp-options').show();
+		}
+		else if (s.value.type === 'RETS') {
+			$('#ext-rets-options').show();
+		}
+	});
 })

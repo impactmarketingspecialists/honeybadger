@@ -21,3 +21,20 @@ footer {
 	height: 5em;
 	margin-top: -5em;
 }
+
+.wizard .navigator {
+	margin:0 0 2em 0;
+}
+
+.wizard .navigator .steps {
+	display:inline-block;
+	margin:0;
+	padding:0;
+}
+.wizard .navigator .step { 
+	display:inline;
+	padding:0.4em 0.6em;
+	border:1px solid #ccc;
+	border-radius: 5px;
+	font-size: 0.9em;
+}

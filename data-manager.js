@@ -17,6 +17,7 @@ app.use(express.bodyParser());
 
 var DataManager = new (function(){
     var sources = [];
+    var extractors = [];
 
     var refreshSources = function(){
         db.view('sources', 'list', function(err, body) {
@@ -29,14 +30,28 @@ var DataManager = new (function(){
         });
     };
 
-    refreshSources();
+    var refreshExtractors = function(){
+        db.view('extractors', 'list', function(err, body) {
+            if(!err) {
+                extractors = [];
+                body.rows.forEach(function(doc){
+                    extractors.push(doc);
+               });
+            } else console.trace(err);
+        });
+    };
 
     Object.defineProperty(this, "sources", {
         get: function() { return sources; }
     });
 
+    Object.defineProperty(this, "extractors", {
+        get: function() { return extractors; }
+    });
+
     this.refresh = function(){
         refreshSources();
+        refreshExtractors();
     };
 
     this.sourceDetail = function(id) {
@@ -70,12 +85,18 @@ var DataManager = new (function(){
         else _newSource();
     };
 
+    this.refresh();
 });
 
 var WSAPI = {
     list: function(callback){
         process.nextTick(function(){
-            callback('onlist', null, DataManager.sources);
+            callback('onList', null, DataManager.sources);
+        });
+    },
+    getExtractorList: function(callback){
+        process.nextTick(function(){
+            callback('onExtractorList', null, DataManager.extractors);
         });
     },
     validateSource: function(source, callback) {
