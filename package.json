@@ -12,7 +12,8 @@
     "async": "*",
     "rets": "git://github.com/dermidgen/node-rets-client.git",
     "MD5": "^1.2.0",
-    "ftp": "*"
+    "ftp": "*",
+    "csv-parse": "*"
   },
   "contributors": [
     {
