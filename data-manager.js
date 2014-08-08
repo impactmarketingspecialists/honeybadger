@@ -60,6 +60,10 @@ var DataManager = new (function(){
         });
     };
 
+    this.getSource = function(id, cb) {
+        db.get(id, cb);
+    }
+
     this.sourceSave = function(source, callback) {
 
         var _updateSource = function(){
@@ -98,6 +102,44 @@ var WSAPI = {
         process.nextTick(function(){
             callback('onExtractorList', null, DataManager.extractors);
         });
+    },
+    browseFTP: function(source, callback){
+        DataManager.getSource(source.id,function(err, src){
+            if (!err && src.source.type === 'FTP') {
+                var client = require('ftp');
+                var c = new client();
+
+                c.on('ready', function() {
+                    c.list(function(err, list) {
+                      if (err) {
+                        process.nextTick(function(){
+                            callback('onFTPBrowse',err,null);
+                        });
+                        return;
+                      }
+                      c.end();
+                      process.nextTick(function(){
+                        callback('onFTPBrowse',null,{success:true, list: list});
+                      })
+                    });
+                });
+
+                c.on('error', function(e) {
+                    console.trace(e);
+                    process.nextTick(function(){
+                        callback('onFTPBrowse',e,null);
+                    });
+                });
+
+                c.connect({
+                    host: src.source.uri,
+                    port: src.source.port,
+                    user: src.source.auth.username,
+                    password: src.source.auth.password
+                });
+            }
+        });
+        // callback('onFTPList', null, {});
     },
     validateSource: function(source, callback) {
 

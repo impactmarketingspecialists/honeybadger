@@ -295,7 +295,11 @@
 					<div class="form-inline">
 						<label for="ftpFileName">FTP Target File</label><br>
 						<input type="text" class="form-control" placeholder="data_dump.csv" name="ftpFileName" id="ftpFileName"/> 
-	        			<button id="findFTPFile" type="button" class="btn btn-primary" onclick="DataManager.findFTPFile()">Browse</button>
+	        			<button type="button" class="btn btn-primary" onclick="DataManager.ftpBrowse()">Browse</button>
+					</div>
+					<div id="ext-ftp-browser">
+						<ul class="files">
+						</ul>
 					</div>
 				</div>
 	      	</section>

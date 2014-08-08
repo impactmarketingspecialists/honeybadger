@@ -167,6 +167,17 @@ var DataManager = new (function(){
 		return extractors;
 	};
 
+	this.ftpBrowse = function()
+	{
+		send('browseFTP',[sources[0]],function(e){
+			if(!e.err && e.body.success === true) {
+				e.body.list.forEach(function(item, index){
+					if (item.name) $('#ext-ftp-browser .files').append('<li>'+item.name+'</li>');
+				});
+			}
+		});
+	};
+
 	this.source = function(name, type, properties){
 
 	};
