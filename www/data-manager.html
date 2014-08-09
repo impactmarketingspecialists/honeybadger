@@ -275,27 +275,35 @@
 	      	<div class="navigator">
 	      		<strong>Steps:</strong> 
 	      		<ul class="steps">
-	      			<li class="step bg-primary">Select Source</li>
+	      			<li class="step bg-primary">Basic Setup</li>
 	      			<li class="step">Source Details</li>
-	      			<li class="step">Extraction Setup</li>
+	      			<li class="step">Test Extraction</li>
 	      		</ul>
 	      	</div>
 	      	<section id="ext-step-1" class="step">
-				<h4>Select Source</h4>
-				<div class="form-inline form-group">
+				<h4>Basic Setup</h4>
+				<div class="form-group">
+					<label for="extractorName">Extractor Name</label>
+					<input type="text" class="form-control" placeholder="My Extractor" name="extractorName" id="extractorName"/>
+				</div>
+				<div class="form-group">
 					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
 					<select id="ext-source-select" class="form-control">
 					</select>
 				</div>
 				<div class="source-options" id="ext-ftp-options">
 					<div class="form-group">
-						<label for="ftpRootPath">FTP Path</label>
+						<label for="ftpRootPath">FTP Base Path</label>
 						<input type="text" class="form-control" placeholder="/data/" name="ftpRootPath" id="ftpRootPath"/>
 					</div>
-					<div class="form-inline">
 						<label for="ftpFileName">FTP Target File</label><br>
-						<input type="text" class="form-control" placeholder="data_dump.csv" name="ftpFileName" id="ftpFileName"/> 
-	        			<button type="button" class="btn btn-primary" onclick="DataManager.ftpBrowse()">Browse</button>
+					<div class="row">
+						<div class="col-xs-6">
+							<input type="text" class="form-control" placeholder="data_dump.csv" name="ftpFileName" id="ftpFileName"/> 
+						</div>
+						<div class="col-xs-4">
+	        				<button type="button" class="btn btn-primary" onclick="DataManager.ftpBrowse()">Browse</button>
+	        			</div>
 					</div>
 					<div id="ext-ftp-browser">
 						<ul class="files">
@@ -344,8 +352,8 @@
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="extractionWizardNext" type="button" class="btn btn-primary" disabled="disabled">Back</button>
-	        <button id="extractionWizardNext" type="button" class="btn btn-primary">Next</button>
+	        <button id="extractionWizardBack" type="button" class="btn btn-primary" disabled="disabled">Back</button>
+	        <button id="extractionWizardNext" type="button" class="btn btn-primary" disabled="disabled">Next</button>
 	      </div>
 	    </div>
 	  </div>

@@ -171,8 +171,13 @@ var DataManager = new (function(){
 	{
 		send('browseFTP',[sources[0]],function(e){
 			if(!e.err && e.body.success === true) {
+				$('#ext-ftp-browser .files').empty();
 				e.body.list.forEach(function(item, index){
-					if (item.name) $('#ext-ftp-browser .files').append('<li>'+item.name+'</li>');
+					if (item.name) $('#ext-ftp-browser .files').append($('<li class="file">'+item.name+'</li>').click(function(){
+						$('#ftpFileName').val(item.name);
+						$('#ext-ftp-browser .files').empty();
+						$('#extractionWizardNext').removeAttr("disabled");
+					}));
 				});
 			}
 		});
@@ -332,10 +337,17 @@ $(document).ready(function(){
 
 		$('#extractorWizard .source-options').hide();
 		if (s.value.type === 'FTP') {
+			$('#ext-ftp-browser .files').empty();
+			$('#ftpRootPath').val('');
+			$('#ftpFileName').val('');
 			$('#ext-ftp-options').show();
 		}
 		else if (s.value.type === 'RETS') {
 			$('#ext-rets-options').show();
 		}
+	});
+
+	$('#extractionWizardNext').click(function(){
+
 	});
 })
