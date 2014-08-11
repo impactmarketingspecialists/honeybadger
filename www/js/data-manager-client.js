@@ -33,7 +33,7 @@ function update(element,data)
 		$('#ext-source-select').html('');
 		$(d).each(function(index, item){
 			$('#sourceList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>')
-			$('#ext-source-select').append('<option value="'+item.key+'">'+item.key+'</option>');
+			$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 			if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
@@ -99,11 +99,14 @@ var DataManager = new (function(){
 	var receive = function(e) {
 		// console.log(e.data);
 		var d = JSON.parse(e.data);
-		var e = d.event;
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
 			__cbqueue[msig](d);
 			delete __cbqueue[msig];
+			return;
+		}
+		if (d.event == 'log-stream') {
+			$('#'+d.target).append(d.body);
 		}
 	}
 
@@ -185,6 +188,21 @@ var DataManager = new (function(){
 
 	this.source = function(name, type, properties){
 
+	};
+
+	this.extractor = {};
+	this.extractor.validate = function(){
+
+	};
+
+	this.extractor.save = function(ext){
+		console.log(ext);
+	};
+
+	this.extractor.sample = function(ext, cb){
+		send('testExtractor', [ext], function(e){
+			cb(e);
+		});
 	};
 
 	this.source.validate = function(src){
@@ -312,6 +330,19 @@ var resetWizard = function(id){
 };
 
 $(document).ready(function(){
+
+	var ext = function(){
+		return {
+			name: $('#extractorName').val(),
+			source: $('#ext-source-select').val(),
+			target: {
+				type: "file",
+				res: $('#ftpRootPath').val() + $('#ftpFileName').val(),
+				format: $('[name=ext-text-format]:checked').val()
+			}
+		};
+	};
+
 	$('#sourcetype').change(function(){
 		sourceModalReset();
 		if ($(this).val() == 'RETS') $('#source_RETS').show();
@@ -331,7 +362,7 @@ $(document).ready(function(){
 	$('#ext-source-select').change(function(){
 		var v = $(this).val();
 		var s = DataManager.getSources().filter(function(e){
-			if (e.key == v) return e;
+			if (e.id == v) return e;
 			else return null;
 		}).pop();
 
@@ -351,7 +382,8 @@ $(document).ready(function(){
 
 		var finish = function(){
 			$('#extractorWizard').modal('hide');
-			// console.log('Finished');
+			DataManager.extractor.validate(ext());
+			DataManager.extractor.save(ext());
 		}
 
 		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
@@ -359,14 +391,37 @@ $(document).ready(function(){
 		$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
 		$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
 		if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').removeAttr('disabled');
-		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success');
+		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
 	});
 
 	$('#extractorWizardBack').click(function(){
 		$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
 		$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
 		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').attr('disabled','disabled');
-		if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary');
+		if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
 	});
 
+	$('#ext-unarchive').change(function(){
+		if ($('#ext-unarchive')[0].checked) $('#ext-archive-opts').removeAttr('disabled');
+		else  $('#ext-archive-opts').attr('disabled','disabled');
+	});
+
+	$('#ext-test').click(function(){
+		$('#extraction-result').html('');
+		DataManager.extractor.sample(ext(),function(e){
+			console.log(e);
+			if (!e.err) {
+				$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+				$('#extractorWizardNext').removeAttr('disabled');
+			} else {
+				$('#extractorWizardNext').attr('disabled','disabled');
+				$('#extraction-result').html('<p class="bg-danger">Extractor Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+			}
+		});
+	});
+
+	$('#ext-test-clear').click(function(){
+		$('#extraction-log-body').html('');
+		$('#extraction-result').html('');
+	});
 })

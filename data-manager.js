@@ -141,6 +141,130 @@ var WSAPI = {
         });
         // callback('onFTPList', null, {});
     },
+    testExtractor: function(extractor, callback, client){
+
+        var clog = function(e){
+            client.send('{ "event":"log-stream", "target": "extraction-log-body", "body":'+JSON.stringify(e)+'}');
+        };
+
+        //We want to pipe extraction events back to the client
+        clog('Testing extraction from source: '+ extractor.source);
+        DataManager.getSource(extractor.source,function(err, body){
+            if (!err) {
+                clog('<div class="text-success">Extraction source is valid.</div>');
+                var src = body;
+                if (src.source.type === 'FTP') {
+
+                    clog('<div class="text-info">Extraction source is an FTP resource.</div>');
+                    var client = require('ftp');
+                    var c = new client();
+
+                    c.on('ready', function() {
+                        clog('<div class="text-success">Connection established.</div>');
+                        clog('<div class="text-info">Searching for extraction target.</div>');
+
+                        c.get(extractor.target.res, function(err, stream){
+                            if (err) {
+                                clog('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
+                                clog(err);
+                                console.log(err);
+                                process.nextTick(function(){
+                                    callback('onExtractorTest',err,null);
+                                });
+                                return;
+                            }
+
+                            clog('<div class="text-success">Discovered source file on remote file-system.</div>');
+                            stream.once('close', function(){ 
+                                clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
+                                c.end(); 
+                            });
+
+                            var parseCSV = function(delimiter,quotes,escape){
+                                var errors = false;
+                                clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
+                                var libcsv = require('csv-parse');
+                                
+                                clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
+                                clog('<div class="text-info">Using quote character: '+quotes+'</div>');
+                                clog('<div class="text-info">Using escape character: "</div>');
+                                var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
+                                    if (head.length <= 1) {
+                                        errors = true;
+                                        clog('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
+                                        process.nextTick(function(){
+                                            callback('onExtractorTest','Unable to parse column headers from data stream',null);
+                                        });
+                                    } else {
+                                        clog('<div class="text-success">CSV extraction engine was found the following column headers.</div>');
+                                        clog('<pre>'+head.join("\n")+'</pre>');
+                                    }
+                                }});
+
+                                parser.on('finish',function(){
+                                    clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                    process.nextTick(function(){
+                                        if (!errors) callback('onExtractorTest',null,{success:true,body:'completed'});
+                                    })
+                                });
+
+                                parser.on('error',function(err){
+                                    console.log(err);
+                                    clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
+                                    process.nextTick(function(){
+                                        callback('onExtractorTest','Unable to parse data stream',null);
+                                    })
+                                });
+
+                                stream.pipe(parser);
+                                stream.pipe(fs.createWriteStream('../foo.local-copy.txt'));
+
+                            };
+
+                            switch(extractor.target.format)
+                            {
+                                case "csv":
+                                    parseCSV(',','');
+                                break;
+                                case "tsv":
+                                    parseCSV("\t",'');
+                                break;
+                                case "pipe":
+                                    parseCSV('|','');
+                                break;
+                                default:
+                                    process.nextTick(function(){
+                                        callback('onExtractorTest','Invalid target format',null);
+                                    });                                    
+                            }
+
+                        });
+
+                    });
+
+                    c.on('error', function(e) {
+                        clog('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
+                        clog(e);
+                        process.nextTick(function(){
+                            callback('onExtractorTest',e,null);
+                        });
+                    });
+
+                    c.connect({
+                        host: src.source.uri,
+                        port: src.source.port,
+                        user: src.source.auth.username,
+                        password: src.source.auth.password
+                    });
+                }
+            }
+            else {
+                clog('<div class="text-danger">Extraction source is bad.</div>');
+                callback('onExtractorTest',err,null);
+            }
+        });
+
+    },
     validateSource: function(source, callback) {
 
         switch(source.type)
@@ -267,6 +391,7 @@ wss.on('connection',function(ws) {
                     body:body
                 }));
 			});
+            args.push(ws)
 			// console.dir(args);
         	WSAPI[data.method].apply(this, args);
         } else {

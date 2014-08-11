@@ -314,30 +314,43 @@
 	      	<section id="ext-step-2" class="step">
 				<h4>Source Details</h4>
 				<div class="form-inline form-group">
-					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
-					<select id="ext-source-select" class="form-control">
-						<option value="2349u2130125945">Impact Feeds</option>
+					<label class="control-label" for="ext-source-select">Data Format</label> &nbsp;
+					<select class="form-control" name="ext-data-format" id="ext-data-format">
+						<option value="delimited-text">Delimited Text (CSV...)</option>
+						<option value="json">JSON</option>
+						<option value="xml">XML</option>
+						<option value="excel">Excel (XLS...)</option>
 					</select>
 				</div>
-				<!-- <div class="row form-group">
-					<div class="col-md-6">
-						<label for="ftpuser">Username</label>
-						<input type="text" class="form-control" placeholder="CARETSIMPACT" name="ftpuser" id="ftpuser"/>
-					</div>
-					<div class="col-md-6">
-						<label for="ftpauth">Password</label>
-						<input type="password" class="form-control" placeholder="CARETSIMPACT" name="ftpauth" id="ftpauth"/>
-					</div>
-				</div> -->
+				<div class="form-group">
+					<label for="ext-unarchive">Data in Archive</label>
+					<fieldset class="checkbox inline-fieldset" id="ext-archive-opts">
+						<label><input type="radio" name="ext-archive-format" value="false" checked/> N/A</label> &nbsp;
+						<label><input type="radio" name="ext-archive-format" value="zip"/> .zip</label> &nbsp;
+						<label><input type="radio" name="ext-archive-format" value="tar"/> .tar</label> &nbsp;
+						<label><input type="radio" name="ext-archive-format" value="gzip"/> .tar.gz</label>
+					</fieldset>
+				</div>
+				<div class="form-group" id="ext-delimited-text-opts">
+					<label>Text Deliniator</label>
+					<fieldset class="checkbox inline-fieldset">
+						<label><input type="radio" name="ext-text-format" value="csv" checked/> , Comma</label> &nbsp;
+						<label><input type="radio" name="ext-text-format" value="tsv"/> \t Tab</label> &nbsp;
+						<label><input type="radio" name="ext-text-format" value="pipe"/> | Pipe</label>
+					</fieldset>					
+				</div>
 	      	</section>
 	      	<section id="ext-step-3" class="step">
-				<h4>Extraction Setup</h4>
-				<div class="form-inline form-group">
-					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
-					<select id="ext-source-select" class="form-control">
-						<option value="2349u2130125945">Impact Feeds</option>
-					</select>
+				<h4>Test Extraction</h4>
+				<div class="form-group">
+					<button type="button" class="btn btn-primary" id="ext-test">Run Test</button>
+					<button type="button" class="btn btn-default" id="ext-test-clear">Clear Log</button>
 				</div>
+				<h5>Extraction Log:</h5>
+				<div class="well">
+					<div class="body" id="extraction-log-body"></div>
+				</div>
+				<div id="extraction-result" class="wizard-result"></div>
 				<!-- <div class="row form-group">
 					<div class="col-md-6">
 						<label for="ftpuser">Username</label>

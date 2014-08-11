@@ -22,6 +22,10 @@ footer {
 	margin-top: -5em;
 }
 
+.inline-fieldset {
+	display:inline-block;
+}
+
 .wizard .navigator {
 	margin:0 0 2em 0;
 }
@@ -38,6 +42,13 @@ footer {
 	border:1px solid #ccc;
 	border-radius: 5px;
 	font-size: 0.9em;
+}
+
+.wizard .wizard-result p {
+	padding: 1em;
+	font-size: 1.1em;
+	font-weight: bold;
+	border-radius: 5px;
 }
 
 ul.files {
