@@ -30,6 +30,7 @@ footer {
 	display:inline-block;
 	margin:0;
 	padding:0;
+	/*cursor:pointer;*/
 }
 .wizard .navigator .step { 
 	display:inline;

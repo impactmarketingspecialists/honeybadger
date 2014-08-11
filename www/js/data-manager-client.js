@@ -347,7 +347,26 @@ $(document).ready(function(){
 		}
 	});
 
-	$('#extractionWizardNext').click(function(){
+	$('#extractorWizardNext').click(function(){
 
+		var finish = function(){
+			$('#extractorWizard').modal('hide');
+			// console.log('Finished');
+		}
+
+		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
+
+		$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
+		$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+		if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').removeAttr('disabled');
+		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success');
 	});
+
+	$('#extractorWizardBack').click(function(){
+		$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
+		$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+		if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').attr('disabled','disabled');
+		if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary');
+	});
+
 })

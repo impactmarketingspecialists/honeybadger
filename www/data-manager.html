@@ -264,7 +264,7 @@
 	  </div>
 	</div>
 
-	<div class="modal fade" id="extractorWizard" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal fade" data-backdrop="static" data-keyboard="false" id="extractorWizard" tabindex="-1" role="dialog" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
@@ -280,7 +280,7 @@
 	      			<li class="step">Test Extraction</li>
 	      		</ul>
 	      	</div>
-	      	<section id="ext-step-1" class="step">
+	      	<section id="ext-step-1" class="step active">
 				<h4>Basic Setup</h4>
 				<div class="form-group">
 					<label for="extractorName">Extractor Name</label>
@@ -352,8 +352,8 @@
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="extractionWizardBack" type="button" class="btn btn-primary" disabled="disabled">Back</button>
-	        <button id="extractionWizardNext" type="button" class="btn btn-primary" disabled="disabled">Next</button>
+	        <button id="extractorWizardBack" type="button" class="btn btn-primary" disabled="disabled">Back</button>
+	        <button id="extractorWizardNext" type="button" class="btn btn-primary">Next</button>
 	      </div>
 	    </div>
 	  </div>
