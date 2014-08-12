@@ -172,7 +172,13 @@ var DataManager = new (function(){
 
 	this.ftpBrowse = function()
 	{
-		send('browseFTP',[sources[0]],function(e){
+		var v = $('#ext-source-select').val();
+		var s = DataManager.getSources().filter(function(e){
+			if (e.id == v) return e;
+			else return null;
+		}).pop();
+
+		send('browseFTP',[s],function(e){
 			if(!e.err && e.body.success === true) {
 				$('#ext-ftp-browser .files').empty();
 				e.body.list.forEach(function(item, index){

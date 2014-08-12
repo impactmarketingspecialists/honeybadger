@@ -217,8 +217,6 @@ var WSAPI = {
                                 });
 
                                 stream.pipe(parser);
-                                stream.pipe(fs.createWriteStream('../foo.local-copy.txt'));
-
                             };
 
                             switch(extractor.target.format)
