@@ -16,8 +16,11 @@ var http_port = 8090;
 app.use(express.bodyParser());
 
 var DataManager = new (function(){
-    var sources = [];
-    var extractors = [];
+    var sources = [],
+        extractors = [],
+        transformers = [],
+        loaders = [],
+        programs = [];
 
     var refreshSources = function(){
         db.view('sources', 'list', function(err, body) {
@@ -41,6 +44,28 @@ var DataManager = new (function(){
         });
     };
 
+    var refreshTransformers = function(){
+        db.view('transformers', 'list', function(err, body) {
+            if(!err) {
+                transformers = [];
+                body.rows.forEach(function(doc){
+                    transformers.push(doc);
+               });
+            } else console.trace(err);
+        });
+    };
+
+    var refreshLoaders = function(){
+        db.view('loaders', 'list', function(err, body) {
+            if(!err) {
+                loaders = [];
+                body.rows.forEach(function(doc){
+                    loaders.push(doc);
+               });
+            } else console.trace(err);
+        });
+    };
+
     Object.defineProperty(this, "sources", {
         get: function() { return sources; }
     });
@@ -49,9 +74,19 @@ var DataManager = new (function(){
         get: function() { return extractors; }
     });
 
+    Object.defineProperty(this, "transformers", {
+        get: function() { return transformers; }
+    });
+
+    Object.defineProperty(this, "loaders", {
+        get: function() { return loaders; }
+    });
+
     this.refresh = function(){
         refreshSources();
         refreshExtractors();
+        refreshTransformers();
+        refreshLoaders();
     };
 
     this.sourceDetail = function(id) {
@@ -89,6 +124,81 @@ var DataManager = new (function(){
         else _newSource();
     };
 
+    this.extractorSave = function(extractor, callback) {
+
+        var _updateExtractor = function(){
+            if (!extractor._rev) {
+                console.log('Document has no _rev; cannot update');
+                console.trace();
+                callback({err:true,body:'Document has no _rev; cannot update'});
+                return false;
+            }
+
+            db.insert(extractor, extractor._id, callback);
+        };
+
+        var _newExtractor = function(){
+            extractor.type = 'extractor'; // Set the document type to Data Source Name
+            extractor.status = 'active'; // Activate the source
+            extractor.activatedOn = Date.now();
+            db.insert(extractor, null, callback);
+            refreshExtractors();
+        };
+
+        if (extractor._id) _updateExtractor();
+        else _newExtractor();
+    };
+
+    this.transformerSave = function(transformer, callback) {
+
+        var _updateExtractor = function(){
+            if (!transformer._rev) {
+                console.log('Document has no _rev; cannot update');
+                console.trace();
+                callback({err:true,body:'Document has no _rev; cannot update'});
+                return false;
+            }
+
+            db.insert(transformer, transformer._id, callback);
+        };
+
+        var _newExtractor = function(){
+            transformer.type = 'transformer'; // Set the document type to Data Source Name
+            transformer.status = 'active'; // Activate the source
+            transformer.activatedOn = Date.now();
+            db.insert(transformer, null, callback);
+            refreshTransformers();
+        };
+
+        if (transformer._id) _updateTransformer();
+        else _newTransformer();
+    };
+
+    this.loaderSave = function(loader, callback) {
+
+        var _updateExtractor = function(){
+            if (!loader._rev) {
+                console.log('Document has no _rev; cannot update');
+                console.trace();
+                callback({err:true,body:'Document has no _rev; cannot update'});
+                return false;
+            }
+
+            db.insert(loader, loader._id, callback);
+        };
+
+        var _newExtractor = function(){
+            loader.type = 'loader'; // Set the document type to Data Source Name
+            loader.status = 'active'; // Activate the source
+            loader.activatedOn = Date.now();
+            db.insert(loader, null, callback);
+            refreshLoaders();
+        };
+
+        if (loader._id) _updateLoader();
+        else _newLoader();
+    };
+
     this.refresh();
 });
 
@@ -101,6 +211,16 @@ var WSAPI = {
     getExtractorList: function(callback){
         process.nextTick(function(){
             callback('onExtractorList', null, DataManager.extractors);
+        });
+    },
+    getTransformerList: function(callback){
+        process.nextTick(function(){
+            callback('onTransformerList', null, DataManager.transformers);
+        });
+    },
+    getLoaderList: function(callback){
+        process.nextTick(function(){
+            callback('onLoaderList', null, DataManager.loaders);
         });
     },
     browseFTP: function(source, callback){
@@ -262,6 +382,11 @@ var WSAPI = {
             }
         });
 
+    },
+    saveExtractor: function(extractor, callback) {
+        DataManager.extractorSave(extractor, function(err, body){
+            callback('onExtractorSave',err,body);
+        });
     },
     validateSource: function(source, callback) {
 

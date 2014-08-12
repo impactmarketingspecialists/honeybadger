@@ -50,6 +50,28 @@ function update(element,data)
 		});
 	};
 
+	var transformerLists = function(d) {
+		// $('#activeSources > tbody').html('');
+		// $('#inactiveSources > tbody').html('');
+		$('#transformerList > tbody').html('');
+		$(d).each(function(index, item){
+			$('#transformerList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
+			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+		});
+	};
+
+	var loaderLists = function(d) {
+		// $('#activeSources > tbody').html('');
+		// $('#inactiveSources > tbody').html('');
+		$('#laoderList > tbody').html('');
+		$(d).each(function(index, item){
+			$('#loaderList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
+			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+		});
+	};
+
 	switch(element)
 	{
 		case "connectionStatus":
@@ -60,6 +82,12 @@ function update(element,data)
 		break;
 		case "extractorLists":
 			extractorLists(data);
+		break;
+		case "transformerLists":
+			transformerLists(data);
+		break;
+		case "loaderLists":
+			loaderLists(data);
 		break;
 	}
 }
@@ -90,10 +118,14 @@ var DataManager = new (function(){
 	var __cbqueue = {},
 		sources = [],
 		extractors = [],
+		transformers = [],
+		loaders = [],
 		pages = {
 			dashboard: $('#dashboard').hide(),
 			sourceManager: $('#sourceManager').hide(),
-			extractorManager: $('#extractorManager').hide()
+			extractorManager: $('#extractorManager').hide(),
+			transformManager: $('#transformManager').hide(),
+			loaderManager: $('#loaderManager').hide()
 		};
 
 	var receive = function(e) {
@@ -157,9 +189,29 @@ var DataManager = new (function(){
 		});
 	};
 
+	this.getTransformerList = function(){
+		send('getTransformerList',null,function(e){
+			if(!e.err) {
+				transformers = e.body;
+				update('transformerLists', transformers);
+			}
+		});
+	};
+
+	this.getLoaderList = function(){
+		send('getLoaderList',null,function(e){
+			if(!e.err) {
+				loaders = e.body;
+				update('loaderLists', loaders);
+			}
+		});
+	};
+
 	this.refresh = function(){
 		this.list();
 		this.getExtractorList();
+		this.getTransformerList();
+		this.getLoaderList();
 	};
 
 	this.getSources = function(){
@@ -168,6 +220,14 @@ var DataManager = new (function(){
 
 	this.getExtractors = function(){
 		return extractors;
+	};
+
+	this.getTransformers = function(){
+		return transformers;
+	};
+
+	this.getLoaders = function(){
+		return loaders;
 	};
 
 	this.ftpBrowse = function()
@@ -202,11 +262,47 @@ var DataManager = new (function(){
 	};
 
 	this.extractor.save = function(ext){
-		console.log(ext);
+		send('saveExtractor', [ext], function(e){
+			console.log(e);
+		});
 	};
 
 	this.extractor.sample = function(ext, cb){
 		send('testExtractor', [ext], function(e){
+			cb(e);
+		});
+	};
+
+	this.transformer = {};
+	this.transformer.validate = function(){
+
+	};
+
+	this.transformer.save = function(ext){
+		send('saveTransformer', [ext], function(e){
+			console.log(e);
+		});
+	};
+
+	this.transformer.sample = function(ext, cb){
+		send('testTransformer', [ext], function(e){
+			cb(e);
+		});
+	};
+
+	this.loader = {};
+	this.loader.validate = function(){
+
+	};
+
+	this.loader.save = function(ext){
+		send('saveLoader', [ext], function(e){
+			console.log(e);
+		});
+	};
+
+	this.loader.sample = function(ext, cb){
+		send('testLoader', [ext], function(e){
 			cb(e);
 		});
 	};
@@ -349,6 +445,10 @@ $(document).ready(function(){
 		};
 	};
 
+	var trn = function(){
+		return {};
+	};
+
 	$('#sourcetype').change(function(){
 		sourceModalReset();
 		if ($(this).val() == 'RETS') $('#source_RETS').show();
@@ -415,7 +515,6 @@ $(document).ready(function(){
 	$('#ext-test').click(function(){
 		$('#extraction-result').html('');
 		DataManager.extractor.sample(ext(),function(e){
-			console.log(e);
 			if (!e.err) {
 				$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 				$('#extractorWizardNext').removeAttr('disabled');
@@ -430,4 +529,29 @@ $(document).ready(function(){
 		$('#extraction-log-body').html('');
 		$('#extraction-result').html('');
 	});
+
+	$('#transformWizardNext').click(function(){
+
+		var finish = function(){
+			$('#transformWizard').modal('hide');
+			DataManager.transformer.validate(ext());
+			DataManager.transformer.save(ext());
+		}
+
+		if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) return finish();
+
+		$('#transformWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
+		$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+		if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizardBack').removeAttr('disabled');
+		if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
+	});
+
+	$('#transformWizardBack').click(function(){
+		$('#transformWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
+		$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+		if ($('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizardBack').attr('disabled','disabled');
+		if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
+	});
+
+
 })
