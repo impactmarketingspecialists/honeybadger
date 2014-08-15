@@ -13,7 +13,7 @@ var feed = db.follow({since: "now"});
 
 var http_port = 8090;
 
-app.use(express.bodyParser());
+// app.use(express.bodyParser());
 
 var DataManager = new (function(){
     var sources = [],
