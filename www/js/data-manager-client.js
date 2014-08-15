@@ -74,6 +74,11 @@ function update(element,data)
 			$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
 			$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
 		});
+
+		$('#transformNormalize input:checkbox').change(function(){
+			if (!$(this)[0].checked) $(this).parent().parent().parent().find('input[type="text"]').attr('disabled','disabled');
+			else $(this).parent().parent().parent().find('[type=text]').removeAttr('disabled');
+		})
 	};
 
 	switch(element)
