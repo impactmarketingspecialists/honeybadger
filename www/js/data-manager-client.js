@@ -69,7 +69,8 @@ function update(element,data)
 	};
 
 	var transformDataStructures = function(d) {
-		// $('#dataStructures .input');
+		$('#transformNormalize').html('');
+		$('#transformMapper .fields').html('');
 		$.each(d.headers,function(index,item){
 			$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
 			$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
@@ -290,14 +291,14 @@ var DataManager = new (function(){
 
 	};
 
-	this.transformer.save = function(ext){
-		send('saveTransformer', [ext], function(e){
+	this.transformer.save = function(trn){
+		send('saveTransformer', [trn], function(e){
 			console.log(e);
 		});
 	};
 
-	this.transformer.sample = function(ext, cb){
-		send('testTransformer', [ext], function(e){
+	this.transformer.sample = function(trn, cb){
+		send('testTransformer', [trn], function(e){
 			cb(e);
 		});
 	};
@@ -458,7 +459,27 @@ $(document).ready(function(){
 	};
 
 	var trn = function(){
-		return {};
+		var transform = {
+			name: $('#transformerName').val(),
+			description: $('#transformerDescription').val(),
+			style: $('#trn-source-toggle').val(),
+			extractor: $('#trn-source-select').val(),
+			transform: {
+				input: [],
+				normalize: [],
+				map: $('#trn-map').val()
+			}
+		};
+
+		$('#transformNormalize .item input:text:enabled').each(function(index,item){
+			transform.transform.input.push($('.name', $(item).parent().parent()).text());
+			transform.transform.normalize.push({
+				in: $('.name', $(item).parent().parent()).text(),
+				out: $(item).val()
+			});
+		});
+
+		return transform;
 	};
 
 	$('#sourcetype').change(function(){
@@ -547,8 +568,8 @@ $(document).ready(function(){
 
 		var finish = function(){
 			$('#transformWizard').modal('hide');
-			DataManager.transformer.validate(ext());
-			DataManager.transformer.save(ext());
+			DataManager.transformer.validate(trn());
+			DataManager.transformer.save(trn());
 		}
 
 		if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) return finish();
@@ -596,4 +617,22 @@ $(document).ready(function(){
 		}
 	});
 
-})
+	$('#trn-test').click(function(){
+		$('#extraction-result').html('');
+		DataManager.transformer.sample(trn(),function(e){
+			if (!e.err) {
+				$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+				$('#transformWizardNext').removeAttr('disabled');
+			} else {
+				$('#transformer-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+				$('#transformWizardNext').attr('disabled','disabled');
+			}
+		});
+	});
+
+	$('#trn-test-clear').click(function(){
+		$('#transformer-log-body').html('');
+		$('#transformer-result').html('');
+	});
+
+});

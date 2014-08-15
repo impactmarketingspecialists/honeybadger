@@ -78,3 +78,8 @@ li.file:hover {
 	margin-left: 0.5em;
 	/*width: 10em;*/
 }
+
+#transformer-log-body {
+	max-height: 25em;
+	overflow-y: scroll;
+}

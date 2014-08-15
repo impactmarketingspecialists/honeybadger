@@ -10,6 +10,7 @@ var async = require('async');
 var nano = require('nano')('http://localhost:5984');
 var db = nano.use('honeybadger');
 var feed = db.follow({since: "now"});
+var streamTransform = require('stream-transform');
 
 var http_port = 8090;
 
@@ -95,7 +96,7 @@ var DataManager = new (function(){
 
     this.getSource = function(id, cb) {
         db.get(id, cb);
-    }
+    };
 
     this.sourceSave = function(source, callback) {
 
@@ -386,6 +387,166 @@ var WSAPI = {
         DataManager.extractorSave(extractor, function(err, body){
             callback('onExtractorSave',err,body);
         });
+    },
+    testTransformer: function(transformer, callback, client) {
+
+        var clog = function(e){
+            client.send('{ "event":"log-stream", "target": "transformer-log-body", "body":'+JSON.stringify(e)+'}');
+        };
+
+        // console.log(transformer);
+        //We want to pipe transformer events back to the client
+        db.get(transformer.extractor,function(err, extractor){
+            if (!err) {
+
+                clog('Testing transformer from extractor: '+ extractor.name);
+                clog('Testing extractor from source: '+ extractor.source);
+                DataManager.getSource(extractor.source,function(err, body){
+                    if (!err) {
+                        clog('<div class="text-success">Extraction source is valid.</div>');
+                        var src = body;
+                        if (src.source.type === 'FTP') {
+
+                            clog('<div class="text-info">Extraction source is an FTP resource.</div>');
+                            var client = require('ftp');
+                            var c = new client();
+
+                            c.on('ready', function() {
+                                clog('<div class="text-success">Connection established.</div>');
+                                clog('<div class="text-info">Searching for extraction target.</div>');
+
+                                c.get(extractor.target.res, function(err, stream){
+                                    if (err) {
+                                        clog('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
+                                        clog(err);
+                                        console.log(err);
+                                        process.nextTick(function(){
+                                            callback('onTransformerTest',err,null);
+                                        });
+                                        return;
+                                    }
+
+                                    clog('<div class="text-success">Discovered source file on remote file-system.</div>');
+                                    stream.once('close', function(){ 
+                                        clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
+                                        c.end(); 
+                                    });
+
+                                    var parseCSV = function(delimiter,quotes,escape){
+                                        var libcsv = require('csv-parse');
+                                        var errors = false;
+
+                                        var rawheaders = [];
+                                        var headers = [];
+                                        var records = [];
+                                        var trnheaders = [];
+
+                                        transformer.transform.normalize.forEach(function(item, index){
+                                            trnheaders.push(item.in);
+                                        });
+
+                                        clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
+                                        clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
+                                        clog('<div class="text-info">Using quote character: '+quotes+'</div>');
+                                        clog('<div class="text-info">Using escape character: "</div>');
+
+                                        var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
+                                            clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
+                                            clog('<pre>'+head.join("\n")+'</pre>');
+                                            clog('<div class="text-info">Transformer wants the following columns.</div>');
+                                            clog('<pre>'+trnheaders.join("\n")+'</pre>');
+                                            clog('<div class="text-info">Transformer sampling 10 records...</div>');
+
+                                            rawheaders = head;
+                                        }});
+
+                                        parser.on('finish',function(){
+                                            clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                        });
+
+                                        parser.on('error',function(err){
+                                            console.log(err);
+                                            clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
+                                            process.nextTick(function(){
+                                                callback('onTransformerTest','Unable to parse data stream',null);
+                                            })
+                                        });
+
+                                        var xfm = streamTransform(function(record, cb){
+                                            if (records.length >= 10) {
+                                                process.nextTick(function(){
+                                                    clog('<div class="text-success">Transform completed successfully.</div>');
+                                                    if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
+                                                });
+                                                return;
+                                            }
+
+                                            var rec = {};
+                                            var rstr = '{\n';
+                                            transformer.transform.normalize.forEach(function(item, index){
+                                                var i = rawheaders.indexOf(item.in);
+                                                if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                                rec[item.out] = record[i];
+                                                rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
+                                            });
+                                            rstr += '}'
+
+                                            records.push(rec);
+                                            clog('<pre>'+rstr+'</pre>');
+
+                                            cb(null, record.join('|'));
+                                        }, {parallel: 1});
+
+                                        stream.pipe(parser).pipe(xfm);
+                                    };
+
+                                    switch(extractor.target.format)
+                                    {
+                                        case "csv":
+                                            parseCSV(',','');
+                                        break;
+                                        case "tsv":
+                                            parseCSV("\t",'');
+                                        break;
+                                        case "pipe":
+                                            parseCSV('|','');
+                                        break;
+                                        default:
+                                            process.nextTick(function(){
+                                                callback('onTransformerTest','Invalid target format',null);
+                                            });                                    
+                                    }
+
+                                });
+
+                            });
+
+                            c.on('error', function(e) {
+                                clog('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
+                                clog(e);
+                                process.nextTick(function(){
+                                    callback('onTransformerTest',e,null);
+                                });
+                            });
+
+                            c.connect({
+                                host: src.source.uri,
+                                port: src.source.port,
+                                user: src.source.auth.username,
+                                password: src.source.auth.password
+                            });
+                        }
+                    }
+                    else {
+                        clog('<div class="text-danger">Extraction source is bad.</div>');
+                        callback('onTransformerTest',err,null);
+                    }
+                });
+            }
+        })
+    },
+    saveTransformer: function(transformer, callback) {
+
     },
     validateSource: function(source, callback) {
 
