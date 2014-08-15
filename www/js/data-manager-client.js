@@ -44,6 +44,7 @@ function update(element,data)
 		// $('#inactiveSources > tbody').html('');
 		$('#extractorList > tbody').html('');
 		$(d).each(function(index, item){
+			$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 			$('#extractorList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
@@ -459,6 +460,7 @@ $(document).ready(function(){
 	}).change();
 
 	resetWizard('extractorWizard');
+	resetWizard('transformWizard');
 	// $('.wizard section.step').first().show();
 
 	/**
@@ -553,5 +555,9 @@ $(document).ready(function(){
 		if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
 	});
 
+	$('#trn-source-toggle').change(function(){
+		if ($(this).val() !== 'custom') $('#trn-source-select').removeAttr('disabled');
+		else $('#trn-source-select').attr('disabled','disabled');
+	});
 
 })

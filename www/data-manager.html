@@ -455,9 +455,38 @@
 					<input type="text" class="form-control" placeholder="BHHS Normalizer" name="transformerName" id="transformerName"/>
 				</div>
 				<div class="form-group">
-					<label class="control-label" for="trn-source-select">Data Extractor</label> &nbsp;
-					<select id="trn-source-select" class="form-control">
-					</select>
+					<label for="transformerDescription">Transformer Description</label>
+					<textarea class="form-control" placeholder="BHHS Normalizer" name="transformerDescription" id="transformerDescription"></textarea>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="control-label" for="trn-source-select">Transformer Input</label>
+							<select id="trn-source-toggle" class="form-control">
+								<option value="custom">Custom source definition</option>
+								<option value="extractor-template">Use extractor as template</option>
+								<option value="extractor-bind">Bind to an extractor</option>
+							</select>
+							
+						</div>
+						<div class="form-group">
+							<label class="control-label">Select Extractor</label>
+							<select id="trn-source-select" class="form-control" disabled="disabled">
+							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<small>
+							<dl>
+								<dt>Custom source definition</dt>
+								<dd>Define your own fields and data types</dd>
+								<dt>Use extractor as a template</dt>
+								<dd>Start with the fields an extractor has found a go from there</dd>
+								<dt>Bind to an extractor <em>*experimental*</em></dt>
+								<dd>Always use the fields from this extractor - and adapt to changes</dd>
+							</dl>
+						</small>
+					</div>
 				</div>
 	      	</section>
 	      	<section id="trn-step-2" class="step">
