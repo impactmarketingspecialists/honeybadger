@@ -69,6 +69,11 @@ li.file:hover {
 	background-color: #ccc;
 }
 
+.logger {
+	max-height: 20em;
+	overflow-y: scroll;
+}
+
 #transformNormalize .item {
 	display:block;
 }
@@ -77,9 +82,4 @@ li.file:hover {
 	display:inline-block;
 	margin-left: 0.5em;
 	/*width: 10em;*/
-}
-
-#transformer-log-body {
-	max-height: 25em;
-	overflow-y: scroll;
 }

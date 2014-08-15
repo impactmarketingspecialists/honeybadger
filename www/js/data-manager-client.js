@@ -52,7 +52,9 @@ function update(element,data)
 
 	var transformerLists = function(d) {
 		$('#transformerList > tbody').html('');
+		$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
 		$(d).each(function(index, item){
+			$('#ldr-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 			$('#transformerList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
@@ -60,7 +62,7 @@ function update(element,data)
 	};
 
 	var loaderLists = function(d) {
-		$('#laoderList > tbody').html('');
+		$('#loaderList > tbody').html('');
 		$(d).each(function(index, item){
 			$('#loaderList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
@@ -482,6 +484,16 @@ $(document).ready(function(){
 		return transform;
 	};
 
+	var ldr = function(){
+		return {};
+	};
+
+	$('.logger').each(function(index, item){
+		item.addEventListener("DOMNodeInserted", function(e){
+			this.scrollTop = this.scrollHeight;
+		});
+	});
+
 	$('#sourcetype').change(function(){
 		sourceModalReset();
 		if ($(this).val() == 'RETS') $('#source_RETS').show();
@@ -493,6 +505,7 @@ $(document).ready(function(){
 
 	resetWizard('extractorWizard');
 	resetWizard('transformWizard');
+	resetWizard('loaderWizard');
 	// $('.wizard section.step').first().show();
 
 	/**
@@ -564,6 +577,10 @@ $(document).ready(function(){
 		$('#extraction-result').html('');
 	});
 
+	/**
+	 * Transform Wizard
+	 */
+
 	$('#transformWizardNext').click(function(){
 
 		var finish = function(){
@@ -618,7 +635,7 @@ $(document).ready(function(){
 	});
 
 	$('#trn-test').click(function(){
-		$('#extraction-result').html('');
+		$('#transformer-result').html('');
 		DataManager.transformer.sample(trn(),function(e){
 			if (!e.err) {
 				$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
@@ -633,6 +650,92 @@ $(document).ready(function(){
 	$('#trn-test-clear').click(function(){
 		$('#transformer-log-body').html('');
 		$('#transformer-result').html('');
+	});
+
+	/**
+	 * Loader Wizard
+	 */
+
+	$('#loaderWizardNext').click(function(){
+
+		var finish = function(){
+			$('#loaderWizard').modal('hide');
+			DataManager.loader.validate(ldr());
+			DataManager.loader.save(ldr());
+		}
+
+		if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) return finish();
+
+		$('#loaderWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
+		$('#loaderWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+		if (!$('#loaderWizard section.step.active').is($('#loaderWizard section.step').first())) $('#loaderWizardBack').removeAttr('disabled');
+		if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) $('#loaderWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
+	});
+
+	$('#loaderWizardBack').click(function(){
+		$('#loaderWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
+		$('#loaderWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+		if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').first())) $('#loaderWizardBack').attr('disabled','disabled');
+		if (!$('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) $('#loaderWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
+	});
+
+	$('#ldr-source-toggle').change(function(){
+		if ($(this).val() !== 'custom') $('#ldr-source-select').removeAttr('disabled');
+		else $('#ldr-source-select').attr('disabled','disabled');
+	});
+
+	$('#ldr-source-select').change(function(){
+		var v = $(this).val();
+		var s = DataManager.getTransformers().filter(function(e){
+			if (e.id == v) return e;
+			else return null;
+		}).pop();
+
+		DataManager.transformer.sample(s.value,function(e){
+			if (!e.err) update('dataStructures',e.body);
+		});
+	});
+
+	$('#loaderMySQL').hide();
+	$('#loaderCouchDB').hide();
+	$('#loaderFTP').hide();
+	$('#ldr-target-type').change(function(){
+		switch($(this).val())
+		{
+			case "mysql":
+				$('#loaderMySQL').show();
+				$('#loaderCouchDB').hide();
+				$('#loaderFTP').hide();
+			break;
+			case "couchdb":
+				$('#loaderMySQL').hide();
+				$('#loaderCouchDB').show();
+				$('#loaderFTP').hide();
+			break;
+			case "ftp":
+				$('#loaderMySQL').hide();
+				$('#loaderCouchDB').hide();
+				$('#loaderFTP').show();
+			break;
+		}
+	});
+
+	$('#ldr-test').click(function(){
+		$('#loader-result').html('');
+		DataManager.loader.sample(ldr(),function(e){
+			if (!e.err) {
+				$('#loader-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+				$('#loaderWizardNext').removeAttr('disabled');
+			} else {
+				$('#loader-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+				$('#loaderWizardNext').attr('disabled','disabled');
+			}
+		});
+	});
+
+	$('#ldr-test-clear').click(function(){
+		$('#loader-log-body').html('');
+		$('#loader-result').html('');
 	});
 
 });
