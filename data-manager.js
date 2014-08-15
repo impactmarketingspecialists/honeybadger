@@ -14,6 +14,38 @@ var streamTransform = require('stream-transform');
 
 var http_port = 8090;
 
+function parseDSN(dsn) {
+  var args;
+
+  var components = require('url').parse(dsn);
+
+  // DSN is not a plain hostname?
+  if (components.hostname) {
+    // Guard protocol
+    if (components.protocol !== 'mysql:') {
+      throw new Error("mysql-libmysqlclient supports only connections to MySQL server");
+    }
+
+    var
+      hostname = components.hostname,
+      port     = components.port,
+      auth     = components.auth.split(':'),
+      user     = auth.shift(),
+      password = auth.shift(),
+      database = components.pathname
+               ? components.pathname.substr(1).replace(/\/.*$/, '').replace(/\?.*$/, '')
+               : null,
+      socket = null,
+      flags = null;
+
+    args = { host: hostname, user: user, password: password, database: database, port: port, socket: socket, flags: flags };
+  } else {
+    args = [arguments[0]];
+  }
+
+  return args;
+}
+
 var DataManager = new (function(){
     var sources = [],
         extractors = [],
@@ -549,6 +581,34 @@ var WSAPI = {
         DataManager.transformerSave(transformer, function(err, body){
             callback('onTransformerSave',err,body);
         });
+    },
+    validateLoaderConnection: function(loader, callback) {
+        switch(loader.target.type)
+        {
+            case "mysql":
+                var mysql = require('mysql');
+
+                var dsn = parseDSN(loader.target.dsn);
+                var connection = mysql.createConnection({
+                    host: dsn.host,
+                    user: dsn.user,
+                    password: dsn.password,
+                    database: dsn.database
+                });
+                connection.query('SHOW tables', function(err, res){
+                    if (err) {
+                        console.trace(err);
+                        callback('onLoaderValidateConnection',err,null);
+                        return;
+                    }
+                    callback('onLoaderValidateConnection',null,{tables:res});
+                });
+            break;
+            case "couchdb":
+            break;
+            case "ftp":
+            break;
+        }
     },
     validateSource: function(source, callback) {
 

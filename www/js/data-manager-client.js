@@ -84,6 +84,14 @@ function update(element,data)
 		})
 	};
 
+	var loaderDefinition = function(d) {
+		$('#loaderSchemas .fields .maps').html('');
+		$.each(d.headers,function(index,item){
+			if (!item) return;
+			$('#loaderSchemas .fields .maps').append('<div class="row form-group"><div class="col-md-6"><label>'+item+'</label></div><div class="col-md-6"><select class="form-control"><option value="string">String</option><option value="float">Float</option><option value="bool">Boolean</option><option value="text">Long Text</option></select></div></div>')
+		})
+	};
+
 	switch(element)
 	{
 		case "connectionStatus":
@@ -103,6 +111,9 @@ function update(element,data)
 		break;
 		case "dataStructures":
 			transformDataStructures(data);
+		break;
+		case "loaderDefinition":
+			loaderDefinition(data);
 		break;
 	}
 }
@@ -310,6 +321,13 @@ var DataManager = new (function(){
 
 	};
 
+	this.loader.validateConnection = function(ldr, cb){
+		send('validateLoaderConnection', [ldr], function(e){
+			console.log(e);
+			cb(e);
+		});
+	};
+
 	this.loader.save = function(ext){
 		send('saveLoader', [ext], function(e){
 			console.log(e);
@@ -485,7 +503,13 @@ $(document).ready(function(){
 	};
 
 	var ldr = function(){
-		return {};
+		return {
+			transform: $('#ldr-source-select').val(),
+			target: {
+				type: $('#ldr-target-type').val(),
+				dsn: $('#ldr-mysql-dsn').val()
+			}
+		};
 	};
 
 	$('.logger').each(function(index, item){
@@ -692,7 +716,7 @@ $(document).ready(function(){
 		}).pop();
 
 		DataManager.transformer.sample(s.value,function(e){
-			if (!e.err) update('dataStructures',e.body);
+			if (!e.err) update('loaderDefinition',e.body);
 		});
 	});
 
@@ -718,6 +742,28 @@ $(document).ready(function(){
 				$('#loaderFTP').show();
 			break;
 		}
+	});
+
+	$('#loaderDSN button').click(function(){
+		DataManager.loader.validateConnection(ldr(),function(e){
+			var t = $('#ldr-target-type').val();
+			var btn = (t === 'mysql') ? '#ldr-mysql-validate' : '#ldr-couchdb-validate';
+			$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
+			if (!e.err) {
+				$(btn).removeClass('btn-primary').addClass('btn-success')
+				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+			} else {
+				$(btn).removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+			}
+
+		});
+	});
+
+	$('#loaderSchemas .fields').hide();
+	$('#ldr-create-schema').click(function(){
+		$('#loaderSchemas .create').hide();
+		$('#loaderSchemas .fields').show();
 	});
 
 	$('#ldr-test').click(function(){

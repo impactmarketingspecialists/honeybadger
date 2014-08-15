@@ -564,45 +564,67 @@
 						</div>
 					</div>
 				</div>
-				<div id="loaderMySQL">
-					<div class="form-group">
-						<label class="control-label" for="ldr-mysql-dsn">MySQL Credentials, Host and Port</label>
-						<input type="text" class="form-control" name="ldr-mysql-dsn" id="ldr-mysql-dsn" placeholder="mysql://user:pass@hostname:3306" />
+				<div id="loaderDSN">
+					<div id="loaderMySQL">
+						<div class="form-group">
+							<label class="control-label" for="ldr-mysql-dsn">MySQL Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-mysql-dsn" id="ldr-mysql-dsn" placeholder="mysql://user:pass@hostname:3306" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-mysql-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
 					</div>
-					<div class="form-group">
-						<button id="ldr-mysql-validate" tabindex="-1" type="button" class="btn btn-primary" onclick="DataManager.loader.validate();">
-							Validate Connection <span class="validation-status glyphicon"></span>
-						</button>
+					<div id="loaderCouchDB">
+						<div class="form-group">
+							<label class="control-label" for="ldr-couchdb-dsn">CouchDB Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-couchdb-dsn" id="ldr-couchdb-dsn" placeholder="couchdb://user:pass@hostname:5984" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-couchdb-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
 					</div>
-				</div>
-				<div id="loaderCouchDB">
-					<div class="form-group">
-						<label class="control-label" for="ldr-couchdb-dsn">CouchDB Credentials, Host and Port</label>
-						<input type="text" class="form-control" name="ldr-couchdb-dsn" id="ldr-couchdb-dsn" placeholder="couchdb://user:pass@hostname:5984" />
-					</div>
-					<div class="form-group">
-						<button id="ldr-couchdb-validate" tabindex="-1" type="button" class="btn btn-primary" onclick="DataManager.loader.validate();">
-							Validate Connection <span class="validation-status glyphicon"></span>
-						</button>
-					</div>
-				</div>
-				<div id="loaderFTP">
-					<div class="form-group">
-						<label class="control-label" for="ldr-ftp-dsn">FTP Credentials, Host and Port</label>
-						<input type="text" class="form-control" name="ldr-ftp-dsn" id="ldr-ftp-dsn" placeholder="ftp://user:pass@hostname:21" />
-					</div>
-					<div class="form-group">
-						<button id="ldr-ftp-validate" tabindex="-1" type="button" class="btn btn-primary" onclick="DataManager.loader.validate();">
-							Validate Connection <span class="validation-status glyphicon"></span>
-						</button>
+					<div id="loaderFTP">
+						<div class="form-group">
+							<label class="control-label" for="ldr-ftp-dsn">FTP Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-ftp-dsn" id="ldr-ftp-dsn" placeholder="ftp://user:pass@hostname:21" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-ftp-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
 					</div>
 				</div>
 	      	</section>
 	      	<section id="ldr-step-2" class="step">
-				<h4>Transformer Details</h4>
+				<h4>Loader Details</h4>
+				<div id="loaderSchemas">
+					<div class="create well">
+						<p>This database does not appear to have any schemas that support your transformer's output.</p>
+						<p><center><button id="ldr-create-schema" class="btn btn-primary">Create Schema</button></center></p>
+					</div>
+					<div class="fields">
+						<p>Before creating a new schema on your target, we need to verify the data type for each field in your data source</p>
+						<div class="form-group">
+							<label class="control-label" for="ldr-target-schema">Schema Name</label>
+							<input type="text" class="form-control" placeholder="my_schema" id="ldr-target-schema" name="ldr-target-schema"/>
+						</div>
+						<div class="maps">
+						</div>
+						<div class="form-group">
+							<button id="ldr-create-schema" tabindex="-1" type="button" class="btn btn-primary">
+								Create Schema <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
+					</div>
+				</div>
 	      	</section>
 	      	<section id="ldr-step-3" class="step">
-				<h4>Test Extraction</h4>
+				<h4>Test Loader</h4>
 				<div class="form-group">
 					<button type="button" class="btn btn-primary" id="ldr-test">Run Test</button>
 					<button type="button" class="btn btn-default" id="ldr-test-clear">Clear Log</button>
