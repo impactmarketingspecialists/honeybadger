@@ -13,8 +13,6 @@ var feed = db.follow({since: "now"});
 
 var http_port = 8090;
 
-// app.use(express.bodyParser());
-
 var DataManager = new (function(){
     var sources = [],
         extractors = [],
@@ -304,7 +302,7 @@ var WSAPI = {
                                 var errors = false;
                                 clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
                                 var libcsv = require('csv-parse');
-                                
+                                var headers = null;
                                 clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
                                 clog('<div class="text-info">Using quote character: '+quotes+'</div>');
                                 clog('<div class="text-info">Using escape character: "</div>');
@@ -316,6 +314,7 @@ var WSAPI = {
                                             callback('onExtractorTest','Unable to parse column headers from data stream',null);
                                         });
                                     } else {
+                                        headers = head;
                                         clog('<div class="text-success">CSV extraction engine was found the following column headers.</div>');
                                         clog('<pre>'+head.join("\n")+'</pre>');
                                     }
@@ -324,7 +323,7 @@ var WSAPI = {
                                 parser.on('finish',function(){
                                     clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                                     process.nextTick(function(){
-                                        if (!errors) callback('onExtractorTest',null,{success:true,body:'completed'});
+                                        if (!errors) callback('onExtractorTest',null,{headers:headers});
                                     })
                                 });
 

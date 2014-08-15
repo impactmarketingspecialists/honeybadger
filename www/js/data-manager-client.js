@@ -40,9 +40,8 @@ function update(element,data)
 	};
 
 	var extractorLists = function(d) {
-		// $('#activeSources > tbody').html('');
-		// $('#inactiveSources > tbody').html('');
 		$('#extractorList > tbody').html('');
+		$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
 		$(d).each(function(index, item){
 			$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 			$('#extractorList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
@@ -52,8 +51,6 @@ function update(element,data)
 	};
 
 	var transformerLists = function(d) {
-		// $('#activeSources > tbody').html('');
-		// $('#inactiveSources > tbody').html('');
 		$('#transformerList > tbody').html('');
 		$(d).each(function(index, item){
 			$('#transformerList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
@@ -63,13 +60,19 @@ function update(element,data)
 	};
 
 	var loaderLists = function(d) {
-		// $('#activeSources > tbody').html('');
-		// $('#inactiveSources > tbody').html('');
 		$('#laoderList > tbody').html('');
 		$(d).each(function(index, item){
 			$('#loaderList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+		});
+	};
+
+	var transformDataStructures = function(d) {
+		// $('#dataStructures .input');
+		$.each(d.headers,function(index,item){
+			$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
+			$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
 		});
 	};
 
@@ -89,6 +92,9 @@ function update(element,data)
 		break;
 		case "loaderLists":
 			loaderLists(data);
+		break;
+		case "dataStructures":
+			transformDataStructures(data);
 		break;
 	}
 }
@@ -558,6 +564,31 @@ $(document).ready(function(){
 	$('#trn-source-toggle').change(function(){
 		if ($(this).val() !== 'custom') $('#trn-source-select').removeAttr('disabled');
 		else $('#trn-source-select').attr('disabled','disabled');
+	});
+
+	$('#trn-source-select').change(function(){
+		var v = $(this).val();
+		var s = DataManager.getExtractors().filter(function(e){
+			if (e.id == v) return e;
+			else return null;
+		}).pop();
+
+		DataManager.extractor.sample(s.value,function(e){
+			if (!e.err) update('dataStructures',e.body);
+		});
+	});
+
+	$('#transformNormalize').hide();
+	$('#transformMapper').hide();
+	$('#trn-transform-type').change(function(){
+		if ($(this).val() == 'normalize') {
+			$('#transformNormalize').show();
+			$('#transformMapper').hide();
+		}
+		if ($(this).val() == 'map') {
+			$('#transformNormalize').hide();
+			$('#transformMapper').show();
+		}
 	});
 
 })

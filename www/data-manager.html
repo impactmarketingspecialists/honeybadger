@@ -463,8 +463,9 @@
 						<div class="form-group">
 							<label class="control-label" for="trn-source-select">Transformer Input</label>
 							<select id="trn-source-toggle" class="form-control">
+								<option value="">-- Select an input definition --</option>
 								<option value="custom">Custom source definition</option>
-								<option value="extractor-template">Use extractor as template</option>
+								<option value="extractor-template">Use extractor as a template</option>
 								<option value="extractor-bind">Bind to an extractor</option>
 							</select>
 							
@@ -489,16 +490,24 @@
 					</div>
 				</div>
 	      	</section>
-	      	<section id="trn-step-2" class="step">
+	      	<section id="trn-step-2" class="step data-structures">
 				<h4>Transformer Details</h4>
-				<div class="form-inline form-group">
-					<label class="control-label" for="trn-source-select">Data Format</label> &nbsp;
-					<select class="form-control" name="trn-data-format" id="trn-data-format">
-						<option value="delimited-text">Delimited Text (CSV...)</option>
-						<option value="json">JSON</option>
-						<option value="xml">XML</option>
-						<option value="excel">Excel (XLS...)</option>
+				<div class="form-group">
+					<label class="control-label">Transform Type</label>
+					<select name="trn-transform-type" id="trn-transform-type" class="form-control">
+						<option value="">-- Select a transformation type --</option>
+						<option value="normalize">Normalize</option>
+						<option value="map">Custom Mapping</option>
 					</select>
+				</div>
+				<div id="transformNormalize">
+				</div>
+				<div id="transformMapper">
+					<div class="fields">
+					</div>
+					<div class="mapper form-group">
+						<textarea class="form-control" name="trn-map" id="trn-map" rows="10"></textarea>
+					</div>
 				</div>
 	      	</section>
 	      	<section id="trn-step-3" class="step">

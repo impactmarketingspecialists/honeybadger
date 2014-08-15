@@ -68,3 +68,13 @@ li.file {
 li.file:hover {
 	background-color: #ccc;
 }
+
+#transformNormalize .item {
+	display:block;
+}
+
+#transformNormalize .item .name {
+	display:inline-block;
+	margin-left: 0.5em;
+	/*width: 10em;*/
+}
