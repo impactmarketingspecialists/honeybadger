@@ -323,6 +323,12 @@ var DataManager = new (function(){
 
 	this.loader.validateConnection = function(ldr, cb){
 		send('validateLoaderConnection', [ldr], function(e){
+			cb(e);
+		});
+	};
+
+	this.loader.createSchema = function(ldr, cb){
+		send('createLoaderSchema', [ldr], function(e){
 			console.log(e);
 			cb(e);
 		});
@@ -503,13 +509,25 @@ $(document).ready(function(){
 	};
 
 	var ldr = function(){
-		return {
+		var res = {
 			transform: $('#ldr-source-select').val(),
 			target: {
 				type: $('#ldr-target-type').val(),
-				dsn: $('#ldr-mysql-dsn').val()
+				dsn: $('#ldr-mysql-dsn').val(),
+				schema: {
+					name: $('#ldr-target-schema').val(),
+					fields: []
+				}
 			}
 		};
+		$('#loaderSchemas .fields .maps label').each(function(index,item){
+			res.target.schema.fields.push({
+				key: $(item).text(),
+				type: $(item).parent().parent().find('select').val()
+			});
+		});
+		console.log(res);
+		return res;
 	};
 
 	$('.logger').each(function(index, item){
@@ -708,6 +726,7 @@ $(document).ready(function(){
 		else $('#ldr-source-select').attr('disabled','disabled');
 	});
 
+	var trnSample = {};
 	$('#ldr-source-select').change(function(){
 		var v = $(this).val();
 		var s = DataManager.getTransformers().filter(function(e){
@@ -716,7 +735,10 @@ $(document).ready(function(){
 		}).pop();
 
 		DataManager.transformer.sample(s.value,function(e){
-			if (!e.err) update('loaderDefinition',e.body);
+			if (!e.err) {
+				update('loaderDefinition',e.body);
+				trnSample = e.body;
+			} 
 		});
 	});
 
@@ -760,8 +782,24 @@ $(document).ready(function(){
 		});
 	});
 
-	$('#loaderSchemas .fields').hide();
 	$('#ldr-create-schema').click(function(){
+		DataManager.loader.createSchema(ldr(),function(e){
+			var t = $('#ldr-target-type').val();
+			var btn = (t === 'mysql') ? '#ldr-mysql-validate' : '#ldr-couchdb-validate';
+			$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
+			if (!e.err) {
+				$(btn).removeClass('btn-primary').addClass('btn-success')
+				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+			} else {
+				$(btn).removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+			}
+
+		});
+	});
+
+	$('#loaderSchemas .fields').hide();
+	$('#ldr-new-schema').click(function(){
 		$('#loaderSchemas .create').hide();
 		$('#loaderSchemas .fields').show();
 	});

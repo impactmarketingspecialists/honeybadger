@@ -610,6 +610,57 @@ var WSAPI = {
             break;
         }
     },
+    createLoaderSchema: function(loader, callback) {
+        switch(loader.target.type)
+        {
+            case "mysql":
+                var mysql = require('mysql');
+
+                var dsn = parseDSN(loader.target.dsn);
+                var connection = mysql.createConnection({
+                    host: dsn.host,
+                    user: dsn.user,
+                    password: dsn.password,
+                    database: dsn.database
+                });
+
+                var qry = 'CREATE TABLE `'+loader.target.schema.name+'` ( `id` INT NOT NULL AUTO_INCREMENT, ';
+                loader.target.schema.fields.forEach(function(item, index){
+                    qry += '`'+item.key+'` ';
+                    switch(item.type) {
+                        case "string":
+                            qry += 'VARCHAR(255) NULL,'
+                        break;
+                        case "boolean":
+                            qry += 'INT NULL,'
+                        break;
+                        case "float":
+                            qry += 'FLOAT NULL,'
+                        break;
+                        case "date":
+                            qry += 'DATE NULL,'
+                        break;
+                        case "text":
+                            qry += 'TEXT NULL,'
+                        break;
+                    }
+                })
+                qry += 'PRIMARY KEY (`id`), UNIQUE INDEX `id_UNIQUE` (`id` ASC));'
+                connection.query(qry, function(err, res){
+                    if (err) {
+                        console.trace(err);
+                        callback('onLoaderSchemaCreate',err,null);
+                        return;
+                    }
+                    callback('onLoaderSchemaCreate',null,{res:res});
+                });
+            break;
+            case "couchdb":
+            break;
+            case "ftp":
+            break;
+        }
+    },
     validateSource: function(source, callback) {
 
         switch(source.type)
