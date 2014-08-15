@@ -329,19 +329,20 @@ var DataManager = new (function(){
 
 	this.loader.createSchema = function(ldr, cb){
 		send('createLoaderSchema', [ldr], function(e){
-			console.log(e);
 			cb(e);
 		});
 	};
 
-	this.loader.save = function(ext){
-		send('saveLoader', [ext], function(e){
-			console.log(e);
+	this.loader.save = function(ldr){
+		send('saveLoader', [ldr], function(e){
+			// console.log(e);
+			cb(e);
 		});
 	};
 
-	this.loader.sample = function(ext, cb){
-		send('testLoader', [ext], function(e){
+	this.loader.sample = function(ldr, cb){
+		send('testLoader', [ldr], function(e){
+			// console.log(e);
 			cb(e);
 		});
 	};
@@ -510,6 +511,7 @@ $(document).ready(function(){
 
 	var ldr = function(){
 		var res = {
+			name: $('#loaderName').val(),
 			transform: $('#ldr-source-select').val(),
 			target: {
 				type: $('#ldr-target-type').val(),
@@ -784,15 +786,13 @@ $(document).ready(function(){
 
 	$('#ldr-create-schema').click(function(){
 		DataManager.loader.createSchema(ldr(),function(e){
-			var t = $('#ldr-target-type').val();
-			var btn = (t === 'mysql') ? '#ldr-mysql-validate' : '#ldr-couchdb-validate';
-			$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
+			$('#ldr-create-schema').removeClass('btn-danger btn-success').addClass('btn-primary');
 			if (!e.err) {
-				$(btn).removeClass('btn-primary').addClass('btn-success')
-				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+				$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
+				$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
 			} else {
-				$(btn).removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
-				$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+				$('#ldr-create-schema').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+				$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
 			}
 
 		});
