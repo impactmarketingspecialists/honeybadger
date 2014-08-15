@@ -150,7 +150,7 @@ var DataManager = new (function(){
 
     this.transformerSave = function(transformer, callback) {
 
-        var _updateExtractor = function(){
+        var _updateTransformer = function(){
             if (!transformer._rev) {
                 console.log('Document has no _rev; cannot update');
                 console.trace();
@@ -161,7 +161,7 @@ var DataManager = new (function(){
             db.insert(transformer, transformer._id, callback);
         };
 
-        var _newExtractor = function(){
+        var _newTransformer = function(){
             transformer.type = 'transformer'; // Set the document type to Data Source Name
             transformer.status = 'active'; // Activate the source
             transformer.activatedOn = Date.now();
@@ -546,7 +546,9 @@ var WSAPI = {
         })
     },
     saveTransformer: function(transformer, callback) {
-
+        DataManager.transformerSave(transformer, function(err, body){
+            callback('onTransformerSave',err,body);
+        });
     },
     validateSource: function(source, callback) {
 
