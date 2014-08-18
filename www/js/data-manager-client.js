@@ -1,6 +1,6 @@
-var ts;
+var ts,tp;
 var socket;
-var host = "ws://"+location.hostname+":8090/";
+var host = "ws://"+location.host+"/data-manager/";
 
 var events = {
 	onsave: function(res){
@@ -95,15 +95,21 @@ function update(element,data)
 function connect()
 {
 	if (ts) clearInterval(ts);
+	if (tp) clearInterval(tp);
+
 	socket = new WebSocket(host);
 	socket.onopen = function(){
 		update('connectionStatus',{online:true});
 		DataManager.refresh();
 		DataManager.alert('Connected to server.');
 		if (ts) clearInterval(ts);
+		tp = setInterval(function(){
+			socket.send('ping');
+		}, 15000);
 	};
 
 	socket.onclose = function(){
+		if (tp) clearInterval(tp);
 		update('connectionStatus',{online:false});
 		DataManager.alert('Connection to server lost. Trying to restablish connection with the server.',{type:'danger'});
 		ts = setInterval(connect, 1000);

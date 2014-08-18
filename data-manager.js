@@ -492,6 +492,8 @@ wss.on('connection',function(ws) {
             return false; 
         }
 
+        if (message === 'ping') return ws.send('pong');
+
         var data = JSON.parse(message);
         if (!data) {
             console.log('WebSocket bad message');
