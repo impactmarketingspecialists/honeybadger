@@ -408,19 +408,9 @@
 				</div>
 				<h5>Extraction Log:</h5>
 				<div class="well">
-					<div class="body" id="extraction-log-body"></div>
+					<div class="body logger" id="extraction-log-body"></div>
 				</div>
 				<div id="extraction-result" class="wizard-result"></div>
-				<!-- <div class="row form-group">
-					<div class="col-md-6">
-						<label for="ftpuser">Username</label>
-						<input type="text" class="form-control" placeholder="CARETSIMPACT" name="ftpuser" id="ftpuser"/>
-					</div>
-					<div class="col-md-6">
-						<label for="ftpauth">Password</label>
-						<input type="password" class="form-control" placeholder="CARETSIMPACT" name="ftpauth" id="ftpauth"/>
-					</div>
-				</div> -->
 	      	</section>
 	      </div>
 	      <div class="modal-footer">
@@ -455,21 +445,59 @@
 					<input type="text" class="form-control" placeholder="BHHS Normalizer" name="transformerName" id="transformerName"/>
 				</div>
 				<div class="form-group">
-					<label class="control-label" for="trn-source-select">Data Extractor</label> &nbsp;
-					<select id="trn-source-select" class="form-control">
-					</select>
+					<label for="transformerDescription">Transformer Description</label>
+					<textarea class="form-control" placeholder="BHHS Normalizer" name="transformerDescription" id="transformerDescription"></textarea>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="control-label" for="trn-source-select">Transformer Input</label>
+							<select id="trn-source-toggle" class="form-control">
+								<option value="">-- Select an input definition --</option>
+								<option value="custom">Custom source definition</option>
+								<option value="extractor-template">Use extractor as a template</option>
+								<option value="extractor-bind">Bind to an extractor</option>
+							</select>
+							
+						</div>
+						<div class="form-group">
+							<label class="control-label">Select Extractor</label>
+							<select id="trn-source-select" class="form-control" disabled="disabled">
+							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<small>
+							<dl>
+								<dt>Custom source definition</dt>
+								<dd>Define your own fields and data types</dd>
+								<dt>Use extractor as a template</dt>
+								<dd>Start with the fields an extractor has found a go from there</dd>
+								<dt>Bind to an extractor <em>*experimental*</em></dt>
+								<dd>Always use the fields from this extractor - and adapt to changes</dd>
+							</dl>
+						</small>
+					</div>
 				</div>
 	      	</section>
-	      	<section id="trn-step-2" class="step">
+	      	<section id="trn-step-2" class="step data-structures">
 				<h4>Transformer Details</h4>
-				<div class="form-inline form-group">
-					<label class="control-label" for="trn-source-select">Data Format</label> &nbsp;
-					<select class="form-control" name="trn-data-format" id="trn-data-format">
-						<option value="delimited-text">Delimited Text (CSV...)</option>
-						<option value="json">JSON</option>
-						<option value="xml">XML</option>
-						<option value="excel">Excel (XLS...)</option>
+				<div class="form-group">
+					<label class="control-label">Transform Type</label>
+					<select name="trn-transform-type" id="trn-transform-type" class="form-control">
+						<option value="">-- Select a transformation type --</option>
+						<option value="normalize">Normalize</option>
+						<option value="map">Custom Mapping</option>
 					</select>
+				</div>
+				<div id="transformNormalize">
+				</div>
+				<div id="transformMapper">
+					<div class="fields">
+					</div>
+					<div class="mapper form-group">
+						<textarea class="form-control" name="trn-map" id="trn-map" rows="10"></textarea>
+					</div>
 				</div>
 	      	</section>
 	      	<section id="trn-step-3" class="step">
@@ -480,7 +508,7 @@
 				</div>
 				<h5>Transformer Log:</h5>
 				<div class="well">
-					<div class="body" id="transformer-log-body"></div>
+					<div class="body logger" id="transformer-log-body"></div>
 				</div>
 				<div id="transformer-result" class="wizard-result"></div>
 	      	</section>
@@ -516,33 +544,94 @@
 					<label for="loaderName">Loader Name</label>
 					<input type="text" class="form-control" placeholder="BHHS Normalizer" name="loaderName" id="loaderName"/>
 				</div>
-				<div class="form-group">
-					<label class="control-label" for="ldr-source-select">Data Extractor</label> &nbsp;
-					<select id="ldr-source-select" class="form-control">
-					</select>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="control-label" for="ldr-source-select">Data Transformer</label> &nbsp;
+							<select id="ldr-source-select" class="form-control">
+							</select>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="control-label" for="ldr-target-type">Data Target</label> &nbsp;
+							<select class="form-control" name="ldr-target-type" id="ldr-target-type">
+								<option value="">-- Select data target --</option>
+								<option value="mysql">MySQL</option>
+								<option value="couchdb">CouchDB</option>
+								<option value="ftp">FTP</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div id="loaderDSN">
+					<div id="loaderMySQL">
+						<div class="form-group">
+							<label class="control-label" for="ldr-mysql-dsn">MySQL Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-mysql-dsn" id="ldr-mysql-dsn" placeholder="mysql://user:pass@hostname:3306" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-mysql-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
+					</div>
+					<div id="loaderCouchDB">
+						<div class="form-group">
+							<label class="control-label" for="ldr-couchdb-dsn">CouchDB Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-couchdb-dsn" id="ldr-couchdb-dsn" placeholder="couchdb://user:pass@hostname:5984" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-couchdb-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
+					</div>
+					<div id="loaderFTP">
+						<div class="form-group">
+							<label class="control-label" for="ldr-ftp-dsn">FTP Credentials, Host and Port</label>
+							<input type="text" class="form-control" name="ldr-ftp-dsn" id="ldr-ftp-dsn" placeholder="ftp://user:pass@hostname:21" />
+						</div>
+						<div class="form-group">
+							<button id="ldr-ftp-validate" tabindex="-1" type="button" class="btn btn-primary">
+								Validate Connection <span class="validation-status glyphicon"></span>
+							</button>
+						</div>
+					</div>
 				</div>
 	      	</section>
 	      	<section id="ldr-step-2" class="step">
-				<h4>Transformer Details</h4>
-				<div class="form-inline form-group">
-					<label class="control-label" for="ldr-source-select">Data Format</label> &nbsp;
-					<select class="form-control" name="ldr-data-format" id="ldr-data-format">
-						<option value="delimited-text">Delimited Text (CSV...)</option>
-						<option value="json">JSON</option>
-						<option value="xml">XML</option>
-						<option value="excel">Excel (XLS...)</option>
-					</select>
+				<h4>Loader Details</h4>
+				<div id="loaderSchemas">
+					<div class="create well">
+						<p>This database does not appear to have any schemas that support your transformer's output.</p>
+						<p><center><button id="ldr-new-schema" class="btn btn-primary">Create Schema</button></center></p>
+					</div>
+					<div class="fields">
+						<p>Before creating a new schema on your target, we need to verify the data type for each field in your data source</p>
+						<div class="form-group">
+							<label class="control-label" for="ldr-target-schema">Schema Name</label>
+							<input type="text" class="form-control" placeholder="my_schema" id="ldr-target-schema" name="ldr-target-schema"/>
+						</div>
+						<div class="maps">
+						</div>
+						<div class="form-group">
+							<button id="ldr-create-schema" tabindex="-1" type="button" class="btn btn-primary">
+								Create Schema <span class="schema-status glyphicon"></span>
+							</button>
+						</div>
+					</div>
 				</div>
 	      	</section>
 	      	<section id="ldr-step-3" class="step">
-				<h4>Test Extraction</h4>
+				<h4>Test Loader</h4>
 				<div class="form-group">
 					<button type="button" class="btn btn-primary" id="ldr-test">Run Test</button>
 					<button type="button" class="btn btn-default" id="ldr-test-clear">Clear Log</button>
 				</div>
 				<h5>Loader Log:</h5>
 				<div class="well">
-					<div class="body" id="loader-log-body"></div>
+					<div class="body logger" id="loader-log-body"></div>
 				</div>
 				<div id="loader-result" class="wizard-result"></div>
 	      	</section>
