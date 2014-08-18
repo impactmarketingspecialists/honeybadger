@@ -161,6 +161,7 @@ var DataManager = new (function(){
 		};
 
 	var receive = function(e) {
+		console.log(e);
 		if (e === 'pong') return;
 
 		var d = JSON.parse(e.data);
