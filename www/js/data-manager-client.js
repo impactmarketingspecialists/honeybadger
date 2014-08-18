@@ -161,7 +161,8 @@ var DataManager = new (function(){
 		};
 
 	var receive = function(e) {
-		// console.log(e.data);
+		if (e === 'pong') return;
+
 		var d = JSON.parse(e.data);
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
