@@ -311,7 +311,7 @@ var WSAPI = {
             client.once('connection.success',function(client){
                 console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
                 // Fetch classifications
-                client.getClassifications( source.source.rets.class, function has_meta( error, meta ) {
+                client.getClassifications( source.source.rets.resource, function has_meta( error, meta ) {
                     console.log(error,meta);
 
                     if( error ) {
@@ -329,6 +329,50 @@ var WSAPI = {
             client.once('connection.error',function(error, client){
                 console.error( 'Connection failed: %s.', error.message );
                 callback('onRETSBrowse',error, null);
+            });
+        });
+    },
+    inspectRETS: function(source, callback, client){
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
+
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                path: uri.path,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.5',
+                agent: { user: source.source.auth.userAgentHeader }
+            });
+
+            client.on( '#', function( error, data, cb ) {
+              console.log( this.event );
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                // Fetch classifications
+                client.searchQuery({
+                    resource: 'Property',
+                    class: 'A',
+                    dmql: '(status=Listed)',
+                    limit: 100
+                }, function( error, data ) {
+                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                });
+                
+                // client.getMetadataTable('Property', 'A', function( error, data ) {
+                //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                // });
+
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSInspect',error, null);
             });
         });
     },

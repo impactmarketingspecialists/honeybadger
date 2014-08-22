@@ -371,16 +371,30 @@
 					</div>
 				</div>
 				<div class="source-options" id="ext-rets-options">
-					<label for="ext-rets-class">RETS Data Class</label>
-					<div class="row">
-						<div class="col-xs-6">
-							<select name="ext-rets-class" id="ext-rets-class" class="form-control">
-								<option value="Property">Property</option>
-								<option value="Agent">Agent</option>
-							</select>
+					<div class="form-group rets-resource">
+						<label for="ext-rets-class">RETS Resource</label>
+						<div class="row form-group">
+							<div class="col-xs-6">
+								<select name="ext-rets-resource" id="ext-rets-resource" class="form-control">
+									<option value="Property">Property</option>
+									<option value="Agent">Agent</option>
+								</select>
+							</div>
+							<div clas="col-xs-4">
+								<button type="button" class="btn btn-primary" onclick="DataManager.retsBrowse()">Browse</button>
+							</div>
 						</div>
-						<div clas="col-xs-4">
-							<button type="button" class="btn btn-primary" onclick="DataManager.retsBrowse()">Browse</button>
+					</div>
+					<div class="form-group rets-classification hide">
+						<label for="ext-rets-class">RETS Data Class</label>
+						<div class="row">
+							<div class="col-xs-6">
+								<select name="ext-rets-class" id="ext-rets-class" class="form-control">
+								</select>
+							</div>
+							<div clas="col-xs-4">
+								<button type="button" class="btn btn-primary" onclick="DataManager.retsInspect()">Browse</button>
+							</div>
 						</div>
 					</div>
 				</div>

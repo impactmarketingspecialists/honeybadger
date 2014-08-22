@@ -437,15 +437,29 @@ var DataManager = new (function(){
 	{
 		var v = $('#ext-source-select').val();
 		var s = DataManager.getSource(v).value;
-		s.source.rets = { class: $('#ext-rets-class').val() };
+		s.source.rets = { resource: $('#ext-rets-resource').val() };
 		send('browseRETS',[s],function(e){
-			console.log(e);
+			if (e.body.meta) {
+				$.each(e.body.meta.data,function(index,item){
+					// console.log(item);
+					$('#ext-rets-class').append('<option value="'+item.ClassName[0]+'">'+item.VisibleName[0]+'</option>');
+					$('#ext-rets-options .rets-classification').removeClass('hide').show();
+				});
+			}
 		});
 	};
 
 	this.retsInspect = function()
 	{
-
+		var v = $('#ext-source-select').val();
+		var s = DataManager.getSource(v).value;
+		s.source.rets = {
+			resource: $('#ext-rets-resource').val(),
+			classification: $('#ext-rets-class').val()
+		};
+		send('inspectRETS',[s],function(e){
+			console.log(e);
+		});
 	};
 
 	this.source = function(name, type, properties){
