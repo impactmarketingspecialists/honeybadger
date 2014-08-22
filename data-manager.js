@@ -355,18 +355,23 @@ var WSAPI = {
             client.once('connection.success',function(client){
                 console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
                 // Fetch classifications
-                client.searchQuery({
-                    resource: 'Property',
-                    class: 'A',
-                    dmql: '(status=Listed)',
-                    limit: 100
-                }, function( error, data ) {
-                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                });
-                
-                // client.getMetadataTable('Property', 'A', function( error, data ) {
+                // client.searchQuery({
+                //     SearchType: 'Property',
+                //     Class: 'A',
+                //     Query: '(status=Listed)',
+                //     Limit: 10
+                // }, function( error, data ) {
                 //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
                 // });
+                
+                client.getMetadataTable('Property', 'A', function( error, data ) {
+                    console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                });
+                client.getMetadataClasses('Property', function( error, data ) {
+                    console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                });
 
             });
 
