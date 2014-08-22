@@ -32,7 +32,10 @@ function update(element,data)
 		$('#sourceList > tbody').html('');
 		$('#ext-source-select').html('');
 		$(d).each(function(index, item){
-			$('#sourceList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>')
+			$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+				setupWizard('sourceEditor', DataManager.getSource(item.id).value);
+				showWizard('sourceEditor');
+			}));
 			$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 			if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
@@ -43,8 +46,11 @@ function update(element,data)
 		$('#extractorList > tbody').html('');
 		$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
 		$(d).each(function(index, item){
+			$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+				setupWizard('extractorWizard', item.value);
+				showWizard('extractorWizard');
+			}));
 			$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
-			$('#extractorList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
@@ -54,8 +60,11 @@ function update(element,data)
 		$('#transformerList > tbody').html('');
 		$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
 		$(d).each(function(index, item){
+			$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+				setupWizard('transformWizard', item.value);
+				showWizard('transformWizard');
+			}));
 			$('#ldr-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
-			$('#transformerList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
@@ -64,7 +73,10 @@ function update(element,data)
 	var loaderLists = function(d) {
 		$('#loaderList > tbody').html('');
 		$(d).each(function(index, item){
-			$('#loaderList > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>');
+			$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+				setupWizard('loaderWizard', item.value);
+				showWizard('loaderWizard');
+			}));
 			// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 			// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 		});
@@ -142,6 +154,80 @@ function connect()
 	};
 
 	DataManager.bind(socket);
+}
+
+
+var sourceModalReset = function(){
+	$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
+	$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
+	$('#sourceTypeOptions .option-group').hide();
+	$('#sourceEditorSave').prop('disabled',true);
+};
+
+var resetWizard = function(id){
+	$('#'+id+' section.step').hide().first().show();
+	$('#'+id+' .files').empty();
+};
+
+var setupWizard = function(id, data){
+	console.log(data);
+	resetWizard(id);
+	switch(id)
+	{
+		case "sourceEditor":
+			sourceModalReset();
+			$('#sourcename').val(data.name);
+			$('#sourcetype').val(data.source.type);
+			if (data.source.type == 'RETS') {
+				$('#sourceuri').val(data.source.uri);
+				$('#sourceuser').val(data.source.auth.username);
+				$('#sourcepassword').val(data.source.auth.password);
+				$('#sourceua').val(data.source.auth.userAgentHeader);
+				$('#sourceuapw').val(data.source.auth.userAgentPassword);
+				$('#source_RETS').show();
+			} else if (data.source.type == 'FTP') {
+				$('#ftphost').val(data.source.uri);
+				$('#ftpuser').val(data.source.auth.username);
+				$('#ftpauth').val(data.source.auth.password);
+				$('#source_FTP').show();
+			}
+			else if (data.source.type == 'SOAP') $('#source_SOAP').show();
+			else if (data.source.type == 'REST') $('#source_REST').show();
+			else if (data.source.type == 'XML') $('#source_XML').show();	
+		break;
+		case "extractorWizard":
+			$('#extractorName').val(data.name);
+			$('#ext-source-select').val(data.source);
+			$('#ext-source-select').val(data.source);
+			if (data.target.type == 'file') {
+				$('#ftpFileName').val(data.target.res);
+				$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
+			}
+			$('#extractorWizard .source-options').hide();
+
+			var type = DataManager.getSource(data.source).value.source.type;
+			if (type === 'FTP') {
+				$('#ext-ftp-browser .files').empty();
+				$('#ext-ftp-options').show();
+			}
+			else if (type === 'RETS') {
+				$('#ext-rets-options').show();
+			}
+		break;
+		case "transformWizard":
+			$('#transformerName').val(data.name);
+			$('#transformerDescription').val(data.description);
+			$('#trn-source-toggle').val(data.style);
+			$('#trn-source-select').val(data.extractor).removeAttr('disabled');
+			DataManager.extractor.sample(DataManager.getExtractor(data.extractor).value,function(e){
+				if (!e.err) update('dataStructures',e.body);
+			});
+		break;
+	}
+}
+
+var showWizard = function(id) {
+	$('#'+id).modal('show');
 }
 
 var DataManager = new (function(){
@@ -245,6 +331,34 @@ var DataManager = new (function(){
 		this.getExtractorList();
 		this.getTransformerList();
 		this.getLoaderList();
+	};
+
+	this.getSource = function(id){
+		return DataManager.getSources().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getExtractor = function(id){
+		return DataManager.getExtractors().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getTransformer = function(id){
+		return DataManager.getTransformers().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getLoader = function(id){
+		return DataManager.getLoaders().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
 	};
 
 	this.getSources = function(){
@@ -466,17 +580,6 @@ connect();
 
 if (document.location.hash) DataManager.navigate(document.location.hash.replace('#',''));
 else DataManager.navigate('dashboard');
-
-var sourceModalReset = function(){
-	$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
-	$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
-	$('#sourceTypeOptions .option-group').hide();
-	$('#sourceEditorSave').prop('disabled',true);
-};
-
-var resetWizard = function(id){
-	$('#'+id+' section.step').hide().first().show();
-};
 
 $(document).ready(function(){
 
