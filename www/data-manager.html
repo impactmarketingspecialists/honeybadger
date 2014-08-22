@@ -370,6 +370,20 @@
 						</ul>
 					</div>
 				</div>
+				<div class="source-options" id="ext-rets-options">
+					<label for="ext-rets-class">RETS Data Class</label>
+					<div class="row">
+						<div class="col-xs-6">
+							<select name="ext-rets-class" id="ext-rets-class" class="form-control">
+								<option value="Property">Property</option>
+								<option value="Agent">Agent</option>
+							</select>
+						</div>
+						<div clas="col-xs-4">
+							<button type="button" class="btn btn-primary" onclick="DataManager.retsBrowse()">Browse</button>
+						</div>
+					</div>
+				</div>
 	      	</section>
 	      	<section id="ext-step-2" class="step">
 				<h4>Source Details</h4>

@@ -292,6 +292,46 @@ var WSAPI = {
         });
         // callback('onFTPList', null, {});
     },
+    browseRETS: function(source, callback, client){
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
+
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                path: uri.path,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.5',
+                agent: { user: source.source.auth.userAgentHeader }
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                // Fetch classifications
+                client.getClassifications( source.source.rets.class, function has_meta( error, meta ) {
+                    console.log(error,meta);
+
+                    if( error ) {
+                        console.log( 'Error while fetching classifications: %s.', error.message );
+                    } else {
+                        console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
+                        console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
+                    }
+
+                    callback('onRETSBrowse',null,{success:true, meta:meta});
+                });
+
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSBrowse',error, null);
+            });
+        });
+    },
     testExtractor: function(extractor, callback, client){
 
         var clog = function(e){

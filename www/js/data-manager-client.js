@@ -30,7 +30,7 @@ function update(element,data)
 		$('#activeSources > tbody').html('');
 		$('#inactiveSources > tbody').html('');
 		$('#sourceList > tbody').html('');
-		$('#ext-source-select').html('');
+		$('#ext-source-select').html('<option value="">-- Select Source --</option>');
 		$(d).each(function(index, item){
 			$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 				setupWizard('sourceEditor', DataManager.getSource(item.id).value);
@@ -167,6 +167,7 @@ var sourceModalReset = function(){
 var resetWizard = function(id){
 	$('#'+id+' section.step').hide().first().show();
 	$('#'+id+' .files').empty();
+	$('input, select, textarea','#'+id).val('');
 };
 
 var setupWizard = function(id, data){
@@ -203,9 +204,9 @@ var setupWizard = function(id, data){
 				$('#ftpFileName').val(data.target.res);
 				$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
 			}
-			$('#extractorWizard .source-options').hide();
 
 			var type = DataManager.getSource(data.source).value.source.type;
+			$('#extractorWizard .source-options').hide();
 			if (type === 'FTP') {
 				$('#ext-ftp-browser .files').empty();
 				$('#ext-ftp-options').show();
@@ -222,6 +223,39 @@ var setupWizard = function(id, data){
 			DataManager.extractor.sample(DataManager.getExtractor(data.extractor).value,function(e){
 				if (!e.err) update('dataStructures',e.body);
 			});
+		break;
+		case "loaderWizard":
+			$('#loaderName').val(data.name);
+			$('#ldr-source-select').val(data.transform);
+			$('#ldr-target-type').val(data.target.type);
+			$('#ldr-mysql-dsn').val(data.target.dsn);
+			$('#ldr-target-schema').val(data.target.schema.name);
+
+			DataManager.transformer.sample(DataManager.getTransformer(data.transform).value,function(e){
+				if (!e.err) {
+					update('loaderDefinition',e.body);
+					trnSample = e.body;
+				} 
+			});
+
+			switch(data.target.type)
+			{
+				case "mysql":
+					$('#loaderMySQL').show();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').hide();
+				break;
+				case "couchdb":
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').show();
+					$('#loaderFTP').hide();
+				break;
+				case "ftp":
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').show();
+				break;
+			}
 		break;
 	}
 }
@@ -397,6 +431,21 @@ var DataManager = new (function(){
 				});
 			}
 		});
+	};
+
+	this.retsBrowse = function()
+	{
+		var v = $('#ext-source-select').val();
+		var s = DataManager.getSource(v).value;
+		s.source.rets = { class: $('#ext-rets-class').val() };
+		send('browseRETS',[s],function(e){
+			console.log(e);
+		});
+	};
+
+	this.retsInspect = function()
+	{
+
 	};
 
 	this.source = function(name, type, properties){
@@ -666,6 +715,7 @@ $(document).ready(function(){
 	 * When selecting a data source for an extractor let's do some logic
 	 * based on the type of source they've chosen
 	 */
+	$('#extractorWizard .source-options').hide();
 	$('#ext-source-select').change(function(){
 		var v = $(this).val();
 		var s = DataManager.getSources().filter(function(e){
@@ -674,13 +724,13 @@ $(document).ready(function(){
 		}).pop();
 
 		$('#extractorWizard .source-options').hide();
-		if (s.value.type === 'FTP') {
+		if (s.value.source.type === 'FTP') {
 			$('#ext-ftp-browser .files').empty();
 			$('#ftpRootPath').val('');
 			$('#ftpFileName').val('');
 			$('#ext-ftp-options').show();
 		}
-		else if (s.value.type === 'RETS') {
+		else if (s.value.source.type === 'RETS') {
 			$('#ext-rets-options').show();
 		}
 	});
