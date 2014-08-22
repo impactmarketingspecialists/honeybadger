@@ -332,6 +332,37 @@ var WSAPI = {
             });
         });
     },
+    exploreRETS: function(source, callback, client){
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
+
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                path: uri.path,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.5',
+                agent: { user: source.source.auth.userAgentHeader }
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                client.getMetadataResources('0', function( error, data ) {
+                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                    callback('onRETSExplore',null,{success:true, meta:data});
+                });
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSExplore',error, null);
+            });
+        });
+    },
     inspectRETS: function(source, callback, client){
         DataManager.getSource(source.id,function(err,src){
             var librets = require('rets-client');
@@ -364,14 +395,14 @@ var WSAPI = {
                 //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
                 // });
                 
-                client.getMetadataTable('Property', 'A', function( error, data ) {
-                    console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
+                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
                     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
                 });
-                client.getMetadataClasses('Property', function( error, data ) {
-                    console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                });
+                // client.getMetadataClasses('Property', function( error, data ) {
+                //     // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                // });
 
             });
 

@@ -433,6 +433,23 @@ var DataManager = new (function(){
 		});
 	};
 
+	this.retsExplore = function()
+	{
+		var v = $('#ext-source-select').val();
+		var s = DataManager.getSource(v).value;
+		s.source.rets = { resource: $('#ext-rets-resource').val() };
+		send('exploreRETS',[s],function(e){
+			if (e.body.meta) {
+				$('#ext-rets-resource').html('<option>-- Select a data resource --</option>');
+				$.each(e.body.meta.data,function(index,item){
+					// console.log(item);
+					$('#ext-rets-resource').append('<option value="'+item.ResourceID[0]+'">'+item.VisibleName[0]+'</option>');
+					$('#ext-rets-options .rets-resource').removeClass('hide').show();
+				});
+			}
+		});
+	};
+
 	this.retsBrowse = function()
 	{
 		var v = $('#ext-source-select').val();
@@ -440,9 +457,10 @@ var DataManager = new (function(){
 		s.source.rets = { resource: $('#ext-rets-resource').val() };
 		send('browseRETS',[s],function(e){
 			if (e.body.meta) {
+				$('#ext-rets-class').html('<option>-- Select a data class --</option>')
 				$.each(e.body.meta.data,function(index,item){
 					// console.log(item);
-					$('#ext-rets-class').append('<option value="'+item.ClassName[0]+'">'+item.VisibleName[0]+'</option>');
+					$('#ext-rets-class').append('<option value="'+item.ClassName[0]+'">'+item.VisibleName[0] + ((item.StandardName[0]) ? ' : '+item.StandardName[0] : '') +'</option>');
 					$('#ext-rets-options .rets-classification').removeClass('hide').show();
 				});
 			}
@@ -737,6 +755,8 @@ $(document).ready(function(){
 			else return null;
 		}).pop();
 
+		$('#ext-rets-options .rets-resource').hide();
+		$('#ext-rets-options .rets-classification').hide();
 		$('#extractorWizard .source-options').hide();
 		if (s.value.source.type === 'FTP') {
 			$('#ext-ftp-browser .files').empty();
@@ -747,6 +767,8 @@ $(document).ready(function(){
 		else if (s.value.source.type === 'RETS') {
 			$('#ext-rets-options').show();
 		}
+
+		DataManager.retsExplore();
 	});
 
 	$('#extractorWizardNext').click(function(){
