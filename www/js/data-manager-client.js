@@ -85,10 +85,17 @@ function update(element,data)
 	var transformDataStructures = function(d) {
 		$('#transformNormalize').html('');
 		$('#transformMapper .fields').html('');
-		$.each(d.headers,function(index,item){
-			$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
-			$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
-		});
+		if (d.headers) {
+			$.each(d.headers,function(index,item){
+				$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
+				$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
+			});			
+		} else if (d.data.data) {
+			$.each(d.data.data[0],function(index,item){
+				$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+index+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+index+'"/></div></label>')
+				$('#transformMapper .fields').append('<span class="item badge">'+index+'</span> ');
+			});			
+		}
 
 		$('#transformNormalize input:checkbox').change(function(){
 			if (!$(this)[0].checked) $(this).parent().parent().parent().find('input[type="text"]').attr('disabled','disabled');

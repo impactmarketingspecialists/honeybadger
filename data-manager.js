@@ -543,7 +543,8 @@ var WSAPI = {
                             SearchType: extractor.target.type,
                             Class: extractor.target.class,
                             Query: extractor.target.res,
-                            Limit: 10
+                            // Format: 'COMPACT-DECODED',
+                            Limit: 1
                         };
                         client.searchQuery(qry, function( error, data ) {
                             if (error) {
