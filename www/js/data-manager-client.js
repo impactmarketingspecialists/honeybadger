@@ -476,7 +476,11 @@ var DataManager = new (function(){
 			classification: $('#ext-rets-class').val()
 		};
 		send('inspectRETS',[s],function(e){
-			console.log(e);
+			$('#ext-step-2 > .ext-rets-options .fields').html('');
+			$.each(e.body.meta.data, function(index,item){
+				console.log(item);
+				$('#ext-step-2 > .ext-rets-options .fields').append('<div class="item"><strong>'+item.LongName[0]+'</strong> <small>'+item.ShortName[0]+'</small><div class="detail">'+item.StandardName[0]+' '+item.DBName[0]+' '+item.DataType[0]+' '+index+' '+((item.Searchable[0] == '1') ? 'Searchable' : 'Non-Searchable')+'</div></div>');
+			});
 		});
 	};
 
@@ -763,14 +767,25 @@ $(document).ready(function(){
 			$('#ftpRootPath').val('');
 			$('#ftpFileName').val('');
 			$('#ext-ftp-options').show();
+			$('#ext-rets-options').hide();
+			$('#ext-step-2 > .ext-ftp-options').show();
+			$('#ext-step-2 > .ext-rets-options').hide();
 		}
 		else if (s.value.source.type === 'RETS') {
+			$('#ext-ftp-options').hide();
 			$('#ext-rets-options').show();
+			$('#ext-step-2 > .ext-ftp-options').hide();
+			$('#ext-step-2 > .ext-rets-options').show();
 		}
 
 		DataManager.retsExplore();
 	});
-
+	$('#ext-rets-resource').change(function(){
+		DataManager.retsBrowse();
+	});
+	$('#ext-rets-class').change(function(){
+		DataManager.retsInspect();
+	});
 	$('#extractorWizardNext').click(function(){
 
 		var finish = function(){

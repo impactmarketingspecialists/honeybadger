@@ -74,6 +74,26 @@ li.file:hover {
 	overflow-y: scroll;
 }
 
+#ext-step-2 .fields {
+	max-height: 30em;
+	overflow-y: scroll;
+}
+
+#ext-step-2 .fields .item {
+	margin:0.13em 0;
+	padding:0.2em;
+	cursor:pointer;
+	background-color:inherit;
+}
+
+#ext-step-2 .fields .item:hover {
+	background-color:#eaeaea;
+}
+
+#ext-step-2 .fields .item .detail {
+	display:none;
+}
+
 #transformNormalize .item {
 	display:block;
 }

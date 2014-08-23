@@ -310,20 +310,16 @@ var WSAPI = {
 
             client.once('connection.success',function(client){
                 console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                // Fetch classifications
                 client.getClassifications( source.source.rets.resource, function has_meta( error, meta ) {
-                    console.log(error,meta);
-
                     if( error ) {
                         console.log( 'Error while fetching classifications: %s.', error.message );
+                        callback('onRETSBrowse',error, null);
                     } else {
-                        console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
-                        console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
+                        // console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
+                        // console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
+                        callback('onRETSBrowse',null,{success:true, meta:meta});
                     }
-
-                    callback('onRETSBrowse',null,{success:true, meta:meta});
                 });
-
             });
 
             client.once('connection.error',function(error, client){
@@ -379,12 +375,22 @@ var WSAPI = {
                 agent: { user: source.source.auth.userAgentHeader }
             });
 
-            client.on( '#', function( error, data, cb ) {
-              console.log( this.event );
-            });
-
             client.once('connection.success',function(client){
                 console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
+                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                    callback('onRETSInspect',null,{success:true, meta:data});
+                });
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSInspect',error, null);
+            });
+        });
+    },
+    extracRETS: function() {
                 // Fetch classifications
                 // client.searchQuery({
                 //     SearchType: 'Property',
@@ -394,23 +400,7 @@ var WSAPI = {
                 // }, function( error, data ) {
                 //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
                 // });
-                
-                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
-                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                });
-                // client.getMetadataClasses('Property', function( error, data ) {
-                //     // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                // });
 
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSInspect',error, null);
-            });
-        });
     },
     testExtractor: function(extractor, callback, client){
 
