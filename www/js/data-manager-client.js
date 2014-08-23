@@ -669,13 +669,14 @@ else DataManager.navigate('dashboard');
 $(document).ready(function(){
 
 	var ext = function(){
+		var stype = DataManager.getSource($('#ext-source-select').val()).value.source.type;
 		return {
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
 			target: {
-				type: "file",
-				res: $('#ftpRootPath').val() + $('#ftpFileName').val(),
-				format: $('[name=ext-text-format]:checked').val()
+				type: (stype == 'RETS') ? "query" : "file",
+				res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
+				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-text-format]:checked').val()
 			}
 		};
 	};

@@ -516,6 +516,55 @@ var WSAPI = {
                         user: src.source.auth.username,
                         password: src.source.auth.password
                     });
+                } else if (src.source.type === 'RETS') {
+                    clog('<div class="text-info">Extraction source is a RETS resource.</div>');
+                    var librets = require('rets-client');
+
+                    var uri = url.parse(src.source.uri);
+
+                    var client = librets.createConnection({
+                        host: uri.hostname,
+                        port: uri.port,
+                        path: uri.path,
+                        user: src.source.auth.username,
+                        pass: src.source.auth.password,
+                        version: src.source.version || '1.5',
+                        agent: { user: src.source.auth.userAgentHeader }
+                    });
+
+                    client.once('connection.success',function(client){
+                        console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                        clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
+                        clog('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
+                        clog('<div class="text-info">-- Resource/SearchType: Property</div>');
+                        clog('<div class="text-info">-- Classification: A (Residential)</div>');
+                        clog('<div class="text-info">-- Query: (LIST_87=2014-07-01T00:00:00+)</div>');
+                        var qry = {
+                            SearchType: 'Property',
+                            Class: 'A',
+                            Query: '(LIST_87=2014-08-15T00:00:00+)',
+                            Limit: 10
+                        };
+                        client.searchQuery(qry, function( error, data ) {
+                            if (error) {
+                                clog('<div class="text-danger">Query did not execute.</div>');
+                                clog('<pre class="text-danger">'+JSON.stringify(error)+'</pre>');
+                                console.log(error);
+                            } else {
+                                data.data.forEach(function(item,index){
+                                    clog('<pre>'+JSON.stringify(item)+'</pre>');
+                                });
+                                clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
+                                callback('onExtractorTest',null,{query:qry, count: data.data.length});
+                                // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                            }
+                        });
+                    });
+
+                    client.once('connection.error',function(error, client){
+                        console.error( 'Connection failed: %s.', error.message );
+                        callback('onExtractorTest',error, null);
+                    });
                 }
             }
             else {
