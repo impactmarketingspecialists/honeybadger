@@ -536,26 +536,37 @@ var WSAPI = {
                         console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
                         clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
                         clog('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
-                        clog('<div class="text-info">-- Resource/SearchType: Property</div>');
-                        clog('<div class="text-info">-- Classification: A (Residential)</div>');
-                        clog('<div class="text-info">-- Query: (LIST_87=2014-07-01T00:00:00+)</div>');
+                        clog('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
+                        clog('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
+                        clog('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
                         var qry = {
-                            SearchType: 'Property',
-                            Class: 'A',
-                            Query: '(LIST_87=2014-08-15T00:00:00+)',
+                            SearchType: extractor.target.type,
+                            Class: extractor.target.class,
+                            Query: extractor.target.res,
                             Limit: 10
                         };
                         client.searchQuery(qry, function( error, data ) {
                             if (error) {
                                 clog('<div class="text-danger">Query did not execute.</div>');
-                                clog('<pre class="text-danger">'+JSON.stringify(error)+'</pre>');
+                                clog('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
                                 console.log(error);
+                                callback('onExtractorTest',error, null);
+                                return;
+                            } else if (data.type == 'status') {
+                                clog('<div class="text-warning">'+data.text+'</div>');
+                                if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                                callback('onExtractorTest',null,{data:data});
+                                return;
                             } else {
-                                data.data.forEach(function(item,index){
-                                    clog('<pre>'+JSON.stringify(item)+'</pre>');
-                                });
-                                clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
-                                callback('onExtractorTest',null,{query:qry, count: data.data.length});
+                                if (data.data && data.data.length) {
+                                    data.data.forEach(function(item,index){
+                                        clog('<pre>'+JSON.stringify(item,2)+'</pre>');
+                                    });
+                                }
+                                if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                                else clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
+                                callback('onExtractorTest',null,{data:data});
+                                return;
                                 // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
                             }
                         });

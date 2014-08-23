@@ -478,8 +478,9 @@ var DataManager = new (function(){
 		send('inspectRETS',[s],function(e){
 			$('#ext-step-2 > .ext-rets-options .fields').html('');
 			$.each(e.body.meta.data, function(index,item){
-				console.log(item);
-				$('#ext-step-2 > .ext-rets-options .fields').append('<div class="item"><strong>'+item.LongName[0]+'</strong> <small>'+item.ShortName[0]+'</small><div class="detail">'+item.StandardName[0]+' '+item.DBName[0]+' '+item.DataType[0]+' '+index+' '+((item.Searchable[0] == '1') ? 'Searchable' : 'Non-Searchable')+'</div></div>');
+				// console.log(item);
+				$('#ext-step-2 > .ext-rets-options .fields').append('<div class="item"><strong>'+item.LongName[0]+'</strong> <em>'+index+'</em> <small>'+item.StandardName[0]+'</small> '+((item.Searchable[0] == '1') ? '<span class="badge">Searchable</span>' : '')+'<div class="detail"><small><em>'+item.DataType[0]+'</em> </small></div></div>');
+				// +item.ShortName[0]+' '+item.DBName[0]+' '
 			});
 		});
 	};
@@ -674,7 +675,8 @@ $(document).ready(function(){
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
 			target: {
-				type: (stype == 'RETS') ? "query" : "file",
+				type: (stype == 'RETS') ? $('#ext-rets-resource').val() : "file",
+				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
 				res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
 				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-text-format]:checked').val()
 			}

@@ -75,7 +75,7 @@ li.file:hover {
 }
 
 #ext-step-2 .fields {
-	max-height: 30em;
+	max-height: 20em;
 	overflow-y: scroll;
 }
 
@@ -91,7 +91,7 @@ li.file:hover {
 }
 
 #ext-step-2 .fields .item .detail {
-	display:none;
+	/*display:none;*/
 }
 
 #transformNormalize .item {
