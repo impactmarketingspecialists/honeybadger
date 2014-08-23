@@ -1,50 +1,18 @@
-var fs = require('fs');
-var path = require('path');
-var url = require('url');
-var express = require('express');
-var app = new express();
-var http = require('http').createServer(app);
-var WebSocketServer = require('ws').Server;
-var wss = new WebSocketServer({ server: http });
-var async = require('async');
-var nano = require('nano')('http://localhost:5984');
-var db = nano.use('honeybadger');
-var feed = db.follow({since: "now"});
-var streamTransform = require('stream-transform');
-
-var http_port = 8090;
-
-function parseDSN(dsn) {
-  var args;
-
-  var components = require('url').parse(dsn);
-
-  // DSN is not a plain hostname?
-  if (components.hostname) {
-    // Guard protocol
-    if (components.protocol !== 'mysql:') {
-      throw new Error("mysql-libmysqlclient supports only connections to MySQL server");
-    }
-
-    var
-      hostname = components.hostname,
-      port     = components.port,
-      auth     = components.auth.split(':'),
-      user     = auth.shift(),
-      password = auth.shift(),
-      database = components.pathname
-               ? components.pathname.substr(1).replace(/\/.*$/, '').replace(/\?.*$/, '')
-               : null,
-      socket = null,
-      flags = null;
-
-    args = { host: hostname, user: user, password: password, database: database, port: port, socket: socket, flags: flags };
-  } else {
-    args = [arguments[0]];
-  }
-
-  return args;
-}
+var fs = require('fs')
+    path = require('path'),
+    url = require('url'),
+    express = require('express'),
+    app = new express(),
+    http = require('http').createServer(app),
+    WebSocketServer = require('ws').Server,
+    wss = new WebSocketServer({ server: http }),
+    async = require('async'),
+    nano = require('nano')('http://localhost:5984'),
+    db = nano.use('honeybadger'),
+    feed = db.follow({since: "now"}),
+    streamTransform = require('stream-transform'),
+    utility = require('./lib/utility');
+    http_port = 8090;
 
 var DataManager = new (function(){
     var sources = [],
@@ -759,7 +727,7 @@ var WSAPI = {
             case "mysql":
                 var mysql = require('mysql');
 
-                var dsn = parseDSN(loader.target.dsn);
+                var dsn = utility.dsn(loader.target.dsn);
                 var connection = mysql.createConnection({
                     host: dsn.host,
                     user: dsn.user,
@@ -787,7 +755,7 @@ var WSAPI = {
             case "mysql":
                 var mysql = require('mysql');
 
-                var dsn = parseDSN(loader.target.dsn);
+                var dsn = utility.dsn(loader.target.dsn);
                 var connection = mysql.createConnection({
                     host: dsn.host,
                     user: dsn.user,
@@ -888,7 +856,7 @@ var WSAPI = {
 
                                             var mysql = require('mysql');
 
-                                            var dsn = parseDSN(loader.target.dsn);
+                                            var dsn = utility.dsn(loader.target.dsn);
                                             var connection = mysql.createConnection({
                                                 host: dsn.host,
                                                 user: dsn.user,
