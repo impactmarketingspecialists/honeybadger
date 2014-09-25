@@ -10,7 +10,7 @@
     "dnode": "*",
     "rimraf": "*",
     "async": "*",
-    "rets": "git://github.com/dermidgen/node-rets-client.git",
+    "rets": "git://github.com/dermidgen/node-rets-client.git#develop",
     "MD5": "^1.2.0",
     "ftp": "*",
     "csv-parse": "*",

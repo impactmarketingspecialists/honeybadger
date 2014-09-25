@@ -941,7 +941,7 @@ var DataManager = new (function(){
 		}
 
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
-		$('#validateBtn').attr('disabled','disabled');
+		// $('#validateBtn').attr('disabled','disabled');
 
 		send('validateSource',[src],function(e){
 			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
