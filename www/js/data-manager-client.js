@@ -161,7 +161,7 @@ var sourceModalReset = function(){
 var resetWizard = function(id){
 	$('#'+id+' section.step').hide().first().show();
 	$('#'+id+' .files').empty();
-	$('input, select, textarea','#'+id).val('');
+	$('input[type=text], input[type=password], select, textarea','#'+id).val('');
 };
 
 var setupWizard = function(id, data){
@@ -263,6 +263,7 @@ $(document).ready(function(){
 
 	var ext = function(){
 		var stype = DataManager.getSource($('#ext-source-select').val()).value.source.type;
+		console.log(stype);
 		return {
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
