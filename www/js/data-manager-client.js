@@ -515,6 +515,7 @@ $(document).ready(function(){
 		}).pop();
 
 		DataManager.extractor.sample(s.value,function(e){
+			console.log(e.body);
 			if (!e.err) update('dataStructures',e.body);
 		});
 	});
