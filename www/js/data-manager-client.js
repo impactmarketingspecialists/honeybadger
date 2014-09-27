@@ -663,10 +663,10 @@ $(document).ready(function(){
 		$('#loader-result').html('');
 		DataManager.loader.sample(ldr(),function(e){
 			if (!e.err) {
-				$('#loader-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+				$('#loader-result').html('<p class="bg-success">Loader Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 				$('#loaderWizardNext').removeAttr('disabled');
 			} else {
-				$('#loader-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+				$('#loader-result').html('<p class="bg-danger">Loader Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
 				$('#loaderWizardNext').attr('disabled','disabled');
 			}
 		});
