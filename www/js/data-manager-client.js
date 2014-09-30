@@ -1,5 +1,7 @@
 var ts,tp,socket,host = "ws://"+location.host+"/data-manager/";
 
+/* dan is cools */
+
 function connect()
 {
 	if (ts) clearInterval(ts);
