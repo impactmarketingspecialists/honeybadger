@@ -695,12 +695,14 @@ var DataManager = new (function(){
 			extractorManager: $('#extractorManager').hide(),
 			transformManager: $('#transformManager').hide(),
 			loaderManager: $('#loaderManager').hide()
-		};
+		},
+		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
 
 	var receive = function(e) {
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
+		if( localDev ){ console.dir( d ); }
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
 			__cbqueue[msig](d);
@@ -716,6 +718,7 @@ var DataManager = new (function(){
 		var args = args || [];
 		msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
+		if( localDev ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 
