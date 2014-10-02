@@ -2,6 +2,30 @@
 
 	// We hate polluting global scope; this is a great way to avoid that
 	var ts,tp,socket,host = "ws://"+location.host+"/data-manager/";
+	var Emitter = function (context){
+
+		var _register = [];
+		context.on = function(event, callback) {
+			var s = _register.map(function(i){
+				if (i.event !== event && i.context !== context && i.callback !== callback) return i;
+			});
+			if (!s.length) _register.push({
+				event: event,
+				context: context,
+				callback: callback
+			});
+		};
+
+		var _emit = function(event, data, context){
+			for (var i=0; i<_register.length; i++) {
+				if (_register[i].event === event && _register[i].context) _register[i].callback(data)
+			}
+		};
+
+		return function Emit(event, data){
+			_emit(event,data,context);
+		}
+	};
 
 	/* dan is cools */
 
@@ -686,6 +710,8 @@
 
 	var DataManager = new (function(){
 
+	var Emit = Emitter(this);
+
 	var self = this;
 	var __cbqueue = {},
 		sources = [],
@@ -701,8 +727,8 @@
 		},
 		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
 
-		var receive = function(e) {
-			if (e.data === 'pong') return;
+	var receive = function(e) {
+		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
 		if( localDev ){ console.dir( d ); }
@@ -715,7 +741,7 @@
 		if (d.event == 'log-stream') {
 			$('#'+d.target).append(d.body);
 		}
-	}
+	};
 
 	var send = function(method, args, callback){
 		var args = args || [];
