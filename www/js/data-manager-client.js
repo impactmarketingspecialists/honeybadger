@@ -353,7 +353,11 @@
 			if (!$('#sourcename').val()) return false;
 
 			var type = $('#sourcetype').val(),
-				src = {	name: $('#sourcename').val() };
+				src = {	name: $('#sourcename').val() },
+				src_id = $('#sourceEditor').attr('data-id'),
+				src_rev = $('#sourceEditor').attr('data-rev');
+			if( src_id ){ src._id = src_id; }
+			if( src_rev ){ src._rev = src_rev; }
 
 			switch(type)
 			{
@@ -555,10 +559,11 @@
 		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
 		$('#sourceTypeOptions .option-group').hide();
-		$('#sourceEditorSave').prop('disabled',true);
+		$('#sourceEditorSave').prop('disabled',false);
 	};
 
 	var resetWizard = function(id){
+		$('#'+id).attr({'data-id':'','data-rev':''});
 		$('#'+id+' section.step').hide().first().show();
 		$('#'+id+' .files').empty();
 		$('input[type=text], input[type=password], select, textarea','#'+id).val('');
@@ -571,12 +576,17 @@
 	 * @return {[type]}
 	 */
 	var setupWizard = function(id, data){
+		// ONLY EXECUTES ON EDIT NOT "NEW"
 		console.log(data);
 		resetWizard(id);
 		switch(id)
 		{
 			case "sourceEditor":
 				sourceModalReset();
+
+				$('#sourceEditor').attr('data-id',data._id);
+				$('#sourceEditor').attr('data-rev',data._rev);
+
 				$('#sourcename').val(data.name);
 				$('#sourcetype').val(data.source.type);
 				if (data.source.type == 'RETS') {
