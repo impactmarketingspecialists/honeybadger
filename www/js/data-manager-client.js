@@ -753,6 +753,34 @@
 		});
 
 		/**
+		 * Detect when source modal is activated 
+		 */
+		$('#sourceEditor').modal('show.bs.modal', function(){
+			resetWizard('#sourceEditor');
+		})
+
+		/**
+		 * Detect when extractor modal is activated 
+		 */
+		$('#extractorWizard').modal('show.bs.modal', function(){
+			resetWizard('#extractorWizard');
+		})
+
+		/**
+		 * Detect when transformer modal is activated 
+		 */
+		$('#transformWizard').modal('show.bs.modal', function(){
+			resetWizard('#transformWizard');
+		})
+
+		/**
+		 * Detect when loader modal is activated 
+		 */
+		$('#loaderWizard').modal('show.bs.modal', function(){
+			resetWizard('#loaderWizard');
+		})
+
+		/**
 		 * Reset our wizards
 		 */
 		resetWizard('extractorWizard');
