@@ -444,8 +444,8 @@
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
 			$(d).each(function(index, item){
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
 					showWizard('sourceEditor');
+					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
 				}));
 				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
@@ -458,8 +458,8 @@
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
 			$(d).each(function(index, item){
 				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					setupWizard('extractorWizard', item.value);
 					showWizard('extractorWizard');
+					setupWizard('extractorWizard', item.value);
 				}));
 				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
@@ -472,8 +472,8 @@
 			$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
 			$(d).each(function(index, item){
 				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					setupWizard('transformWizard', item.value);
 					showWizard('transformWizard');
+					setupWizard('transformWizard', item.value);
 				}));
 				$('#ldr-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
@@ -485,8 +485,8 @@
 			$('#loaderList > tbody').html('');
 			$(d).each(function(index, item){
 				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					setupWizard('loaderWizard', item.value);
 					showWizard('loaderWizard');
+					setupWizard('loaderWizard', item.value);
 				}));
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
@@ -755,29 +755,29 @@
 		/**
 		 * Detect when source modal is activated 
 		 */
-		$('#sourceEditor').modal('show.bs.modal', function(){
-			resetWizard('#sourceEditor');
+		$('#sourceEditor').on('show.bs.modal', function(){
+			resetWizard('sourceEditor');
 		})
 
 		/**
 		 * Detect when extractor modal is activated 
 		 */
-		$('#extractorWizard').modal('show.bs.modal', function(){
-			resetWizard('#extractorWizard');
+		$('#extractorWizard').on('show.bs.modal', function(){
+			resetWizard('extractorWizard');
 		})
 
 		/**
 		 * Detect when transformer modal is activated 
 		 */
-		$('#transformWizard').modal('show.bs.modal', function(){
-			resetWizard('#transformWizard');
+		$('#transformWizard').on('show.bs.modal', function(){
+			resetWizard('transformWizard');
 		})
 
 		/**
 		 * Detect when loader modal is activated 
 		 */
-		$('#loaderWizard').modal('show.bs.modal', function(){
-			resetWizard('#loaderWizard');
+		$('#loaderWizard').on('show.bs.modal', function(){
+			resetWizard('loaderWizard');
 		})
 
 		/**
