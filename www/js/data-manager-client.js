@@ -686,41 +686,44 @@
 
 	var DataManager = new (function(){
 
-		var self = this;
-		var __cbqueue = {},
-			sources = [],
-			extractors = [],
-			transformers = [],
-			loaders = [],
-			pages = {
-				dashboard: $('#dashboard').hide(),
-				sourceManager: $('#sourceManager').hide(),
-				extractorManager: $('#extractorManager').hide(),
-				transformManager: $('#transformManager').hide(),
-				loaderManager: $('#loaderManager').hide()
-			};
+	var self = this;
+	var __cbqueue = {},
+		sources = [],
+		extractors = [],
+		transformers = [],
+		loaders = [],
+		pages = {
+			dashboard: $('#dashboard').hide(),
+			sourceManager: $('#sourceManager').hide(),
+			extractorManager: $('#extractorManager').hide(),
+			transformManager: $('#transformManager').hide(),
+			loaderManager: $('#loaderManager').hide()
+		},
+		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
 
 		var receive = function(e) {
 			if (e.data === 'pong') return;
 
-			var d = JSON.parse(e.data);
-			var msig = d.msig || null;
-			if (msig && __cbqueue[msig]) {
-				__cbqueue[msig](d);
-				delete __cbqueue[msig];
-				return;
-			}
-			if (d.event == 'log-stream') {
-				$('#'+d.target).append(d.body);
-			}
+		var d = JSON.parse(e.data);
+		if( localDev ){ console.dir( d ); }
+		var msig = d.msig || null;
+		if (msig && __cbqueue[msig]) {
+			__cbqueue[msig](d);
+			delete __cbqueue[msig];
+			return;
 		}
+		if (d.event == 'log-stream') {
+			$('#'+d.target).append(d.body);
+		}
+	}
 
-		var send = function(method, args, callback){
-			var args = args || [];
-			msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
-			if (msig) { __cbqueue[msig] = callback }
-			socket.send(JSON.stringify({method:method,msig:msig,args:args}));
-		};
+	var send = function(method, args, callback){
+		var args = args || [];
+		msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
+		if (msig) { __cbqueue[msig] = callback }
+		if( localDev ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
+	};
 
 		this.bind = function(socket) {
 			socket.onmessage = receive;
