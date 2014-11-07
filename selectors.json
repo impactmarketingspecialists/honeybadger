@@ -6,13 +6,11 @@
     },
     {
       "key":"honeybadger",
-      "uri":"mysql://honeybadger:data@192.168.6.231/honeybadger"
+      "uri":"mysql://honeybadger:data@192.168.6.230/honeybadger"
     }
   ],
   "selectors": [
-    /**
-     * RDS POC Selectors
-     */
+
   	{
   		"dsn":"ims_selector_production",
   		"key":"qryAgentListingSoldGeoPrompt",
@@ -176,11 +174,9 @@
       ],
       "query":"SELECT CONCAT(CAST(`Year` AS CHAR CHARACTER SET utf8), '/', Qtr) as YrQtr, ListingsSoldUnits, ListingsSoldVolume, AVG(ListingsSoldVolume) as AvgListingsSoldVolume FROM tblMarketDataGeo1Geo2Qtr WHERE PropGeo1 in (%s) GROUP BY (YrQtr)"
     },
-    /**
-     * Market Update
-     */
+
     {
-      "dsn":"ims_selector_production",
+      "dsn":"honeybadger",
       "key":"marketUpdate",
       "modifiers": ["PropGeo1"],
       "limit": null,
