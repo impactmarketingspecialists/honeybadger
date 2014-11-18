@@ -125,9 +125,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-newer' );
   grunt.loadNpmTasks('assemble');
 
   // Default task(s).
-  grunt.registerTask('default', ['clean','copy','concat', 'uglify', 'cssmin','assemble']);
+  grunt.registerTask('default', ['copy','concat', 'newer:uglify', 'newer:cssmin','newer:assemble']);
   
 };
