@@ -1,0 +1,11 @@
+{
+  "name": "honeybadger",
+  "dependencies": {
+    "jquery": "*"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
