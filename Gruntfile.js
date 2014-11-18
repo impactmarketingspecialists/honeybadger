@@ -75,8 +75,14 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           cwd: 'src',
-          src: ['data-manager.js','lib/**'],
+          src: ['data-manager.js'],
           dest: 'release/admin'
+        },
+        {
+          expand: true,
+          cwd: 'src',
+          src: ['honeybadger.js','data-select.js','config.json','selectors.json','lib/**'],
+          dest: 'release'
         }]
       }
     },
