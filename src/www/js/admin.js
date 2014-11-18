@@ -1,7 +1,7 @@
 +(function(window){
 
 	// We hate polluting global scope; this is a great way to avoid that
-	var ts,tp,socket,host = "ws://"+location.host+"/data-manager/";
+	var ts,tp,socket,host = "ws://"+location.host+"/admin/";
 
 	/**
 	 * This little guy might help organize things later

@@ -11,12 +11,12 @@ var fs = require('fs')
     db = nano.use('honeybadger'),
     feed = db.follow({since: "now"}),
     streamTransform = require('stream-transform'),
-    utility = require('./lib/utility'),
-    DataManager = require('./lib/data-manager'),
-    WSAPI = require('./lib/data-manager-api'),
+    utility = require('../lib/utility'),
+    DataManager = require('../lib/data-manager'),
+    WSAPI = require('../lib/data-manager-api'),
     http_port = 8090;
 
-var baseURL = '/data-manager';
+var baseURL = '/admin';
 app.use(baseURL+'/', express.static(path.resolve('www/'))); // Path resolve clears forbidden exception
 app.use(baseURL+'/js', express.static('www/js/'));
 app.use(baseURL+'/css', express.static('www/css/'));
