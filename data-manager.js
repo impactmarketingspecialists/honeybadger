@@ -27,8 +27,6 @@ app.use(baseURL+'/fonts', express.static('www/fonts/'));
 //     res.status(200).set('Content-Type', 'text/html').send('OK');
 // });
 
-/** ref comment to test asana github integration **/
-
 app.get(baseURL+'/download',function(req,res){
 });
 
