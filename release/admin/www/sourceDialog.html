@@ -1,8 +1,13 @@
----
-title: sourceDialog
-layout: dialog.hbs
----
-<!-- {{title}} -->
+	<div class="modal fade" id="sourceEditor" tabindex="-1" role="dialog" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title" id="myModalLabel">Source Editor</h4>
+	      </div>
+	      <div class="modal-body">
+			
+<!-- sourceDialog -->
 
 <form class="form" role="form" id="sourceEditorForm">
 	<fieldset>
@@ -89,3 +94,11 @@ layout: dialog.hbs
 		</div>
 	</fieldset>
 </form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button id="sourceEditorSave" type="button" class="btn btn-primary" onclick="DataManager.source.save()" disabled="disabled">Save</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>

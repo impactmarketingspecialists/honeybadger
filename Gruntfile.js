@@ -10,16 +10,19 @@ module.exports = function(grunt) {
       admin: ["release/admin/**"]
     },
     assemble: {
-      options: {
-        layoutdir: 'www/templates/layouts',
-        partials: ['www/templates/includes/*.hbs']
-      },
-      files: [{
-        expand: true,
-        cwd: 'src',
-        src: ['www/templates/*.hbs'],
-        dest: 'release/admin'
-      }]
+      release: {
+        options: {
+          layoutdir: 'src/www/templates/layouts',
+          partials: ['src/www/templates/includes/**/*.hbs']
+        },
+        files: [{
+          expand: true,
+          flatten: true,
+          cwd: 'src',
+          src: ['www/templates/pages/**/*.hbs'],
+          dest: 'release/admin/www'
+        }]
+      }
     },
     concat: {
       options: {
@@ -125,6 +128,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('assemble');
 
   // Default task(s).
-  grunt.registerTask('default', ['clean','copy','concat', 'uglify', 'cssmin']);
+  grunt.registerTask('default', ['clean','copy','concat', 'uglify', 'cssmin','assemble']);
   
 };
