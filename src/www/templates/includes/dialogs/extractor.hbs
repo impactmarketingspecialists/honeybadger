@@ -1,0 +1,128 @@
+	<div class="modal fade" data-backdrop="static" data-keyboard="false" id="extractorWizard" tabindex="-1" role="dialog" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title" id="extractorWizardTitle">Extractor Wizard</h4>
+	      </div>
+	      <div class="modal-body wizard">
+	      	<div class="navigator">
+	      		<strong>Steps:</strong> 
+	      		<ul class="steps">
+	      			<li class="step bg-primary">Basic Setup</li>
+	      			<li class="step">Source Details</li>
+	      			<li class="step">Test Extraction</li>
+	      		</ul>
+	      	</div>
+	      	<section id="ext-step-1" class="step active">
+				<h4>Basic Setup</h4>
+				<div class="form-group">
+					<label for="extractorName">Extractor Name</label>
+					<input type="text" class="form-control" placeholder="My Extractor" name="extractorName" id="extractorName"/>
+				</div>
+				<div class="form-group">
+					<label class="control-label" for="ext-source-select">Data Source</label> &nbsp;
+					<select id="ext-source-select" class="form-control">
+					</select>
+				</div>
+				<div class="source-options" id="ext-ftp-options">
+					<div class="form-group">
+						<label for="ftpRootPath">FTP Base Path</label>
+						<input type="text" class="form-control" placeholder="/data/" name="ftpRootPath" id="ftpRootPath"/>
+					</div>
+						<label for="ftpFileName">FTP Target File</label><br>
+					<div class="row">
+						<div class="col-xs-6">
+							<input type="text" class="form-control" placeholder="data_dump.csv" name="ftpFileName" id="ftpFileName"/> 
+						</div>
+						<div class="col-xs-4">
+	        				<button type="button" class="btn btn-primary" id="ext-ftp-browse">Browse</button>
+	        			</div>
+					</div>
+					<div id="ext-ftp-browser">
+						<ul class="files">
+						</ul>
+					</div>
+				</div>
+				<div class="source-options" id="ext-rets-options">
+					<div class="form-group">
+						<div class="row form-group">
+							<div class="col-xs-6 rets-resource hide">
+								<label for="ext-rets-resource">RETS Resource</label>
+								<select name="ext-rets-resource" id="ext-rets-resource" class="form-control">
+									<option value="Property">Property</option>
+									<option value="Agent">Agent</option>
+								</select>
+							</div>
+							<div class="col-xs-6 rets-classification hide">
+								<label for="ext-rets-class">RETS Data Class</label>
+								<select name="ext-rets-class" id="ext-rets-class" class="form-control">
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+	      	</section>
+	      	<section id="ext-step-2" class="step">
+				<h4>Source Details</h4>
+				<div class="ext-ftp-options">
+					<div class="form-inline form-group">
+						<label class="control-label" for="ext-source-select">Data Format</label> &nbsp;
+						<select class="form-control" name="ext-data-format" id="ext-data-format">
+							<option value=""> -- Select Data Format -- </option>
+							<option value="delimited-text">Delimited Text (CSV...)</option>
+							<option value="json">JSON</option>
+							<option value="xml">XML</option>
+							<option value="excel">Excel (XLS...)</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="ext-unarchive">Data in Archive</label>
+						<fieldset class="checkbox inline-fieldset" id="ext-archive-opts">
+							<label><input type="radio" name="ext-archive-format" value="false" checked/> N/A</label> &nbsp;
+							<label><input type="radio" name="ext-archive-format" value="zip"/> .zip</label> &nbsp;
+							<label><input type="radio" name="ext-archive-format" value="tar"/> .tar</label> &nbsp;
+							<label><input type="radio" name="ext-archive-format" value="gzip"/> .tar.gz</label>
+						</fieldset>
+					</div>
+					<div class="form-group" id="ext-delimited-text-opts">
+						<label>Text Deliniator</label>
+						<fieldset class="checkbox inline-fieldset">
+							<label><input type="radio" name="ext-text-format" value="csv" checked/> , Comma</label> &nbsp;
+							<label><input type="radio" name="ext-text-format" value="tsv"/> \t Tab</label> &nbsp;
+							<label><input type="radio" name="ext-text-format" value="pipe"/> | Pipe</label>
+						</fieldset>					
+					</div>
+				</div>
+				<div class="ext-rets-options">
+					<div class="form-group">
+						<label for="ext-rets-query">RETS Query <small><a href="https://www.flexmls.com/developers/rets/tutorials/dmql-tutorial/" target="_blank">DMQL2 Reference</a></small></label>
+						<textarea class="form-control" name="ext-rets-query" id="ext-rets-query" placeholder="(LIST_15=RNKKL0G8XM0)"></textarea>
+					</div>
+					<div class="form-group">
+						<label>Field Reference</label>
+						<div class="fields"></div>
+					</div>
+				</div>
+	      	</section>
+	      	<section id="ext-step-3" class="step">
+				<h4>Test Extraction</h4>
+				<div class="form-group">
+					<button type="button" class="btn btn-primary" id="ext-test">Run Test</button>
+					<button type="button" class="btn btn-default" id="ext-test-clear">Clear Log</button>
+				</div>
+				<h5>Extraction Log:</h5>
+				<div class="well">
+					<div class="body logger" id="extraction-log-body"></div>
+				</div>
+				<div id="extraction-result" class="wizard-result"></div>
+	      	</section>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button id="extractorWizardBack" type="button" class="btn btn-primary" disabled="disabled">Back</button>
+	        <button id="extractorWizardNext" type="button" class="btn btn-primary">Next</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>

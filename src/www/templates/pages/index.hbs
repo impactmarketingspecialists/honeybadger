@@ -1,7 +1,13 @@
 ---
-title: index
+title: Honey Badger Admin
 layout: admin.hbs
+modules:
+    - source
+    - extractor
+    - trasformer
+    - loader
 ---
+
 <!-- {{title}} -->
 
 <header>
@@ -143,3 +149,8 @@ layout: admin.hbs
 		</div>
 	</div>
 </article>
+
+{{title}}
+{{#each modules}}
+	{{> dialog}}
+{{/each}}

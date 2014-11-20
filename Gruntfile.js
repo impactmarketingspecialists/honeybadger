@@ -111,9 +111,10 @@ module.exports = function(grunt) {
          }
       },
       html: {
-         files: ['www/*.html'],
+         files: ['src/**/*.hbs'],
+         tasks: ['newer:assemble'],
          options: {
-          livereload: true
+          livereload: false
          }
       }
     }
