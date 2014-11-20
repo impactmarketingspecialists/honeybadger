@@ -97,24 +97,24 @@ module.exports = function(grunt) {
         }
       }, 
       js: {
-         files: ['www/js/*.js'],
-         // tasks: ['uglify'],
+         files: ['src/www/js/**/*.js'],
+         tasks: ['newer:concat','newer:uglify'],
          options: {
           livereload: true
          }
       },
       css: {
-         files: ['www/css/*.css'],
-         // tasks: ['less'],
+         files: ['src/www/css/**/*.css'],
+         tasks: ['newer:concat:css','newer:cssmin'],
          options: {
           livereload: true
          }
       },
       html: {
-         files: ['src/**/*.hbs'],
+         files: ['src/www/**/*.hbs'],
          tasks: ['newer:assemble'],
          options: {
-          livereload: false
+          livereload: true
          }
       }
     }
