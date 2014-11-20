@@ -21,9 +21,6 @@
 		_construct();
 	});
 
-	// window.DataManager = DataManager;
-	// window.HoneyBadger = this;
-
 	/******************* UI Rendering ******************/
 
 	/**

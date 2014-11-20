@@ -92,6 +92,7 @@ var HoneyBadger = (function($this){
 				}
 			},
 			init: function(){
+				connect();
 				for(var i=0; i<__inits.length; i++) {
 					__inits[i]();
 				}

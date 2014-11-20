@@ -1,13 +1,9 @@
 HoneyBadger.Admin = (function($this,$){
 	var self = this,
-		sources = [],
-		extractors = [],
-		transformers = [],
-		loaders = [],
 		__inits = [],
 		__modules = {};
 
-	$this.Admin = this;
+	// $this.Admin = this;
 
 	var _construct = function() {
 		console.log('Admin constructor');
@@ -53,7 +49,7 @@ HoneyBadger.Admin = (function($this,$){
 					if (init) init(_registerInitializer);
 				}
 			},
-			init: _init
+			init: $this.init // we'll just call our parent's init to make sure honeybadger connects fire up modules
 		};
 	}
 
@@ -72,4 +68,4 @@ HoneyBadger.Admin = (function($this,$){
 
 	return _sealed();
 
-}(HoneyBadger||{},jQuery));
+}(HoneyBadger,jQuery));

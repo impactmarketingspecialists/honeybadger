@@ -9191,14 +9191,10 @@ return jQuery;
 
 HoneyBadger.Admin = (function($this,$){
 	var self = this,
-		sources = [],
-		extractors = [],
-		transformers = [],
-		loaders = [],
 		__inits = [],
 		__modules = {};
 
-	$this.Admin = this;
+	// $this.Admin = this;
 
 	var _construct = function() {
 		console.log('Admin constructor');
@@ -9244,7 +9240,7 @@ HoneyBadger.Admin = (function($this,$){
 					if (init) init(_registerInitializer);
 				}
 			},
-			init: _init
+			init: $this.init // we'll just call our parent's init to make sure honeybadger connects fire up modules
 		};
 	}
 
@@ -9263,7 +9259,7 @@ HoneyBadger.Admin = (function($this,$){
 
 	return _sealed();
 
-}(HoneyBadger||{},jQuery));
+}(HoneyBadger,jQuery));
 	var DataManager = new (function(){
 		// We hate polluting global scope; this is a great way to avoid that
 		var ts,tp,socket,host = "ws://"+location.host+"/admin/";
@@ -9680,9 +9676,6 @@ HoneyBadger.Admin = (function($this,$){
 		$admin = _unsealed(_init); // fire constructor when DOM ready
 		_construct();
 	});
-
-	// window.DataManager = DataManager;
-	// window.HoneyBadger = this;
 
 	/******************* UI Rendering ******************/
 
