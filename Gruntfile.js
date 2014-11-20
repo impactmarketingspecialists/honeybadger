@@ -38,6 +38,7 @@ module.exports = function(grunt) {
       },
       clientbase: {
         src: [
+          'src/www/js/util.js',
           'src/www/js/honeybadger.js',
           'src/www/js/honeybadger/*.js'
         ],
@@ -77,6 +78,13 @@ module.exports = function(grunt) {
       release: {
         files: [{
           expand: true,
+          dot: true,
+          cwd: './',
+          src: ['**foreverignore'],
+          dest: 'release/'
+        },
+        {
+          expand: true,
           cwd: 'src',
           src: ['data-manager.js'],
           dest: 'release/admin'
@@ -91,7 +99,8 @@ module.exports = function(grunt) {
     },
     watch: {
       server: {
-        files: ['honeybadger.js','lib/*.js'],
+        files: ['src/*.js','src/*.json','src/lib/**/*.js'],
+        tasks: ['newer:copy'],
         options:{
           livereload: true
         }

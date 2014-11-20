@@ -1,0 +1,12 @@
+.git/**
+test/**
+www/js/**
+www/css/**
+www/*.html
+tmp/**
+package.json
+README.md
+.gitignore
+.DS_Store
+Gruntfile.js
+travis.yml

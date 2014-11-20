@@ -1,17 +1,72 @@
+/**
+ * quick lifted promises
+ * https://gist.github.com/softwaredoug/9044640
+ */
+var Promise = function(wrappedFn, wrappedThis) {
+  this.then = function(wrappedFn, wrappedThis) {
+    this.next = new Promise(wrappedFn, wrappedThis);
+    return this.next;
+  };
+    
+  this.run = function() {
+    wrappedFn.promise = this;
+    wrappedFn.apply(wrappedThis);
+  };
+    
+  this.complete = function() {
+    if (this.next) {
+      this.next.run();
+    }
+  };
+};
+ 
+Promise.create = function(func) { 
+  if (func.hasOwnProperty('promise')) { 
+    return func.promise;
+  } else { 
+    return new Promise();
+  } 
+};
+
+/**
+ * This little guy might help organize things later
+ * @param {object} context
+ */
+var Emitter = function (context){
+
+  var _register = [];
+  context.on = function(event, callback) {
+    var s = _register.map(function(i){
+      if (i.event !== event && i.context !== context && i.callback !== callback) return i;
+    });
+    if (!s.length) _register.push({
+      event: event,
+      context: context,
+      callback: callback
+    });
+  };
+
+  var _emit = function(event, data, context){
+    for (var i=0; i<_register.length; i++) {
+      if (_register[i].event === event && _register[i].context) _register[i].callback(data)
+    }
+  };
+
+  return function Emit(event, data){
+    _emit(event,data,context);
+  }
+};
+
 var HoneyBadger = (function($this){
 
 	var ts,tp,socket,host = "ws://"+location.host+"/admin/";
-	// var Emit = Emitter(this);
+	var Emit = Emitter(this);
 
 	var self = this;
 	var __cbqueue = {},
 		__modules = {},
 		__inits = [],
-		sources = [],
-		extractors = [],
-		transformers = [],
-		loaders = [],
-		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
+		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
 
 	var _sealed = function(){
 		return {
@@ -29,6 +84,7 @@ var HoneyBadger = (function($this){
 
 	var _unsealed = function(){
 		var hb = _sealed();
+		hb.on = self.on;
 		hb.exec = _exec;
 		return hb;
 	};
@@ -58,11 +114,11 @@ var HoneyBadger = (function($this){
 
 		socket = new WebSocket(host);
 		socket.onopen = function(){
-			// update('connectionStatus',{online:true});
 			if (ts) clearInterval(ts);
 			tp = setInterval(function(){
 				socket.send('ping');
 			}, 15000);
+			Emit('readyStateChange',1);
 		};
 
 		socket.onclose = function(){
@@ -77,13 +133,15 @@ var HoneyBadger = (function($this){
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
-		if( localDev ){ console.dir( d ); }
+		if( __devmode ){ console.dir( d ); }
+
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
 			__cbqueue[msig](d);
 			delete __cbqueue[msig];
 			return;
 		}
+
 		if (d.event == 'log-stream') {
 			// $('#'+d.target).append(d.body);
 		}
@@ -91,9 +149,9 @@ var HoneyBadger = (function($this){
 
 	var send = function(method, args, callback){
 		var args = args || [];
-		msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
+		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
-		if( localDev ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 
@@ -113,22 +171,23 @@ var HoneyBadger = (function($this){
 
 	var _construct = function() {
 		console.log('DataManager constructor');
+		$this.on('readyStateChange',function(readyState){
+			if (readyState === 1) self.refresh();
+		});
 	};
 
 	var _init = function() {
 		console.log('DataManager initialized');
 	};
 
-	this.list = function(id, callback){
+	this.getSourceList = function(id, callback){
+		console.log('Requesting sources');
 		$this.exec('list',null,callback);
 	};
 
 	this.getExtractorList = function(){
 		$this.exec('getExtractorList',null,function(e){
-			if(!e.err) {
-				extractors = e.body;
-				// update('extractorLists', extractors);
-			}
+			if(!e.err) { extractors = e.body; }
 		});
 	};
 
@@ -151,10 +210,10 @@ var HoneyBadger = (function($this){
 	};
 
 	this.refresh = function(){
-		this.list();
-		this.getExtractorList();
-		this.getTransformerList();
-		this.getLoaderList();
+		this.getSourceList();
+		// this.getExtractorList();
+		// this.getTransformerList();
+		// this.getLoaderList();
 	};
 
 	this.getSource = function(id){
@@ -298,61 +357,3 @@ var HoneyBadger = (function($this){
 	};
 	return $this;
 }(HoneyBadger||{}));
-/**
- * quick lifted promises
- * https://gist.github.com/softwaredoug/9044640
- */
-var Promise = function(wrappedFn, wrappedThis) {
-  this.then = function(wrappedFn, wrappedThis) {
-    this.next = new Promise(wrappedFn, wrappedThis);
-    return this.next;
-  };
-    
-  this.run = function() {
-    wrappedFn.promise = this;
-    wrappedFn.apply(wrappedThis);
-  };
-    
-  this.complete = function() {
-    if (this.next) {
-      this.next.run();
-    }
-  };
-};
- 
-Promise.create = function(func) { 
-  if (func.hasOwnProperty('promise')) { 
-    return func.promise;
-  } else { 
-    return new Promise();
-  } 
-};
-
-/**
- * This little guy might help organize things later
- * @param {object} context
- */
-var Emitter = function (context){
-
-  var _register = [];
-  context.on = function(event, callback) {
-    var s = _register.map(function(i){
-      if (i.event !== event && i.context !== context && i.callback !== callback) return i;
-    });
-    if (!s.length) _register.push({
-      event: event,
-      context: context,
-      callback: callback
-    });
-  };
-
-  var _emit = function(event, data, context){
-    for (var i=0; i<_register.length; i++) {
-      if (_register[i].event === event && _register[i].context) _register[i].callback(data)
-    }
-  };
-
-  return function Emit(event, data){
-    _emit(event,data,context);
-  }
-};

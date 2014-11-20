@@ -8,22 +8,23 @@
 
 	var _construct = function() {
 		console.log('DataManager constructor');
+		$this.on('readyStateChange',function(readyState){
+			if (readyState === 1) self.refresh();
+		});
 	};
 
 	var _init = function() {
 		console.log('DataManager initialized');
 	};
 
-	this.list = function(id, callback){
+	this.getSourceList = function(id, callback){
+		console.log('Requesting sources');
 		$this.exec('list',null,callback);
 	};
 
 	this.getExtractorList = function(){
 		$this.exec('getExtractorList',null,function(e){
-			if(!e.err) {
-				extractors = e.body;
-				// update('extractorLists', extractors);
-			}
+			if(!e.err) { extractors = e.body; }
 		});
 	};
 
@@ -46,10 +47,10 @@
 	};
 
 	this.refresh = function(){
-		this.list();
-		this.getExtractorList();
-		this.getTransformerList();
-		this.getLoaderList();
+		this.getSourceList();
+		// this.getExtractorList();
+		// this.getTransformerList();
+		// this.getLoaderList();
 	};
 
 	this.getSource = function(id){

@@ -1,17 +1,13 @@
 var HoneyBadger = (function($this){
 
 	var ts,tp,socket,host = "ws://"+location.host+"/admin/";
-	// var Emit = Emitter(this);
+	var Emit = Emitter(this);
 
 	var self = this;
 	var __cbqueue = {},
 		__modules = {},
 		__inits = [],
-		sources = [],
-		extractors = [],
-		transformers = [],
-		loaders = [],
-		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
+		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
 
 	var _sealed = function(){
 		return {
@@ -29,6 +25,7 @@ var HoneyBadger = (function($this){
 
 	var _unsealed = function(){
 		var hb = _sealed();
+		hb.on = self.on;
 		hb.exec = _exec;
 		return hb;
 	};
@@ -58,11 +55,11 @@ var HoneyBadger = (function($this){
 
 		socket = new WebSocket(host);
 		socket.onopen = function(){
-			// update('connectionStatus',{online:true});
 			if (ts) clearInterval(ts);
 			tp = setInterval(function(){
 				socket.send('ping');
 			}, 15000);
+			Emit('readyStateChange',1);
 		};
 
 		socket.onclose = function(){
@@ -77,13 +74,15 @@ var HoneyBadger = (function($this){
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
-		if( localDev ){ console.dir( d ); }
+		if( __devmode ){ console.dir( d ); }
+
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
 			__cbqueue[msig](d);
 			delete __cbqueue[msig];
 			return;
 		}
+
 		if (d.event == 'log-stream') {
 			// $('#'+d.target).append(d.body);
 		}
@@ -91,9 +90,9 @@ var HoneyBadger = (function($this){
 
 	var send = function(method, args, callback){
 		var args = args || [];
-		msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
+		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
-		if( localDev ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 

@@ -17,11 +17,12 @@ var fs = require('fs')
     http_port = 8090;
 
 var baseURL = '/admin';
-app.use(baseURL+'/', express.static(path.resolve('www/'))); // Path resolve clears forbidden exception
-app.use(baseURL+'/js', express.static('www/js/'));
-app.use(baseURL+'/css', express.static('www/css/'));
-app.use(baseURL+'/images', express.static('www/images/'));
-app.use(baseURL+'/fonts', express.static('www/fonts/'));
+var basePath = 'admin';
+app.use(baseURL+'/', express.static(path.resolve(basePath+'/www/'))); // Path resolve clears forbidden exception
+app.use(baseURL+'/js', express.static(basePath+'/www/js/'));
+app.use(baseURL+'/css', express.static(basePath+'/www/css/'));
+app.use(baseURL+'/images', express.static(basePath+'/www/images/'));
+app.use(baseURL+'/fonts', express.static(basePath+'/www/fonts/'));
 
 // app.get(baseURL+'/',function(req, res){
 //     res.status(200).set('Content-Type', 'text/html').send('OK');
@@ -40,7 +41,7 @@ wss.on('connection',function(ws) {
     console.log('WebSocket connection accepted');
 
     ws.on('message',function(message, flags){
-        // console.log('WebSocket message received',message);
+        console.log('WebSocket message received',message);
         
         if (!message) { 
             console.log('WebSocket empty message');
@@ -56,25 +57,28 @@ wss.on('connection',function(ws) {
             ws.send('Error: malformed request');
             return false; 
         }
+        
+        console.log('Trying method:', data.method);
 
         if (WSAPI[data.method]) {
-        	var args = [];
-			if(data.args) {
-				data.args.forEach(function(item){
-					args.push(item);
-				});
-			}
-        	args.push(function(event, err, body){
-			    ws.send(JSON.stringify({
+            var args = [];
+            if(data.args) {
+                data.args.forEach(function(item){
+                    args.push(item);
+                });
+            }
+            args.push(function(event, err, body){
+                console.log('Send response');
+                ws.send(JSON.stringify({
                     event: event,
                     msig: data.msig || null,
                     err:err,
                     body:body
                 }));
-			});
+            });
             args.push(ws)
-			// console.dir(args);
-        	WSAPI[data.method].apply(this, args);
+            // console.dir(args);
+            WSAPI[data.method].apply(this, args);
         } else {
             console.log('Method '+data.method+' does not exist');
             ws.send('Error: malformed request');
