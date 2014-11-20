@@ -19,7 +19,10 @@
 
 	this.getSourceList = function(id, callback){
 		console.log('Requesting sources');
-		$this.exec('list',null,callback);
+		$this.exec('list',null,function(e){
+			if (!e.err) { sources = e.body; }
+			if (callback) callback(e);
+		});
 	};
 
 	this.getExtractorList = function(){

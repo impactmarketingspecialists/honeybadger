@@ -107,8 +107,7 @@ var HoneyBadger = (function($this){
 		console.log('HoneyBadger initializing complete!');
 	}
 
-	function connect()
-	{
+	var connect = function() {
 		if (ts) clearInterval(ts);
 		if (tp) clearInterval(tp);
 
@@ -126,15 +125,24 @@ var HoneyBadger = (function($this){
 			ts = setInterval(connect, 1000);
 		};
 
+		socket.onmessage = receive;
 		return socket;
-	}
+	};
+
+	var send = function(method, args, callback){
+		var args = args || [];
+		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
+		if (msig) { __cbqueue[msig] = callback }
+		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
+	};
 
 	var receive = function(e) {
+
+		if( __devmode ){ console.dir(e.data); }
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
-		if( __devmode ){ console.dir( d ); }
-
 		var msig = d.msig || null;
 		if (msig && __cbqueue[msig]) {
 			__cbqueue[msig](d);
@@ -147,13 +155,6 @@ var HoneyBadger = (function($this){
 		}
 	};
 
-	var send = function(method, args, callback){
-		var args = args || [];
-		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
-		if (msig) { __cbqueue[msig] = callback }
-		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
-		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
-	};
 
 	var _exec = function(method, args, callback){
 		send(method, args, callback);
@@ -182,7 +183,10 @@ var HoneyBadger = (function($this){
 
 	this.getSourceList = function(id, callback){
 		console.log('Requesting sources');
-		$this.exec('list',null,callback);
+		$this.exec('list',null,function(e){
+			if (!e.err) { sources = e.body; }
+			if (callback) callback(e);
+		});
 	};
 
 	this.getExtractorList = function(){
