@@ -6,6 +6,7 @@ var HoneyBadger = (function($this){
 	var self = this;
 	var __cbqueue = {},
 		__modules = {},
+		__inits = [],
 		sources = [],
 		extractors = [],
 		transformers = [],
@@ -65,7 +66,7 @@ var HoneyBadger = (function($this){
 	}
 
 	var _private = function(message){
-		console.log(self, message);
+		console.log(message);
 	}
 
 	var _unsealed = function(){
@@ -75,6 +76,11 @@ var HoneyBadger = (function($this){
 		return hb;
 	};
 
+	var _registerInitializer = function(callback) {
+		__inits.push(callback);
+		return _unsealed();
+	}
+
 	var _sealed = function(){
 		return {
 			DataManager:{},
@@ -82,7 +88,12 @@ var HoneyBadger = (function($this){
 				register:function(module, init) {
 					if (typeof module.name == undefined || typeof module.instance == undefined) return;
 					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-					if (init) init(_unsealed());
+					if (init) init(_registerInitializer);
+				}
+			},
+			init: function(){
+				for(var i=0; i<__inits.length; i++) {
+					__inits[i]();
 				}
 			}
 		};
@@ -91,17 +102,22 @@ var HoneyBadger = (function($this){
 	return _sealed();
 }(HoneyBadger||{}));
 +(function($this){
-	$this.module.register({
-		name: 'DataManager',
-		access: 'public',
-		instance: this
-	},function(_unsealed){ $this = _unsealed });
-
 	var self = this,
 		sources = [],
 		extractors = [],
 		transformers = [],
 		loaders = [];
+
+
+	var _construct = function() {
+		console.log('DataManager constructor');
+		$this.pm('a message from the DataManager module');
+	};
+
+	var _init = function() {
+		// in this case we're not using jquery so no dom ready
+		console.log('DataManager DOM READY');
+	};
 
 	this.list = function(id, callback){
 		$this.exec('list',null,callback);
@@ -254,7 +270,15 @@ var HoneyBadger = (function($this){
 		});
 	};
 
-	$this.pm('a message from me');
+	$this.module.register({
+		name: 'DataManager',
+		instance: this
+	},function(_unsealed){
+		// Initialize module
+		$this = _unsealed(_init); // fire constructor when DOM ready
+		_construct();
+	});
+
 }(HoneyBadger||{}));
 +(function($this){
 

@@ -6,6 +6,7 @@ var HoneyBadger = (function($this){
 	var self = this;
 	var __cbqueue = {},
 		__modules = {},
+		__inits = [],
 		sources = [],
 		extractors = [],
 		transformers = [],
@@ -65,7 +66,7 @@ var HoneyBadger = (function($this){
 	}
 
 	var _private = function(message){
-		console.log(self, message);
+		console.log(message);
 	}
 
 	var _unsealed = function(){
@@ -75,6 +76,11 @@ var HoneyBadger = (function($this){
 		return hb;
 	};
 
+	var _registerInitializer = function(callback) {
+		__inits.push(callback);
+		return _unsealed();
+	}
+
 	var _sealed = function(){
 		return {
 			DataManager:{},
@@ -82,7 +88,12 @@ var HoneyBadger = (function($this){
 				register:function(module, init) {
 					if (typeof module.name == undefined || typeof module.instance == undefined) return;
 					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-					if (init) init(_unsealed());
+					if (init) init(_registerInitializer);
+				}
+			},
+			init: function(){
+				for(var i=0; i<__inits.length; i++) {
+					__inits[i]();
 				}
 			}
 		};

@@ -1,15 +1,20 @@
 +(function($this){
-	$this.module.register({
-		name: 'DataManager',
-		access: 'public',
-		instance: this
-	},function(_unsealed){ $this = _unsealed });
-
 	var self = this,
 		sources = [],
 		extractors = [],
 		transformers = [],
 		loaders = [];
+
+
+	var _construct = function() {
+		console.log('DataManager constructor');
+		$this.pm('a message from the DataManager module');
+	};
+
+	var _init = function() {
+		// in this case we're not using jquery so no dom ready
+		console.log('DataManager DOM READY');
+	};
 
 	this.list = function(id, callback){
 		$this.exec('list',null,callback);
@@ -162,5 +167,13 @@
 		});
 	};
 
-	$this.pm('a message from me');
+	$this.module.register({
+		name: 'DataManager',
+		instance: this
+	},function(_unsealed){
+		// Initialize module
+		$this = _unsealed(_init); // fire constructor when DOM ready
+		_construct();
+	});
+
 }(HoneyBadger||{}));
