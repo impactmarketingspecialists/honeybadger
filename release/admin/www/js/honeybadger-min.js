@@ -1,1 +1,1 @@
-/*! honeybadger 2014-11-17 */
+/*! honeybadger 2014-11-19 */

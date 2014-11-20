@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>IMS Data Source Management Console</title>
+	<title>{{title}}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
 	<link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-	
+
 	{{> admin-header }}
 
 	<section id="wrap">
@@ -27,7 +27,10 @@
 	<script src="js/admin.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
-	{{> dialog }}
+	{{> source}}
+	{{> extractor}}
+	{{> transformer}}
+	{{> loader}}
 
 	<div class="modal fade" id="sourceExport" tabindex="-1" role="dialog" aria-hidden="true">
 	  <div class="modal-dialog">
