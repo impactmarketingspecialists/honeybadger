@@ -25,6 +25,7 @@ var HoneyBadger = (function($this){
 
 	var _unsealed = function(){
 		var hb = _sealed();
+		hb.__devmode = __devmode;
 		hb.on = self.on;
 		hb.exec = _exec;
 		return hb;

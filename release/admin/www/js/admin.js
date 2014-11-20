@@ -9314,6 +9314,16 @@ var Admin = (function($this,$){
 	 */
 	var _init = function() {
 
+		if ($this.__devmode) {
+			/**
+			 * Add the livereload script - we'll add it manually so
+			 * that you don't need the browser plugin and you can do
+			 * it from across hosts.
+			 */
+			$(document.body).append('<script src="http://'+document.location.hostname+':35729/livereload.js?snipver=1"></script>');
+		}
+		
+
 		// HoneyBadger doesn't use jQuery, but the Admin does
 		$(document).ready(function(){
 
