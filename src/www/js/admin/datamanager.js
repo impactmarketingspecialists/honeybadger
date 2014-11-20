@@ -16,7 +16,7 @@
 
 			socket = new WebSocket(host);
 			socket.onopen = function(){
-				update('connectionStatus',{online:true});
+				// update('connectionStatus',{online:true});
 				_self.refresh();
 				_self.alert('Connected to server.');
 				if (ts) clearInterval(ts);
@@ -27,7 +27,7 @@
 
 			socket.onclose = function(){
 				if (tp) clearInterval(tp);
-				update('connectionStatus',{online:false});
+				// update('connectionStatus',{online:false});
 				_self.alert('Connection to server lost. Trying to restablish connection with the server.',{type:'danger'});
 				ts = setInterval(connect, 1000);
 			};
@@ -385,6 +385,9 @@
 			});
 		});
 
-		connect();
+		
+		this.init = function(){
+			connect();
+		}
 
 	})();
