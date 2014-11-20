@@ -1,4 +1,40 @@
 	var DataManager = new (function(){
+		// We hate polluting global scope; this is a great way to avoid that
+		var ts,tp,socket,host = "ws://"+location.host+"/admin/";
+		var _self = this;
+
+
+		/* dan is cools */
+
+		/**
+		 * Utility methods
+		 */
+		function connect()
+		{
+			if (ts) clearInterval(ts);
+			if (tp) clearInterval(tp);
+
+			socket = new WebSocket(host);
+			socket.onopen = function(){
+				update('connectionStatus',{online:true});
+				_self.refresh();
+				_self.alert('Connected to server.');
+				if (ts) clearInterval(ts);
+				tp = setInterval(function(){
+					socket.send('ping');
+				}, 15000);
+			};
+
+			socket.onclose = function(){
+				if (tp) clearInterval(tp);
+				update('connectionStatus',{online:false});
+				_self.alert('Connection to server lost. Trying to restablish connection with the server.',{type:'danger'});
+				ts = setInterval(connect, 1000);
+			};
+
+			_self.bind(socket);
+			return socket;
+		}
 
 		var Emit = Emitter(this);
 
@@ -67,7 +103,7 @@
 				if (!e.err) {
 					// console.log(e);
 					sources = e.body;
-					update('sourceLists',sources);
+					// update('sourceLists',sources);
 				}
 			});
 		};
@@ -76,7 +112,7 @@
 			send('getExtractorList',null,function(e){
 				if(!e.err) {
 					extractors = e.body;
-					update('extractorLists', extractors);
+					// update('extractorLists', extractors);
 				}
 			});
 		};
@@ -85,7 +121,7 @@
 			send('getTransformerList',null,function(e){
 				if(!e.err) {
 					transformers = e.body;
-					update('transformerLists', transformers);
+					// update('transformerLists', transformers);
 				}
 			});
 		};
@@ -94,7 +130,7 @@
 			send('getLoaderList',null,function(e){
 				if(!e.err) {
 					loaders = e.body;
-					update('loaderLists', loaders);
+					// update('loaderLists', loaders);
 				}
 			});
 		};
@@ -348,5 +384,7 @@
 				DataManager.navigate($(this).attr('data-target'));
 			});
 		});
+
+		connect();
 
 	})();

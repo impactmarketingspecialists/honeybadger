@@ -1,16 +1,17 @@
-
-+(function($,$this){
-	if (typeof window.HoneyBadger == undefined) window.HoneyBadger = $this;
-
-	var _self = this, _modules = {};
-
-	$this.registerModule = function(module){
-		if (typeof module.name == undefined || typeof module.instance == undefined) return;
-		_modules[module.name] = module.instance;
+var HoneyBadger = (function($this){
+	return $this;
+}(HoneyBadger||{}));
++(function($this){
+	$this.source = function(id){
+		return {
+			create:function(){},
+			read:function(){},
+			update:function(){},
+			delete:function(){}
+		};
 	};
-
-}(jQuery,HoneyBadger||{}));
-
+	return $this;
+}(HoneyBadger||{}));
 /**
  * quick lifted promises
  * https://gist.github.com/softwaredoug/9044640
