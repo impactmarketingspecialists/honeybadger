@@ -13,6 +13,44 @@ var HoneyBadger = (function($this){
 		loaders = [],
 		localDev = ( window.location.host == "localhost:8090" ) ? true : false;
 
+	var _sealed = function(){
+		return {
+			DataManager:{},
+			module:{
+				register:function(module, init) {
+					if (typeof module.name == undefined || typeof module.instance == undefined) return;
+					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
+					if (init) init(_registerInitializer);
+				}
+			},
+			init: _init
+		};
+	}
+
+	var _unsealed = function(){
+		var hb = _sealed();
+		hb.exec = _exec;
+		return hb;
+	};
+
+	var _registerInitializer = function(callback) {
+		__inits.push(callback);
+		return _unsealed();
+	};
+
+	console.log('HoneyBadger starting up');
+	var _init = function() {
+		console.log('HoneyBadger initializing');
+		
+		connect();
+
+		console.log('HoneyBadger initializing submodules');
+		for(var i=0; i<__inits.length; i++) {
+			__inits[i]();
+		}
+		console.log('HoneyBadger initializing complete!');
+	}
+
 	function connect()
 	{
 		if (ts) clearInterval(ts);
@@ -34,7 +72,6 @@ var HoneyBadger = (function($this){
 
 		return socket;
 	}
-
 
 	var receive = function(e) {
 		if (e.data === 'pong') return;
@@ -60,44 +97,8 @@ var HoneyBadger = (function($this){
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 
-
 	var _exec = function(method, args, callback){
 		send(method, args, callback);
-	}
-
-	var _private = function(message){
-		console.log(message);
-	}
-
-	var _unsealed = function(){
-		var hb = _sealed();
-		hb.exec = _exec;
-		hb.pm = _private;
-		return hb;
-	};
-
-	var _registerInitializer = function(callback) {
-		__inits.push(callback);
-		return _unsealed();
-	}
-
-	var _sealed = function(){
-		return {
-			DataManager:{},
-			module:{
-				register:function(module, init) {
-					if (typeof module.name == undefined || typeof module.instance == undefined) return;
-					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-					if (init) init(_registerInitializer);
-				}
-			},
-			init: function(){
-				connect();
-				for(var i=0; i<__inits.length; i++) {
-					__inits[i]();
-				}
-			}
-		};
 	}
 
 	return _sealed();
@@ -112,12 +113,10 @@ var HoneyBadger = (function($this){
 
 	var _construct = function() {
 		console.log('DataManager constructor');
-		$this.pm('a message from the DataManager module');
 	};
 
 	var _init = function() {
-		// in this case we're not using jquery so no dom ready
-		console.log('DataManager DOM READY');
+		console.log('DataManager initialized');
 	};
 
 	this.list = function(id, callback){

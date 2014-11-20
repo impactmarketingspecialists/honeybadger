@@ -229,6 +229,7 @@
 		</div>		
 	</footer>
 
+	<!-- editor dialogs -->
 	
 	<div class="modal fade" id="sourceEditor" tabindex="-1" role="dialog" aria-hidden="true">
 	  <div class="modal-dialog">
@@ -694,31 +695,53 @@
 	</div>
 
 
+	<!-- export dialogs -->
+	
 	<div class="modal fade" id="sourceExport" tabindex="-1" role="dialog" aria-hidden="true">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	        <h4 class="modal-title" id="myModalLabel">Export Source List</h4>
+	        <h4 class="modal-title" id="sourceExportModalLabel">Source Export</h4>
 	      </div>
-	      <div class="modal-body">
-	      	<div class="well" style="max-width: 400px; margin: 0 auto">
-		        <h4>Preview</h4>
-				<div id="preview"></div>
-	      	</div>
+	      <div class="modal-body wizard">
+    		
+		<div class="modal fade" id="sourceExport" tabindex="-1" role="dialog" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Export Source List</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<div class="well" style="max-width: 400px; margin: 0 auto">
+			        <h4>Preview</h4>
+					<div id="preview"></div>
+		      	</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	
 	      </div>
 	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button type="button" class="btn btn-primary" onclick="DataManager.source.save()" disabled="disabled">Save</button>
 	      </div>
 	    </div>
 	  </div>
 	</div>
+
+
 	<script src="js/honeybadger.js"></script>
 	<script src="js/admin.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 	<script>
-	// We could call HoneyBadger.init() - or HoneyBadger.Admin.init() - in this case it's all the same method in the end
-	HoneyBadger.Admin.init();
+	// We could call HoneyBadger.init() - or HoneyBadger.Admin.init() - or Admin.init() - in this case it's all the same method in the end
+	Admin.init();
 	</script>
 </body>
 </html>

@@ -9189,60 +9189,156 @@ return jQuery;
 
 }));
 
-HoneyBadger.Admin = (function($this,$){
+var Admin = (function($this,$){
 	var self = this,
+
+		/**
+		 * Since we can extend this with submodules we need
+		 * to store references to their initializers
+		 * @type {Array}
+		 */
 		__inits = [],
+
+		/**
+		 * We're storing references to submodules that register
+		 * themselves.
+		 * @type {Object}
+		 */
 		__modules = {};
 
-	// $this.Admin = this;
-
-	var _construct = function() {
-		console.log('Admin constructor');
-		$this.pm('a message from the Admin module');
-	};
-
-	var _init = function() {
-		// honeybadger doesn't have jquery hooks, but we do!
-		$(document).ready(function(){
-
-			// Pre-initializing any modules on DOM ready
-
-			for(var i=0; i<__inits.length; i++) {
-				__inits[i]();
-			}
-
-			// Post initializing all modules on DOM ready
-			console.log('Admin DOM READY');
-		});
-	};
-
-	var _privateMessage = function() {
-		console.log('Testing private admin message');
-	}
-
-	var _unsealed = function(){
-		var o = _sealed();
-		o.pm = _privateMessage;
-		return o;
-	};
-
-	var _registerInitializer = function(callback) {
-		__inits.push(callback);
-		return _unsealed();
-	};
-
+	/**
+	 * This our public object interface
+	 *
+	 * Since you can extend this module we include module.register()
+	 * This allow submodules to register themselves for access to protected methods
+	 * 
+	 * @return {object} Public interface for HoneyBadger.Admin
+	 */
 	var _sealed = function(){
 		return {
 			module:{
 				register:function(module, init) {
 					if (typeof module.name == undefined || typeof module.instance == undefined) return;
+
+					/**
+					 * Submodules can pass a reference to anything they want as their instance.
+					 * This can be reference to itself (pass this,self,whatever), or their public interface
+					 * The register what the parent thinks is the submodule; not necessarily what their
+					 * public interface looks like.
+					 */
 					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
+
+					/**
+					 * If an initializer is passed, let's register it so it will get call when this module inits
+					 */
 					if (init) init(_registerInitializer);
 				}
 			},
-			init: $this.init // we'll just call our parent's init to make sure honeybadger connects fire up modules
+			/**
+			 * In this case we don't really want to do our own thing with our public init() method.
+			 * We've registered ourselves as a submodule of HoneyBadger - so we just want to call
+			 * HoneyBadger's init - we have nothing special to add.
+			 *
+			 * To initialize this module you can call Admin.init() - since we've declared this module as Admin
+			 * in the global scope.
+			 *
+			 * However, since it's a submodule of HoneyBadger, you can also call HoneyBadger.init() - our _init()
+			 * our _init() will get fired by that. Technically that's all you're really doing by calling Admin.init()
+			 * since we assign it to the same reference below.
+			 *
+			 * Since our submodule registers itself with HoneyBadger as HoneyBadger.Admin you can also call
+			 * HoneyBadger.Admin.init(). It's all the same thing!
+			 * 
+			 * @type {Funtion} Our public init() method.
+			 */
+			init: $this.init // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
 		};
 	}
+
+	/**
+	 * This is our protected interface
+	 *
+	 * This interface is offered to submodules via _registerInitializer().
+	 * We simply extend the public interface with whatever additional methods
+	 * we want to expose to submodules.
+	 * 
+	 * @return {object} Protected interface for HoneyBadger.Admin
+	 */
+	var _unsealed = function(){
+		var o = _sealed();
+		return o;
+	};
+
+	/**
+	 * Registers a submodules initializer to make sure that when this
+	 * module gets initialized, any submodules will also get initialized
+	 * 
+	 * @param  {Function} callback Reference to registering submodule's initializer
+	 * @return {object} Protected interface for HoneyBadger.Admin
+	 */
+	var _registerInitializer = function(callback) {
+		__inits.push(callback);
+		return _unsealed();
+	};
+
+	/**
+	 * Our module's actual constructor
+	 * This happens immediately before any initialization
+	 * 
+	 * @return {void} Constructor
+	 */
+	var _construct = function() {
+		console.log('Admin constructor');
+	};
+
+	/**
+	 * Our module's initializer.
+	 * This gets called via our public init() method.
+	 *
+	 * Since we've registered as a submodule of HoneyBadger
+	 * this gets fired whenever HoneyBadger initializes all
+	 * of it's submodules - that's why our public init()
+	 * method is actually just calling HoneyBadger.init()
+	 *
+	 * The HoneyBadger module doesn't care about the UI
+	 * So it's just inits all of its submodules right away.
+	 * In the case of this module, we do care about the
+	 * DOM, so we will wait for DOM to fire ready before
+	 * initializing any submodules.
+	 *
+	 * Any submodules of Admin will have their _construct()
+	 * fire immediately as they register and their _init()
+	 * fire after DOM ready.
+	 * 
+	 * @return {void} Initializer
+	 */
+	var _init = function() {
+
+		// HoneyBadger doesn't use jQuery, but the Admin does
+		$(document).ready(function(){
+
+			console.log('DOM READY');
+			/** 
+			 * Pre-initializing any modules on DOM ready
+			 * You can do some work here before you fire
+			 * _init() on all the submodules.
+			 */
+
+			/**
+			 * Let's init those submodules
+			 */
+			for(var i=0; i<__inits.length; i++) {
+				__inits[i]();
+			}
+
+			/**
+			 * Anything else you want to do after you've initialized submodules?
+			 */
+			
+			console.log('Admin initialized');
+		});
+	};
+
 
 	// Register our module
 	$this.module.register({
@@ -9257,6 +9353,7 @@ HoneyBadger.Admin = (function($this,$){
 		_construct();
 	});
 
+	HoneyBadger.Admin = _sealed();
 	return _sealed();
 
 }(HoneyBadger,jQuery));
@@ -9660,12 +9757,11 @@ HoneyBadger.Admin = (function($this,$){
 
 	var _construct = function() {
 		console.log('Admin.UI constructor');
-		$admin.pm('a message from the Admin.UI module');
 	};
 
 	var _init = function() {
 		// Our parent already listens for DOM ready
-		console.log('Admin.UI DOM READY');
+		console.log('Admin.UI initialized');
 	};
 
 	$admin.module.register({

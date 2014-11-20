@@ -8,12 +8,10 @@
 
 	var _construct = function() {
 		console.log('DataManager constructor');
-		$this.pm('a message from the DataManager module');
 	};
 
 	var _init = function() {
-		// in this case we're not using jquery so no dom ready
-		console.log('DataManager DOM READY');
+		console.log('DataManager initialized');
 	};
 
 	this.list = function(id, callback){

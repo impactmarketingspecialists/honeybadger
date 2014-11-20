@@ -4,12 +4,11 @@
 
 	var _construct = function() {
 		console.log('Admin.UI constructor');
-		$admin.pm('a message from the Admin.UI module');
 	};
 
 	var _init = function() {
 		// Our parent already listens for DOM ready
-		console.log('Admin.UI DOM READY');
+		console.log('Admin.UI initialized');
 	};
 
 	$admin.module.register({
