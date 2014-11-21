@@ -16,71 +16,70 @@
 		console.log('DataManager initialized');
 	};
 
-	this.getSourceList = function(id, callback){
-		console.log('Requesting sources');
+	$this.module.register({
+		name: 'DataManager',
+		instance: this
+	},function(_unsealed){
+		$this = _unsealed(_init); 
+		_construct();
+	});
+
+	var Emit = new Emitter(this);
+	HoneyBadger.DataManager = this;
+
+	this.loadSources = function(callback){
+		var promise = Promise.create(self.loadSources);
 		$this.exec('list',null,function(e){
 			if (!e.err) { sources = e.body; }
 			if (callback) callback(e);
+			promise.complete();
 		});
+		return promise;
 	};
 
-	this.getExtractorList = function(){
+	this.loadExtractors = function(callback){
+		var promise = Promise.create(self.loadExtractors);
 		$this.exec('getExtractorList',null,function(e){
-			if(!e.err) { extractors = e.body; }
+			if (!e.err) { extractors = e.body; }
+			if (callback) callback(e);
+			promise.complete();
 		});
+		return promise;
 	};
 
-	this.getTransformerList = function(){
+	this.loadTransformers = function(callback){
+		var promise = Promise.create(self.loadTransformers);
 		$this.exec('getTransformerList',null,function(e){
-			if(!e.err) {
-				transformers = e.body;
-				// update('transformerLists', transformers);
-			}
+			if (!e.err) { transformers = e.body; }
+			if (callback) callback(e);
+			promise.complete();
 		});
+		return promise;
 	};
 
-	this.getLoaderList = function(){
+	this.loadLoaders = function(callback){
+		var promise = Promise.create(self.loadLoaders);
 		$this.exec('getLoaderList',null,function(e){
-			if(!e.err) {
-				loaders = e.body;
-				// update('loaderLists', loaders);
-			}
+			if(!e.err) { loaders = e.body; }
+			if (callback) callback(e);
+			promise.complete();
 		});
+		return promise;
 	};
 
-	this.refresh = function(){
-		this.getSourceList();
-		// this.getExtractorList();
-		// this.getTransformerList();
-		// this.getLoaderList();
-	};
-
-	this.getSource = function(id){
-		return DataManager.getSources().filter(function(e){
-			if (e.id == id) return e;
-			else return null;
-		}).pop();
-	};
-
-	this.getExtractor = function(id){
-		return DataManager.getExtractors().filter(function(e){
-			if (e.id == id) return e;
-			else return null;
-		}).pop();
-	};
-
-	this.getTransformer = function(id){
-		return DataManager.getTransformers().filter(function(e){
-			if (e.id == id) return e;
-			else return null;
-		}).pop();
-	};
-
-	this.getLoader = function(id){
-		return DataManager.getLoaders().filter(function(e){
-			if (e.id == id) return e;
-			else return null;
-		}).pop();
+	this.refresh = function(callback){
+		this.loadSources().then(this.loadExtractors).then(this.loadTransformers).then(this.loadLoaders).then(function(){
+			if (callback) callback();
+			Emit('refresh',{
+				sources: sources,
+				extractors: extractors,
+				transformers: transformers,
+				loaders: loaders
+			});
+		});
+		// this.loadExtractors();
+		// this.loadTransformers();
+		// this.loadLoaders();
 	};
 
 	this.getSources = function(){
@@ -97,6 +96,34 @@
 
 	this.getLoaders = function(){
 		return loaders;
+	};
+
+	this.getSource = function(id){
+		return self.getSources().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getExtractor = function(id){
+		return self.getExtractors().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getTransformer = function(id){
+		return self.getTransformers().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getLoader = function(id){
+		return self.getLoaders().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
 	};
 
 	this.source = function(name, type, properties){
@@ -163,20 +190,9 @@
 
 	this.loader.sample = function(ldr, cb){
 		$this.exec('testLoader', [ldr], function(e){
-			// console.log(e);
 			cb(e);
 		});
 	};
 
-	$this.module.register({
-		name: 'DataManager',
-		instance: this
-	},function(_unsealed){
-		// Initialize module
-		$this = _unsealed(_init); // fire constructor when DOM ready
-		_construct();
-	});
-
-	HoneyBadger.DataManager = this;
 
 }(HoneyBadger||{}));

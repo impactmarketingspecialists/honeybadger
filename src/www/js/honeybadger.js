@@ -1,13 +1,14 @@
 var HoneyBadger = (function($this){
 
 	var ts,tp,socket,host = "ws://"+location.host+"/admin/";
-	var Emit = Emitter(this);
 
 	var self = this;
 	var __cbqueue = {},
 		__modules = {},
 		__inits = [],
 		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
+
+	var Emit = new Emitter(self);
 
 	var _sealed = function(){
 		return {
@@ -81,8 +82,8 @@ var HoneyBadger = (function($this){
 
 	var receive = function(e) {
 
-		if( __devmode ){ console.dir(e); }
 		if (e.data === 'pong') return;
+		if ( __devmode ){ console.dir(e); }
 
 		var d = JSON.parse(e.data);
 		var msig = d.msig || null;
