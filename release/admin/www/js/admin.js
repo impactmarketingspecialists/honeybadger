@@ -9507,34 +9507,53 @@ var Admin = (function($this,$){
 			});
 		});
 
+		$('[am-Dialog]').each(function(index,item){
+			var _id = $(item).prop('id');
+			$('[am-Button~=next]',item).click(function(){
+				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) return finish();
+
+				$('#'+_id+' section.step.active').hide().removeClass('active').next().show().addClass('active');
+				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',false);
+				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) $('#'+_id+' [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
+			});
+			$('#'+_id+' [am-Button~=prev]').click(function(){
+				$('#'+_id+' section.step.active').hide().removeClass('active').prev().show().addClass('active');
+				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',true);
+				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) $('#'+_id+' [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
+			});
+
+		});
+
 		/**
 		 * From the extractor wizard: bindings for the Next button
 		 */
-		$('#extractorWizard [am-Button~=next]').click(function(){
+		// $('#extractorWizard [am-Button~=next]').click(function(){
 
-			var finish = function(){
-				$('#extractorWizard').modal('hide');
-				$DM.extractor.validate(ext());
-				$DM.extractor.save(ext(),function() { $DM.loadExtractors(); });
-			};
+		// 	var finish = function(){
+		// 		$('#extractorWizard').modal('hide');
+		// 		$DM.extractor.validate(ext());
+		// 		$DM.extractor.save(ext(),function() { $DM.loadExtractors(); });
+		// 	};
 
-			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
+		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
 
-			$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
-			$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',false);
-			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
-		});
+		// 	$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
+		// 	$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+		// 	if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',false);
+		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
+		// });
 
 		/**
 		 * From the extractor wizard: bindings for the Back button
 		 */
-		$('#extractorWizard [am-Button~=prev]').click(function(){
-			$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
-			$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',true);
-			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
-		});
+		// $('#extractorWizard [am-Button~=prev]').click(function(){
+		// 	$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
+		// 	$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',true);
+		// 	if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
+		// });
 
 		/**
 		 * From the extractor wizard: bindings for unarchive options
