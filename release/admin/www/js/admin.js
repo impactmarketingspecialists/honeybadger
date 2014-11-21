@@ -9680,357 +9680,40 @@ var Admin = (function($this,$){
 
 +(function($admin,$){
 
-	$admin.UI = this;
+	var self = $admin.UI = this;
+	var private = {}, protected = {}, pages = {};
+	var $HB, $DM;
 
 	var _construct = function() {
 		console.log('Admin.UI constructor');
+		$HB = $admin._parent;
+		$DM = $HB.DataManager;
 	};
 
 	var _init = function() {
 		// Our parent already listens for DOM ready
-		console.log('Admin.UI initialized');
-	};
-
-	$admin.module.register({
-		name: 'UI',
-		instance: this
-	},function(_unsealed){
-		// Initialize module
-		$admin = _unsealed(_init); // fire constructor when DOM ready
-		_construct();
-	});
-
-	/******************* UI Rendering ******************/
-
-	/**
-	 * When data is returned from WebSocket calls it gets passed here to be rendered
-	 * @param  {[type]} element
-	 * @param  {[type]} data
-	 * @return {[type]}
-	 */
-	function update(element,data)
-	{
-		var connectionStatus = function(d) {
-			if (d.online && d.online === true) {
-				$('#connection').addClass('online').removeClass('offline');
-				$('#connection .status').text('Online');
-			}
-			else {
-				$('#connection').addClass('offline').removeClass('online');
-				$('#connection .status').text('Offline');
-			}
-		};
-
-		var sourceLists = function(d) {
-			$('#activeSources > tbody').html('');
-			$('#inactiveSources > tbody').html('');
-			$('#sourceList > tbody').html('');
-			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
-			$(d).each(function(index, item){
-				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('sourceEditor');
-					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
-				}));
-				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
-				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
-				else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
-			});
-		};
-
-		var extractorLists = function(d) {
-			$('#extractorList > tbody').html('');
-			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
-			$(d).each(function(index, item){
-				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('extractorWizard');
-					setupWizard('extractorWizard', item.value);
-				}));
-				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
-				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
-				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
-			});
-		};
-
-		var transformerLists = function(d) {
-			$('#transformerList > tbody').html('');
-			$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
-			$(d).each(function(index, item){
-				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('transformWizard');
-					setupWizard('transformWizard', item.value);
-				}));
-				$('#ldr-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
-				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
-				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
-			});
-		};
-
-		var loaderLists = function(d) {
-			$('#loaderList > tbody').html('');
-			$(d).each(function(index, item){
-				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('loaderWizard');
-					setupWizard('loaderWizard', item.value);
-				}));
-				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
-				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
-			});
-		};
-
-		var transformDataStructures = function(d) {
-			$('#transformNormalize').html('');
-			$('#transformMapper .fields').html('');
-			if (d.headers) {
-				$.each(d.headers,function(index,item){
-					$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
-					$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
-				});			
-			} else if (d.data.data) {
-				$.each(d.data.data[0],function(index,item){
-					$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+index+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+index+'"/></div></label>')
-					$('#transformMapper .fields').append('<span class="item badge">'+index+'</span> ');
-				});			
-			}
-
-			$('#transformNormalize input:checkbox').change(function(){
-				if (!$(this)[0].checked) $(this).parent().parent().parent().find('input[type="text"]').attr('disabled','disabled');
-				else $(this).parent().parent().parent().find('[type=text]').removeAttr('disabled');
-			})
-		};
-
-		var loaderDefinition = function(d) {
-			$('#loaderSchemas .fields .maps').html('');
-			$.each(d.headers,function(index,item){
-				if (!item) return;
-				$('#loaderSchemas .fields .maps').append('<div class="row form-group"><div class="col-md-6"><label>'+item+'</label></div><div class="col-md-6"><select class="form-control"><option value="string">String</option><option value="float">Float</option><option value="bool">Boolean</option><option value="text">Long Text</option></select></div></div>')
-			})
-		};
-
-		switch(element)
-		{
-			case "connectionStatus":
-				connectionStatus(data);
-			break;
-			case "sourceLists":
-				sourceLists(data);
-			break;
-			case "extractorLists":
-				extractorLists(data);
-			break;
-			case "transformerLists":
-				transformerLists(data);
-			break;
-			case "loaderLists":
-				loaderLists(data);
-			break;
-			case "dataStructures":
-				transformDataStructures(data);
-			break;
-			case "loaderDefinition":
-				loaderDefinition(data);
-			break;
-		}
-	}
-
-	/**
-	 * Modal resets
-	 */
-	var sourceModalReset = function(){
-		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
-		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
-		$('#sourceTypeOptions .option-group').hide();
-		$('#sourceEditorSave').prop('disabled',false);
-	};
-
-	var resetWizard = function(id){
-		$('#'+id).attr({'data-id':'','data-rev':''});
-		$('#'+id+' section.step').hide().first().show();
-		$('#'+id+' .files').empty();
-		$('input[type=text], input[type=password], select, textarea','#'+id).val('');
-	};
-
-	/**
-	 * Populate the proper wizard with saved data
-	 * @param  {[type]} id
-	 * @param  {[type]} data
-	 * @return {[type]}
-	 */
-	var setupWizard = function(id, data){
-		// ONLY EXECUTES ON EDIT NOT "NEW"
-		console.log(data);
-		resetWizard(id);
-		switch(id)
-		{
-			case "sourceEditor":
-				sourceModalReset();
-
-				$('#sourceEditor').attr('data-id',data._id);
-				$('#sourceEditor').attr('data-rev',data._rev);
-
-				$('#sourcename').val(data.name);
-				$('#sourcetype').val(data.source.type);
-				if (data.source.type == 'RETS') {
-					$('#sourceuri').val(data.source.uri);
-					$('#sourceuser').val(data.source.auth.username);
-					$('#sourcepassword').val(data.source.auth.password);
-					$('#sourceua').val(data.source.auth.userAgentHeader);
-					$('#sourceuapw').val(data.source.auth.userAgentPassword);
-					$('#source_RETS').show();
-				} else if (data.source.type == 'FTP') {
-					$('#ftphost').val(data.source.uri);
-					$('#ftpuser').val(data.source.auth.username);
-					$('#ftpauth').val(data.source.auth.password);
-					$('#source_FTP').show();
-				}
-				else if (data.source.type == 'SOAP') $('#source_SOAP').show();
-				else if (data.source.type == 'REST') $('#source_REST').show();
-				else if (data.source.type == 'XML') $('#source_XML').show();	
-			break;
-			case "extractorWizard":
-				$('#extractorName').val(data.name);
-				$('#ext-source-select').val(data.source);
-				$('#ext-source-select').val(data.source);
-				if (data.target.type == 'file') {
-					$('#ftpFileName').val(data.target.res);
-					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
-				}
-
-				var type = DataManager.getSource(data.source).value.source.type;
-				$('#extractorWizard .source-options').hide();
-				if (type === 'FTP') {
-					$('#ext-ftp-browser .files').empty();
-					$('#ext-ftp-options').show();
-				}
-				else if (type === 'RETS') {
-					$('#ext-rets-options').show();
-				}
-			break;
-			case "transformWizard":
-				$('#transformerName').val(data.name);
-				$('#transformerDescription').val(data.description);
-				$('#trn-source-toggle').val(data.style);
-				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
-				DataManager.extractor.sample(DataManager.getExtractor(data.extractor).value,function(e){
-					if (!e.err) update('dataStructures',e.body);
-				});
-			break;
-			case "loaderWizard":
-				$('#loaderName').val(data.name);
-				$('#ldr-source-select').val(data.transform);
-				$('#ldr-target-type').val(data.target.type);
-				$('#ldr-mysql-dsn').val(data.target.dsn);
-				$('#ldr-target-schema').val(data.target.schema.name);
-
-				DataManager.transformer.sample(DataManager.getTransformer(data.transform).value,function(e){
-					if (!e.err) {
-						update('loaderDefinition',e.body);
-						trnSample = e.body;
-					} 
-				});
-
-				switch(data.target.type)
-				{
-					case "mysql":
-						$('#loaderMySQL').show();
-						$('#loaderCouchDB').hide();
-						$('#loaderFTP').hide();
-					break;
-					case "couchdb":
-						$('#loaderMySQL').hide();
-						$('#loaderCouchDB').show();
-						$('#loaderFTP').hide();
-					break;
-					case "ftp":
-						$('#loaderMySQL').hide();
-						$('#loaderCouchDB').hide();
-						$('#loaderFTP').show();
-					break;
-				}
-			break;
-		}
-	}
-
-	var showWizard = function(id) {
-		$('#'+id).modal('show');
-	}
-
-	/**
-	 * Initial setup and UI bindings
-	 */
-	$(document).ready(function(){
-
+		
+		/**************** UI Bindings ***************/
 		/**
-		 * Get an extractor definition from the UI
-		 * @return {[type]}
+		 * This HUGE block handles all of the setup and bindings
+		 * For latching onto buttons, initializing the UI, etc.
+		 * This is essentially our root DOM ready handler
+		 *
+		 * If you're wondering, "Where the fuck is the handler
+		 * for this stupid button?"; or "How is this UI event
+		 * getting handled?" - this is your spot.
+		 *
+		 * If you're looking for where data is rendered into the
+		 * UI, where DOM getting manipulated or updated; look at
+		 * view.js
 		 */
-		var ext = function(){
-			var stype = DataManager.getSource($('#ext-source-select').val()).value.source.type;
-			console.log(stype);
-			return {
-				name: $('#extractorName').val(),
-				source: $('#ext-source-select').val(),
-				target: {
-					type: (stype == 'RETS') ? $('#ext-rets-resource').val() : "file",
-					class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
-					res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
-					format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-text-format]:checked').val()
-				}
-			};
-		};
 
-		/**
-		 * Get an transformer definition from the UI
-		 * @return {[type]}
-		 */
-		var trn = function(){
-			var transform = {
-				name: $('#transformerName').val(),
-				description: $('#transformerDescription').val(),
-				style: $('#trn-source-toggle').val(),
-				extractor: $('#trn-source-select').val(),
-				transform: {
-					input: [],
-					normalize: [],
-					map: $('#trn-map').val()
-				}
-			};
-
-			$('#transformNormalize .item input:text:enabled').each(function(index,item){
-				transform.transform.input.push($('.name', $(item).parent().parent()).text());
-				transform.transform.normalize.push({
-					in: $('.name', $(item).parent().parent()).text(),
-					out: $(item).val()
-				});
-			});
-
-			return transform;
-		};
-
-		/**
-		 * Get a loader definition from the UI
-		 * @return {[type]}
-		 */
-		var ldr = function(){
-			var res = {
-				name: $('#loaderName').val(),
-				transform: $('#ldr-source-select').val(),
-				target: {
-					type: $('#ldr-target-type').val(),
-					dsn: $('#ldr-mysql-dsn').val(),
-					schema: {
-						name: $('#ldr-target-schema').val(),
-						fields: []
-					}
-				}
-			};
-			$('#loaderSchemas .fields .maps label').each(function(index,item){
-				res.target.schema.fields.push({
-					key: $(item).text(),
-					type: $(item).parent().parent().find('select').val()
-				});
-			});
-			console.log(res);
-			return res;
+		pages = {
+			dashboard: $('#dashboard').hide(),
+			sourceManager: $('#sourceManager').hide(),
+			extractorManager: $('#extractorManager').hide(),
+			transformManager: $('#transformManager').hide(),
+			loaderManager: $('#loaderManager').hide()
 		};
 
 		/**
@@ -10504,13 +10187,240 @@ var Admin = (function($this,$){
 			$('#loader-result').html('');
 		});
 
+
+		/**
+		 * Finish by navigating to a page
+		 */
+
+		if (document.location.hash) self.navigate(document.location.hash.replace('#',''));
+		else self.navigate('dashboard');
+
+		console.log('Admin.UI initialized');
+	};
+
+	$admin.module.register({
+		name: 'UI',
+		instance: this
+	},function(_unsealed){
+		// Initialize module
+		$admin = _unsealed(_init); // fire constructor when DOM ready
+		_construct();
 	});
 
+	/**
+	 * Reset the UI - All of it if you dare
+	 * 
+	 * @return {[type]} [description]
+	 */
+	this.reset = function() {
 
-	// connect();
+	};
 
-	// if (document.location.hash) DataManager.navigate(document.location.hash.replace('#',''));
-	// else DataManager.navigate('dashboard');
+	this.navigate = function(page, callback){
+		if (typeof pages[page] == 'undefined') return false;
+
+		$('#bs-example-navbar-collapse-1 li.active').removeClass('active');
+		$('[data-target="'+page+'"]').closest('.nav-item').addClass('active');
+		$('#bodyContent > *').hide();
+		pages[page].show();
+	};
+
+	/**
+	 * Modal resets
+	 */
+	var sourceModalReset = function(){
+		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
+		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
+		$('#sourceTypeOptions .option-group').hide();
+		$('#sourceEditorSave').prop('disabled',false);
+	};
+
+	var resetWizard = function(id){
+		$('#'+id).attr({'data-id':'','data-rev':''});
+		$('#'+id+' section.step').hide().first().show();
+		$('#'+id+' .files').empty();
+		$('input[type=text], input[type=password], select, textarea','#'+id).val('');
+	};
+
+	/**
+	 * Populate the proper wizard with saved data
+	 * @param  {[type]} id
+	 * @param  {[type]} data
+	 * @return {[type]}
+	 */
+	var setupWizard = function(id, data){
+		// ONLY EXECUTES ON EDIT NOT "NEW"
+		console.log(data);
+		resetWizard(id);
+		switch(id)
+		{
+			case "sourceEditor":
+				sourceModalReset();
+
+				$('#sourceEditor').attr('data-id',data._id);
+				$('#sourceEditor').attr('data-rev',data._rev);
+
+				$('#sourcename').val(data.name);
+				$('#sourcetype').val(data.source.type);
+				if (data.source.type == 'RETS') {
+					$('#sourceuri').val(data.source.uri);
+					$('#sourceuser').val(data.source.auth.username);
+					$('#sourcepassword').val(data.source.auth.password);
+					$('#sourceua').val(data.source.auth.userAgentHeader);
+					$('#sourceuapw').val(data.source.auth.userAgentPassword);
+					$('#source_RETS').show();
+				} else if (data.source.type == 'FTP') {
+					$('#ftphost').val(data.source.uri);
+					$('#ftpuser').val(data.source.auth.username);
+					$('#ftpauth').val(data.source.auth.password);
+					$('#source_FTP').show();
+				}
+				else if (data.source.type == 'SOAP') $('#source_SOAP').show();
+				else if (data.source.type == 'REST') $('#source_REST').show();
+				else if (data.source.type == 'XML') $('#source_XML').show();	
+			break;
+			case "extractorWizard":
+				$('#extractorName').val(data.name);
+				$('#ext-source-select').val(data.source);
+				$('#ext-source-select').val(data.source);
+				if (data.target.type == 'file') {
+					$('#ftpFileName').val(data.target.res);
+					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
+				}
+
+				var type = DataManager.getSource(data.source).value.source.type;
+				$('#extractorWizard .source-options').hide();
+				if (type === 'FTP') {
+					$('#ext-ftp-browser .files').empty();
+					$('#ext-ftp-options').show();
+				}
+				else if (type === 'RETS') {
+					$('#ext-rets-options').show();
+				}
+			break;
+			case "transformWizard":
+				$('#transformerName').val(data.name);
+				$('#transformerDescription').val(data.description);
+				$('#trn-source-toggle').val(data.style);
+				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
+				DataManager.extractor.sample(DataManager.getExtractor(data.extractor).value,function(e){
+					if (!e.err) update('dataStructures',e.body);
+				});
+			break;
+			case "loaderWizard":
+				$('#loaderName').val(data.name);
+				$('#ldr-source-select').val(data.transform);
+				$('#ldr-target-type').val(data.target.type);
+				$('#ldr-mysql-dsn').val(data.target.dsn);
+				$('#ldr-target-schema').val(data.target.schema.name);
+
+				DataManager.transformer.sample(DataManager.getTransformer(data.transform).value,function(e){
+					if (!e.err) {
+						update('loaderDefinition',e.body);
+						trnSample = e.body;
+					} 
+				});
+
+				switch(data.target.type)
+				{
+					case "mysql":
+						$('#loaderMySQL').show();
+						$('#loaderCouchDB').hide();
+						$('#loaderFTP').hide();
+					break;
+					case "couchdb":
+						$('#loaderMySQL').hide();
+						$('#loaderCouchDB').show();
+						$('#loaderFTP').hide();
+					break;
+					case "ftp":
+						$('#loaderMySQL').hide();
+						$('#loaderCouchDB').hide();
+						$('#loaderFTP').show();
+					break;
+				}
+			break;
+		}
+	}
+
+	var showWizard = function(id) {
+		$('#'+id).modal('show');
+	}
+
+	/**
+	 * Get an extractor definition from the UI
+	 * @return {[type]}
+	 */
+	var ext = function(){
+		var stype = DataManager.getSource($('#ext-source-select').val()).value.source.type;
+		console.log(stype);
+		return {
+			name: $('#extractorName').val(),
+			source: $('#ext-source-select').val(),
+			target: {
+				type: (stype == 'RETS') ? $('#ext-rets-resource').val() : "file",
+				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
+				res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
+				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-text-format]:checked').val()
+			}
+		};
+	};
+
+	/**
+	 * Get an transformer definition from the UI
+	 * @return {[type]}
+	 */
+	var trn = function(){
+		var transform = {
+			name: $('#transformerName').val(),
+			description: $('#transformerDescription').val(),
+			style: $('#trn-source-toggle').val(),
+			extractor: $('#trn-source-select').val(),
+			transform: {
+				input: [],
+				normalize: [],
+				map: $('#trn-map').val()
+			}
+		};
+
+		$('#transformNormalize .item input:text:enabled').each(function(index,item){
+			transform.transform.input.push($('.name', $(item).parent().parent()).text());
+			transform.transform.normalize.push({
+				in: $('.name', $(item).parent().parent()).text(),
+				out: $(item).val()
+			});
+		});
+
+		return transform;
+	};
+
+	/**
+	 * Get a loader definition from the UI
+	 * @return {[type]}
+	 */
+	var ldr = function(){
+		var res = {
+			name: $('#loaderName').val(),
+			transform: $('#ldr-source-select').val(),
+			target: {
+				type: $('#ldr-target-type').val(),
+				dsn: $('#ldr-mysql-dsn').val(),
+				schema: {
+					name: $('#ldr-target-schema').val(),
+					fields: []
+				}
+			}
+		};
+		$('#loaderSchemas .fields .maps label').each(function(index,item){
+			res.target.schema.fields.push({
+				key: $(item).text(),
+				type: $(item).parent().parent().find('select').val()
+			});
+		});
+		console.log(res);
+		return res;
+	};
+
 
 }(HoneyBadger.Admin, jQuery));
 
