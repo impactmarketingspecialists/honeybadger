@@ -9400,6 +9400,10 @@ var Admin = (function($this,$){
 		/**************** Extractors ***************/
 
 		/**
+		 * Setup dialog button to be next vs save
+		 */
+		$('#extractorWizard [am-Button~=save]').attr('id','extractionWizardNext').text('Next');
+		/**
 		 * From the extractor Wizard; if selected source is FTP, bind to the browse button
 		 * to find a target from the FTP source
 		 */
@@ -9411,7 +9415,7 @@ var Admin = (function($this,$){
 						if (item.name) $('#ext-ftp-browser .files').append($('<li class="file">'+item.name+'</li>').click(function(){
 							$('#ftpFileName').val(item.name);
 							$('#ext-ftp-browser .files').empty();
-							$('#extractionWizardNext').removeAttr("disabled");
+							$('#extractorWizard [am-Button~=save]').removeAttr("disabled");
 						}));
 					});
 				}
@@ -9430,6 +9434,8 @@ var Admin = (function($this,$){
 			$('#ext-rets-options .rets-resource').hide();
 			$('#ext-rets-options .rets-classification').hide();
 			$('#extractorWizard .source-options').hide();
+
+			if (!s) return;
 			if (s.value.source.type === 'FTP') {
 				$('#ext-ftp-browser .files').empty();
 				$('#ftpRootPath').val('');
@@ -9493,13 +9499,14 @@ var Admin = (function($this,$){
 					$('#ext-step-2 > .ext-rets-options .fields').append('<div class="item"><strong>'+item.LongName[0]+'</strong> <em>'+index+'</em> <small>'+item.StandardName[0]+'</small> '+((item.Searchable[0] == '1') ? '<span class="badge">Searchable</span>' : '')+'<div class="detail"><small><em>'+item.DataType[0]+'</em> </small></div></div>');
 					// +item.ShortName[0]+' '+item.DBName[0]+' '
 				});
+				$('#extractorWizard [am-Button~=save]').removeAttr("disabled");
 			});
 		});
 
 		/**
 		 * From the extractor wizard: bindings for the Next button
 		 */
-		$('#extractorWizardNext').click(function(){
+		$('#extractorWizard [am-Button~=save]').click(function(){
 
 			var finish = function(){
 				$('#extractorWizard').modal('hide');
@@ -9518,7 +9525,7 @@ var Admin = (function($this,$){
 		/**
 		 * From the extractor wizard: bindings for the Back button
 		 */
-		$('#extractorWizardBack').click(function(){
+		$('#extractorWizard [am-Button~=back]').click(function(){
 			$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
 			$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
 			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').attr('disabled','disabled');
