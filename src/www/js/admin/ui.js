@@ -264,7 +264,7 @@
 		$('#ext-test').click(function(){
 			$('#extraction-result').html('');
 			$DM.extractor.sample(ext(),function(e){
-				console.log(e);
+				// console.log(e);
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#extractorWizard [am-Button~=next]').prop('disabled',false);
@@ -286,33 +286,39 @@
 		/**************** UI Bindings ***************/
 		/**************** Transformer ***************/
 
+
+		/**
+		 * Setup dialog button to be next vs save
+		 */
+		$('#transformWizard [am-Button~=finish]').hide();
+
 		/**
 		 * Transform Wizard next button
 		 */
-		$('#transformWizardNext').click(function(){
+		$('#transformWizard [am-Button~=next]').click(function(){
 
 			var finish = function(){
 				$('#transformWizard').modal('hide');
 				$DM.transformer.validate(trn());
-				$DM.transformer.save(trn());
+				$DM.transformer.save(trn(),function() { $DM.loadTransformers(); });
 			}
 
 			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) return finish();
 
 			$('#transformWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
 			$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizardBack').removeAttr('disabled');
-			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
+			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizard [am-Button~=prev]').prop('disabled',false);
+			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',false);
 		});
 
 		/**
 		 * Back button handling for the transform wizard
 		 */
-		$('#transformWizardBack').click(function(){
+		$('#transformWizard [am-Button~=prev]').click(function(){
 			$('#transformWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
 			$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizardBack').attr('disabled','disabled');
-			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
+			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizard [am-Button~=prev]').prop('disabled',true);
+			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
 		});
 
 		/**
@@ -320,7 +326,7 @@
 		 * This should pretty much just be "bind to extractor" now
 		 */
 		$('#trn-source-toggle').change(function(){
-			if ($(this).val() !== 'custom') $('#trn-source-select').removeAttr('disabled');
+			if ($(this).val() !== 'custom') $('#trn-source-select').prop('disabled',false);
 			else $('#trn-source-select').attr('disabled','disabled');
 		});
 
@@ -334,10 +340,13 @@
 				if (e.id == v) return e;
 				else return null;
 			}).pop();
-
+			if (!s) return;
+			console.log(s);
 			$DM.extractor.sample(s.value,function(e){
-				console.log(e.body);
-				if (!e.err) update('dataStructures',e.body);
+				if (!e.err) {
+					Admin.View.transformDataStructures()(e.body);
+					$('#transformWizard [am-Button~=next]').prop('disabled',false);
+				}
 			});
 		});
 
@@ -366,10 +375,10 @@
 			$DM.transformer.sample(trn(),function(e){
 				if (!e.err) {
 					$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
-					$('#transformWizardNext').removeAttr('disabled');
+					$('#transformWizard [am-Button~=next]').prop('disabled',false);
 				} else {
 					$('#transformer-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
-					$('#transformWizardNext').attr('disabled','disabled');
+					$('#transformWizard [am-Button~=next]').prop('disabled',true);
 				}
 			});
 		});
@@ -667,7 +676,7 @@
 				$('#trn-source-toggle').val(data.style);
 				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
 				$DM.extractor.sample($DM.getExtractor(data.extractor).value,function(e){
-					if (!e.err) update('dataStructures',e.body);
+					if (!e.err) Admin.View.transformDataStructures()(e.body);
 				});
 			break;
 			case "loaderWizard":

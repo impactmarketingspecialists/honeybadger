@@ -124,13 +124,13 @@
 		return function render(data) {
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');
-			if (d.headers) {
-				$.each(d.headers,function(index,item){
+			if (data.headers) {
+				$.each(data.headers,function(index,item){
 					$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+item+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+item+'"/></div></label>')
 					$('#transformMapper .fields').append('<span class="item badge">'+item+'</span> ');
 				});			
-			} else if (d.data.data) {
-				$.each(d.data.data[0],function(index,item){
+			} else if (data.data.data) {
+				$.each(data.data.data[0],function(index,item){
 					$('#transformNormalize').append('<label class="row item"><div class="col-md-6 form-inline"><label><input type="checkbox" checked/><span class="name">'+index+'</span></label></div><div class="col-md-6"><input type="text" class="form-control" value="'+index+'"/></div></label>')
 					$('#transformMapper .fields').append('<span class="item badge">'+index+'</span> ');
 				});			
@@ -138,7 +138,7 @@
 
 			$('#transformNormalize input:checkbox').change(function(){
 				if (!$(this)[0].checked) $(this).parent().parent().parent().find('input[type="text"]').attr('disabled','disabled');
-				else $(this).parent().parent().parent().find('[type=text]').removeAttr('disabled');
+				else $(this).parent().parent().parent().find('[type=text]').prop('disabled',false);
 			})
 		};
 	};
@@ -147,7 +147,7 @@
 
 		return function render(data) {
 			$('#loaderSchemas .fields .maps').html('');
-			$.each(d.headers,function(index,item){
+			$.each(data.headers,function(index,item){
 				if (!item) return;
 				$('#loaderSchemas .fields .maps').append('<div class="row form-group"><div class="col-md-6"><label>'+item+'</label></div><div class="col-md-6"><select class="form-control"><option value="string">String</option><option value="float">Float</option><option value="bool">Boolean</option><option value="text">Long Text</option></select></div></div>')
 			});
