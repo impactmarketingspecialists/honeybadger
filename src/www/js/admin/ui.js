@@ -601,7 +601,7 @@
 	 */
 	this.setupWizard = function(id, data){
 		// ONLY EXECUTES ON EDIT NOT "NEW"
-		console.log(data);
+		// console.log(data);
 		resetWizard(id);
 		switch(id)
 		{

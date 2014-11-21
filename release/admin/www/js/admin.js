@@ -9887,7 +9887,7 @@ var Admin = (function($this,$){
 	 */
 	this.setupWizard = function(id, data){
 		// ONLY EXECUTES ON EDIT NOT "NEW"
-		console.log(data);
+		// console.log(data);
 		resetWizard(id);
 		switch(id)
 		{
@@ -10234,7 +10234,6 @@ var Admin = (function($this,$){
 	this.sources = function() {
 		// Do some preloader stuff here
 		return function render(data) {
-			console.log(data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
