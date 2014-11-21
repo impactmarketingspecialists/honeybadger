@@ -36,6 +36,12 @@
 			loaderManager: $('#loaderManager').hide()
 		};
 
+		$('[data-toggle="page"]').each(function(index,item){
+			$(item).click(function(){
+				self.navigate($(this).attr('data-target'));
+			});
+		});
+
 		/**
 		 * Handle keep any log windows down to the bottom
 		 */
@@ -526,6 +532,23 @@
 		$admin = _unsealed(_init); // fire constructor when DOM ready
 		_construct();
 	});
+
+	this.alert = function(msg, opts){
+		if (arguments.length == 1) {
+			var opts = (typeof msg === 'string') ? {
+					msg: msg,
+				} : msg;
+		}
+
+		var opts = opts || {};
+		opts.type = opts.type || 'info';
+		opts.msg = opts.msg || msg;
+		opts.hide = opts.hide || 3;
+
+		$('#alerts').prepend($('<div class="alert alert-'+opts.type+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+opts.msg+'</div>').slideDown().delay( opts.hide * 1000 ).fadeOut(function(){
+			$(this).remove();
+		}));
+	};
 
 	/**
 	 * Reset the UI - All of it if you dare
