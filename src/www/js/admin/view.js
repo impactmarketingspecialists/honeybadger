@@ -12,10 +12,10 @@
 		console.log('Admin.View initialized');
 
 		// HoneyBadger.on('readyStateChange',self.connection());
-		HoneyBadger.DataManager.on('sources',self.sources());
-		// HoneyBadger.DataManager.on('extractors',self.extractors());
-		// HoneyBadger.DataManager.on('transformers',self.transformers());
-		// HoneyBadger.DataManager.on('loaders',self.loaders());
+		// HoneyBadger.DataManager.on('sources',self.sources());
+		HoneyBadger.DataManager.on('extractors',self.extractors());
+		HoneyBadger.DataManager.on('transformers',self.transformers());
+		HoneyBadger.DataManager.on('loaders',self.loaders());
 	};
 
 	$admin.module.register({

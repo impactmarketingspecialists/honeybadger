@@ -1,96 +1,12 @@
 var Admin = (function($this,$){
-	var self = this,
+	var self = this;
 
-		/**
-		 * Since we can extend this with submodules we need
-		 * to store references to their initializers
-		 * @type {Array}
-		 */
-		__inits = [],
+	var public = {}, protected = {};
+	var Emit = new Emitter(protected);
+	var Modules = new Modular(this, function(){ return Extend(public,protected); });
 
-		/**
-		 * We're storing references to submodules that register
-		 * themselves.
-		 * @type {Object}
-		 */
-		__modules = {};
-
-	/**
-	 * This our public object interface
-	 *
-	 * Since you can extend this module we include module.register()
-	 * This allow submodules to register themselves for access to protected methods
-	 * 
-	 * @return {object} Public interface for HoneyBadger.Admin
-	 */
-	var _sealed = function(){
-		return {
-			module:{
-				register:function(module, init) {
-					if (typeof module.name == undefined || typeof module.instance == undefined) return;
-
-					/**
-					 * Submodules can pass a reference to anything they want as their instance.
-					 * This can be reference to itself (pass this,self,whatever), or their public interface
-					 * The register what the parent thinks is the submodule; not necessarily what their
-					 * public interface looks like.
-					 */
-					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-
-					/**
-					 * If an initializer is passed, let's register it so it will get call when this module inits
-					 */
-					if (init) init(_registerInitializer);
-				}
-			},
-			/**
-			 * In this case we don't really want to do our own thing with our public init() method.
-			 * We've registered ourselves as a submodule of HoneyBadger - so we just want to call
-			 * HoneyBadger's init - we have nothing special to add.
-			 *
-			 * To initialize this module you can call Admin.init() - since we've declared this module as Admin
-			 * in the global scope.
-			 *
-			 * However, since it's a submodule of HoneyBadger, you can also call HoneyBadger.init() - our _init()
-			 * our _init() will get fired by that. Technically that's all you're really doing by calling Admin.init()
-			 * since we assign it to the same reference below.
-			 *
-			 * Since our submodule registers itself with HoneyBadger as HoneyBadger.Admin you can also call
-			 * HoneyBadger.Admin.init(). It's all the same thing!
-			 * 
-			 * @type {Funtion} Our public init() method.
-			 */
-			init: function() { console.log($this); $this.init; } // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
-		};
-	}
-
-	/**
-	 * This is our protected interface
-	 *
-	 * This interface is offered to submodules via _registerInitializer().
-	 * We simply extend the public interface with whatever additional methods
-	 * we want to expose to submodules.
-	 * 
-	 * @return {object} Protected interface for HoneyBadger.Admin
-	 */
-	var _unsealed = function(){
-		var o = _sealed();
-		o.hb = $this;
-		return o;
-	};
-
-	/**
-	 * Registers a submodules initializer to make sure that when this
-	 * module gets initialized, any submodules will also get initialized
-	 * 
-	 * @param  {Function} callback Reference to registering submodule's initializer
-	 * @return {object} Protected interface for HoneyBadger.Admin
-	 */
-	var _registerInitializer = function(callback) {
-		__inits.push(callback);
-		return _unsealed();
-	};
-
+	HoneyBadger.Admin = public;
+	
 	/**
 	 * Our module's actual constructor
 	 * This happens immediately before any initialization
@@ -147,9 +63,7 @@ var Admin = (function($this,$){
 			/**
 			 * Let's init those submodules
 			 */
-			for(var i=0; i<__inits.length; i++) {
-				__inits[i]();
-			}
+			Modules.init();
 
 			/**
 			 * Anything else you want to do after you've initialized submodules?
@@ -173,9 +87,9 @@ var Admin = (function($this,$){
 		_construct();
 	});
 
-	HoneyBadger.Admin = _sealed();
-	return {
-		init: HoneyBadger.init
-	};
+	public.init = HoneyBadger.init,
+	public.module = { register: Modules.register };
+
+	return public;
 
 }(HoneyBadger,jQuery));
