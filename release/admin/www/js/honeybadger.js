@@ -392,6 +392,9 @@ var HoneyBadger = (function($this){
 		});
 	};
 
+	this.validateSource = function(source, callback){
+		$this.exec('validateSource', [source], callback);
+	};
 
 }(HoneyBadger||{}));
 +(function($this){

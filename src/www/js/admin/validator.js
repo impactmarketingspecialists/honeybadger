@@ -1,6 +1,6 @@
 +(function($admin,$){
 
-	var self = $admin.Validate = this;
+	var self = $admin.Validator = this;
 	var private = {}, protected = {}, pages = {};
 	var $HB, $DM;
 
@@ -55,7 +55,7 @@
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
 		// $('#validateBtn').attr('disabled','disabled');
 
-		send('validateSource',[src],function(e){
+		$DM.validateSource(src,function(e){
 			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')

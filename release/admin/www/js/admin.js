@@ -9376,6 +9376,10 @@ var Admin = (function($this,$){
 		/**************** UI Bindings ***************/
 		/**************** Sources ***************/
 
+		$('#validateBtn').click(function(){
+			Admin.Validator.source.validate();
+		});
+
 		/**
 		 * From the source Wizard; display source options based on selected source type
 		 */
@@ -9396,7 +9400,7 @@ var Admin = (function($this,$){
 		 * to find a target from the FTP source
 		 */
 		$('#ext-ftp-browse').click(function(){
-			DataManager.ftpBrowse(DataManager.getSource($('#ext-source-select').val()), function(e){
+			$DM.ftpBrowse($DM.getSource($('#ext-source-select').val()), function(e){
 				if(!e.err && e.body.success === true) {
 					$('#ext-ftp-browser .files').empty();
 					e.body.list.forEach(function(item, index){
@@ -9417,7 +9421,7 @@ var Admin = (function($this,$){
 		 */
 		$('#extractorWizard .source-options').hide();
 		$('#ext-source-select').change(function(){
-			var s = DataManager.getSource($(this).val());
+			var s = $DM.getSource($(this).val());
 
 			$('#ext-rets-options .rets-resource').hide();
 			$('#ext-rets-options .rets-classification').hide();
@@ -9438,7 +9442,7 @@ var Admin = (function($this,$){
 				$('#ext-step-2 > .ext-rets-options').show();
 
 				s.value.source.rets = { resource: $('#ext-rets-resource').val() };
-				DataManager.retsExplore(s.value, function(e){
+				$DM.retsExplore(s.value, function(e){
 					if (e.body.meta) {
 						$('#ext-rets-resource').html('<option>-- Select a data resource --</option>');
 						$.each(e.body.meta.data,function(index,item){
@@ -9455,9 +9459,9 @@ var Admin = (function($this,$){
 		 * From the extractor wizard; for RETS sources, when a user selects a resource
 		 */
 		$('#ext-rets-resource').change(function(){
-			var s = DataManager.getSource($('#ext-source-select').val()).value;
+			var s = $DM.getSource($('#ext-source-select').val()).value;
 			s.source.rets = { resource: $('#ext-rets-resource').val() };
-			DataManager.retsBrowse(s, function(e){
+			$DM.retsBrowse(s, function(e){
 				if (e.body.meta) {
 					$('#ext-rets-class').html('<option>-- Select a data class --</option>')
 					$.each(e.body.meta.data,function(index,item){
@@ -9473,12 +9477,12 @@ var Admin = (function($this,$){
 		 * From the extractor wizard; for RETS sources, when a user selects a class
 		 */
 		$('#ext-rets-class').change(function(){
-			var s = DataManager.getSource($('#ext-source-select').val()).value;
+			var s = $DM.getSource($('#ext-source-select').val()).value;
 			s.source.rets = {
 				resource: $('#ext-rets-resource').val(),
 				classification: $('#ext-rets-class').val()
 			};
-			DataManager.retsInspect(s, function(e){
+			$DM.retsInspect(s, function(e){
 				$('#ext-step-2 > .ext-rets-options .fields').html('');
 				$.each(e.body.meta.data, function(index,item){
 					// console.log(item);
@@ -9495,8 +9499,8 @@ var Admin = (function($this,$){
 
 			var finish = function(){
 				$('#extractorWizard').modal('hide');
-				DataManager.extractor.validate(ext());
-				DataManager.extractor.save(ext());
+				$DM.extractor.validate(ext());
+				$DM.extractor.save(ext());
 			}
 
 			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
@@ -9530,7 +9534,7 @@ var Admin = (function($this,$){
 		 */
 		$('#ext-test').click(function(){
 			$('#extraction-result').html('');
-			DataManager.extractor.sample(ext(),function(e){
+			$DM.extractor.sample(ext(),function(e){
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#extractorWizardNext').removeAttr('disabled');
@@ -9559,8 +9563,8 @@ var Admin = (function($this,$){
 
 			var finish = function(){
 				$('#transformWizard').modal('hide');
-				DataManager.transformer.validate(trn());
-				DataManager.transformer.save(trn());
+				$DM.transformer.validate(trn());
+				$DM.transformer.save(trn());
 			}
 
 			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) return finish();
@@ -9596,12 +9600,12 @@ var Admin = (function($this,$){
 		 */
 		$('#trn-source-select').change(function(){
 			var v = $(this).val();
-			var s = DataManager.getExtractors().filter(function(e){
+			var s = $DM.getExtractors().filter(function(e){
 				if (e.id == v) return e;
 				else return null;
 			}).pop();
 
-			DataManager.extractor.sample(s.value,function(e){
+			$DM.extractor.sample(s.value,function(e){
 				console.log(e.body);
 				if (!e.err) update('dataStructures',e.body);
 			});
@@ -9629,7 +9633,7 @@ var Admin = (function($this,$){
 		 */
 		$('#trn-test').click(function(){
 			$('#transformer-result').html('');
-			DataManager.transformer.sample(trn(),function(e){
+			$DM.transformer.sample(trn(),function(e){
 				if (!e.err) {
 					$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#transformWizardNext').removeAttr('disabled');
@@ -9659,8 +9663,8 @@ var Admin = (function($this,$){
 
 			var finish = function(){
 				$('#loaderWizard').modal('hide');
-				DataManager.loader.validate(ldr());
-				DataManager.loader.save(ldr());
+				$DM.loader.validate(ldr());
+				$DM.loader.save(ldr());
 			}
 
 			if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) return finish();
@@ -9696,12 +9700,12 @@ var Admin = (function($this,$){
 		 */
 		$('#ldr-source-select').change(function(){
 			var v = $(this).val();
-			var s = DataManager.getTransformers().filter(function(e){
+			var s = $DM.getTransformers().filter(function(e){
 				if (e.id == v) return e;
 				else return null;
 			}).pop();
 
-			DataManager.transformer.sample(s.value,function(e){
+			$DM.transformer.sample(s.value,function(e){
 				if (!e.err) {
 					update('loaderDefinition',e.body);
 					trnSample = e.body;
@@ -9737,7 +9741,7 @@ var Admin = (function($this,$){
 		 * Bindings to validate the loader DSN, URI, whatever
 		 */
 		$('#loaderDSN button').click(function(){
-			DataManager.loader.validateConnection(ldr(),function(e){
+			$DM.loader.validateConnection(ldr(),function(e){
 				var t = $('#ldr-target-type').val();
 				var btn = (t === 'mysql') ? '#ldr-mysql-validate' : '#ldr-couchdb-validate';
 				$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
@@ -9756,7 +9760,7 @@ var Admin = (function($this,$){
 		 * Bindings to the create schema button for MySQL loaders
 		 */
 		$('#ldr-create-schema').click(function(){
-			DataManager.loader.createSchema(ldr(),function(e){
+			$DM.loader.createSchema(ldr(),function(e){
 				$('#ldr-create-schema').removeClass('btn-danger btn-success').addClass('btn-primary');
 				if (!e.err) {
 					$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
@@ -9780,7 +9784,7 @@ var Admin = (function($this,$){
 		 */
 		$('#ldr-test').click(function(){
 			$('#loader-result').html('');
-			DataManager.loader.sample(ldr(),function(e){
+			$DM.loader.sample(ldr(),function(e){
 				if (!e.err) {
 					$('#loader-result').html('<p class="bg-success">Loader Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#loaderWizardNext').removeAttr('disabled');
@@ -9857,14 +9861,14 @@ var Admin = (function($this,$){
 	/**
 	 * Modal resets
 	 */
-	var sourceModalReset = function(){
+	this.sourceModalReset = function(){
 		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
 		$('#sourceTypeOptions .option-group').hide();
 		$('#sourceEditorSave').prop('disabled',false);
 	};
 
-	var resetWizard = function(id){
+	this.resetWizard = function(id){
 		$('#'+id).attr({'data-id':'','data-rev':''});
 		$('#'+id+' section.step').hide().first().show();
 		$('#'+id+' .files').empty();
@@ -9877,7 +9881,7 @@ var Admin = (function($this,$){
 	 * @param  {[type]} data
 	 * @return {[type]}
 	 */
-	var setupWizard = function(id, data){
+	this.setupWizard = function(id, data){
 		// ONLY EXECUTES ON EDIT NOT "NEW"
 		console.log(data);
 		resetWizard(id);
@@ -9917,7 +9921,7 @@ var Admin = (function($this,$){
 					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
 				}
 
-				var type = DataManager.getSource(data.source).value.source.type;
+				var type = $DM.getSource(data.source).value.source.type;
 				$('#extractorWizard .source-options').hide();
 				if (type === 'FTP') {
 					$('#ext-ftp-browser .files').empty();
@@ -9932,7 +9936,7 @@ var Admin = (function($this,$){
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
 				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
-				DataManager.extractor.sample(DataManager.getExtractor(data.extractor).value,function(e){
+				$DM.extractor.sample($DM.getExtractor(data.extractor).value,function(e){
 					if (!e.err) update('dataStructures',e.body);
 				});
 			break;
@@ -9943,7 +9947,7 @@ var Admin = (function($this,$){
 				$('#ldr-mysql-dsn').val(data.target.dsn);
 				$('#ldr-target-schema').val(data.target.schema.name);
 
-				DataManager.transformer.sample(DataManager.getTransformer(data.transform).value,function(e){
+				$DM.transformer.sample($DM.getTransformer(data.transform).value,function(e){
 					if (!e.err) {
 						update('loaderDefinition',e.body);
 						trnSample = e.body;
@@ -9972,7 +9976,7 @@ var Admin = (function($this,$){
 		}
 	}
 
-	var showWizard = function(id) {
+	this.showWizard = function(id) {
 		$('#'+id).modal('show');
 	}
 
@@ -9981,7 +9985,7 @@ var Admin = (function($this,$){
 	 * @return {[type]}
 	 */
 	var ext = function(){
-		var stype = DataManager.getSource($('#ext-source-select').val()).value.source.type;
+		var stype = $DM.getSource($('#ext-source-select').val()).value.source.type;
 		console.log(stype);
 		return {
 			name: $('#extractorName').val(),
@@ -10055,7 +10059,7 @@ var Admin = (function($this,$){
 
 +(function($admin,$){
 
-	var self = $admin.Validate = this;
+	var self = $admin.Validator = this;
 	var private = {}, protected = {}, pages = {};
 	var $HB, $DM;
 
@@ -10110,7 +10114,7 @@ var Admin = (function($this,$){
 		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
 		// $('#validateBtn').attr('disabled','disabled');
 
-		send('validateSource',[src],function(e){
+		$DM.validateSource(src,function(e){
 			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
@@ -10232,8 +10236,8 @@ var Admin = (function($this,$){
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
 			$(data).each(function(index, item){
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('sourceEditor');
-					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
+					$admin.UI.showWizard('sourceEditor');
+					$admin.UI.setupWizard('sourceEditor', $DM.getSource(item.id).value);
 				}));
 				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');

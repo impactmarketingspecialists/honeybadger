@@ -199,5 +199,8 @@
 		});
 	};
 
+	this.validateSource = function(source, callback){
+		$this.exec('validateSource', [source], callback);
+	};
 
 }(HoneyBadger||{}));

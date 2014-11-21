@@ -53,8 +53,8 @@
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
 			$(data).each(function(index, item){
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('sourceEditor');
-					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
+					$admin.UI.showWizard('sourceEditor');
+					$admin.UI.setupWizard('sourceEditor', $DM.getSource(item.id).value);
 				}));
 				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
