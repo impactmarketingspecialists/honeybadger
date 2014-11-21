@@ -94,7 +94,9 @@
 			Admin.Validator.source.validate();
 		});
 
-		$('#sourceEditor [am-Button~=save]').click(function(){
+		$('#sourceEditor [am-Button~=prev]').hide();
+		$('#sourceEditor [am-Button~=next]').hide();
+		$('#sourceEditor [am-Button~=finish]').click(function(){
 			Admin.Validator.source.save();
 		});
 
@@ -116,7 +118,8 @@
 		/**
 		 * Setup dialog button to be next vs save
 		 */
-		$('#extractorWizard [am-Button~=save]').attr('id','extractionWizardNext').text('Next');
+		$('#extractorWizard [am-Button~=finish]').hide();
+
 		/**
 		 * From the extractor Wizard; if selected source is FTP, bind to the browse button
 		 * to find a target from the FTP source
@@ -129,7 +132,8 @@
 						if (item.name) $('#ext-ftp-browser .files').append($('<li class="file">'+item.name+'</li>').click(function(){
 							$('#ftpFileName').val(item.name);
 							$('#ext-ftp-browser .files').empty();
-							$('#extractorWizard [am-Button~=save]').removeAttr("disabled");
+							// $('#extractorWizard [am-Button~=prev]').prop("disabled", false);
+							$('#extractorWizard [am-Button~=next]').prop("disabled", false);
 						}));
 					});
 				}
@@ -213,14 +217,14 @@
 					$('#ext-step-2 > .ext-rets-options .fields').append('<div class="item"><strong>'+item.LongName[0]+'</strong> <em>'+index+'</em> <small>'+item.StandardName[0]+'</small> '+((item.Searchable[0] == '1') ? '<span class="badge">Searchable</span>' : '')+'<div class="detail"><small><em>'+item.DataType[0]+'</em> </small></div></div>');
 					// +item.ShortName[0]+' '+item.DBName[0]+' '
 				});
-				$('#extractorWizard [am-Button~=save]').removeAttr("disabled");
+				$('#extractorWizard [am-Button~=next]').prop("disabled",false);
 			});
 		});
 
 		/**
 		 * From the extractor wizard: bindings for the Next button
 		 */
-		$('#extractorWizard [am-Button~=save]').click(function(){
+		$('#extractorWizard [am-Button~=next]').click(function(){
 
 			var finish = function(){
 				$('#extractorWizard').modal('hide');
@@ -232,26 +236,26 @@
 
 			$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
 			$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').removeAttr('disabled');
-			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
+			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',false);
+			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
 		});
 
 		/**
 		 * From the extractor wizard: bindings for the Back button
 		 */
-		$('#extractorWizard [am-Button~=back]').click(function(){
+		$('#extractorWizard [am-Button~=prev]').click(function(){
 			$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
 			$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizardBack').attr('disabled','disabled');
-			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
+			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',true);
+			if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
 		});
 
 		/**
 		 * From the extractor wizard: bindings for unarchive options
 		 */
 		$('#ext-unarchive').change(function(){
-			if ($('#ext-unarchive')[0].checked) $('#ext-archive-opts').removeAttr('disabled');
-			else  $('#ext-archive-opts').attr('disabled','disabled');
+			if ($('#ext-unarchive')[0].checked) $('#ext-archive-opts').prop('disabled',false);
+			else  $('#ext-archive-opts').prop('disabled',true);
 		});
 
 		/**
@@ -262,9 +266,9 @@
 			$DM.extractor.sample(ext(),function(e){
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
-					$('#extractorWizardNext').removeAttr('disabled');
+					$('#extractorWizard [am-Button~=next]').prop('disabled',false);
 				} else {
-					$('#extractorWizardNext').attr('disabled','disabled');
+					$('#extractorWizard [am-Button~=next]').prop('disabled',true);
 					$('#extraction-result').html('<p class="bg-danger">Extractor Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
 				}
 			});
