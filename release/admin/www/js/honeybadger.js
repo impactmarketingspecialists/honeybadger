@@ -333,33 +333,25 @@ var HoneyBadger = (function($this){
 
 	};
 
-	this.extractor.save = function(ext){
-		$this.exec('saveExtractor', [ext], function(e){
-			console.log(e);
-		});
+	this.extractor.save = function(ext, callback){
+		$this.exec('saveExtractor', [ext], callback);
 	};
 
-	this.extractor.sample = function(ext, cb){
-		$this.exec('testExtractor', [ext], function(e){
-			cb(e);
-		});
+	this.extractor.sample = function(ext, callback){
+		$this.exec('testExtractor', [ext], callback);
 	};
 
 	this.transformer = {};
-	this.transformer.validate = function(){
+	this.transformer.validate = function(trn, callback){
 
 	};
 
-	this.transformer.save = function(trn){
-		$this.exec('saveTransformer', [trn], function(e){
-			console.log(e);
-		});
+	this.transformer.save = function(trn, callback){
+		$this.exec('saveTransformer', [trn], callback);
 	};
 
-	this.transformer.sample = function(trn, cb){
-		$this.exec('testTransformer', [trn], function(e){
-			cb(e);
-		});
+	this.transformer.sample = function(trn, callback){
+		$this.exec('testTransformer', [trn], callback);
 	};
 
 	this.loader = {};
@@ -367,29 +359,20 @@ var HoneyBadger = (function($this){
 
 	};
 
-	this.loader.validateConnection = function(ldr, cb){
-		$this.exec('validateLoaderConnection', [ldr], function(e){
-			cb(e);
-		});
+	this.loader.validateConnection = function(ldr, callback){
+		$this.exec('validateLoaderConnection', [ldr], callback);
 	};
 
-	this.loader.createSchema = function(ldr, cb){
-		$this.exec('createLoaderSchema', [ldr], function(e){
-			cb(e);
-		});
+	this.loader.createSchema = function(ldr, callback){
+		$this.exec('createLoaderSchema', [ldr], callback);
 	};
 
-	this.loader.save = function(ldr){
-		$this.exec('saveLoader', [ldr], function(e){
-			// console.log(e);
-			cb(e);
-		});
+	this.loader.save = function(ldr, callback){
+		$this.exec('saveLoader', [ldr], callback);
 	};
 
-	this.loader.sample = function(ldr, cb){
-		$this.exec('testLoader', [ldr], function(e){
-			cb(e);
-		});
+	this.loader.sample = function(ldr, callback){
+		$this.exec('testLoader', [ldr], callback);
 	};
 
 	this.validateSource = function(source, callback){
@@ -398,6 +381,26 @@ var HoneyBadger = (function($this){
 
 	this.saveSource = function(source, callback){
 		$this.exec('saveSource', [source], callback);
+	};
+
+	this.ftpBrowse = function(source, callback)
+	{
+		$this.exec('browseFTP',[source],callback);
+	};
+
+	this.retsExplore = function(source, callback)
+	{
+		$this.exec('exploreRETS',[source],callback);
+	};
+
+	this.retsBrowse = function(source, callback)
+	{
+		$this.exec('browseRETS',[source],callback);
+	};
+
+	this.retsInspect = function(source, callback)
+	{
+		$this.exec('inspectRETS',[source],callback);
 	};
 
 }(HoneyBadger||{}));
