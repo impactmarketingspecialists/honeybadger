@@ -102,7 +102,7 @@ module.exports = function(grunt) {
         files: ['src/*.js','src/*.json','src/lib/**/*.js'],
         tasks: ['newer:copy'],
         options:{
-          livereload: true
+          livereload: false
         }
       }, 
       js: {
