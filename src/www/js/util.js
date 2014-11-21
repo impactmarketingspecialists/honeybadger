@@ -47,6 +47,7 @@ var Emitter = function (context){
   };
 
   var _emit = function(event, data, context){
+    console.log(_register)
     for (var i=0; i<_register.length; i++) {
       if (_register[i].event === event && _register[i].context) _register[i].callback(data)
     }
@@ -54,5 +55,54 @@ var Emitter = function (context){
 
   return function Emit(event, data){
     _emit(event,data,context);
+  };
+};
+
+/**
+ * Let a module securely accept submodules
+ * and share protected methods with them
+ */
+var Modular = function(base, protected) {
+  var self = this, __modules = {}, __inits = [];
+
+  var _registerInitializer = function(callback) {
+    console.log('reg init');
+    __inits.push(callback);
+    return protected();
+  };
+
+  this.init = function() {
+    console.log('inits',__inits);
+    for(var i = 0; i < __inits.length; i++) {
+      __inits[i]();
+    }
+  };
+
+  this.register = function(module, init) {
+      if (typeof module.name == undefined || typeof module.instance == undefined) return;
+      if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
+      if (init) init(_registerInitializer);
+  };
+};
+
+var Extend = function(base, ext) {
+  var _base;
+  var o = {};
+  // for(var i in base) {
+  //   if (base.hasOwnProperty(i)) {
+  //     var cb = base[i];
+  //     o[i] = function() { cb.apply(o,arguments); };
+  //   }
+  // }
+  for(var i in base) {
+    if (base.hasOwnProperty(i)) {
+      o[i] = base[i];
+    }
   }
+  for(var i in ext) {
+    if (ext.hasOwnProperty(i)) {
+      o[i] = ext[i];
+    }
+  }
+  return o;
 };

@@ -60,7 +60,7 @@ var Admin = (function($this,$){
 			 * 
 			 * @type {Funtion} Our public init() method.
 			 */
-			init: $this.init // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
+			init: function() { console.log($this); $this.init; } // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
 		};
 	}
 
@@ -75,6 +75,7 @@ var Admin = (function($this,$){
 	 */
 	var _unsealed = function(){
 		var o = _sealed();
+		o.hb = $this;
 		return o;
 	};
 
@@ -173,6 +174,8 @@ var Admin = (function($this,$){
 	});
 
 	HoneyBadger.Admin = _sealed();
-	return _sealed();
+	return {
+		init: HoneyBadger.init
+	};
 
 }(HoneyBadger,jQuery));

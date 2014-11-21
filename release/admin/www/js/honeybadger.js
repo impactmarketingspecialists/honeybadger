@@ -47,6 +47,7 @@ var Emitter = function (context){
   };
 
   var _emit = function(event, data, context){
+    console.log(_register)
     for (var i=0; i<_register.length; i++) {
       if (_register[i].event === event && _register[i].context) _register[i].callback(data)
     }
@@ -54,47 +55,69 @@ var Emitter = function (context){
 
   return function Emit(event, data){
     _emit(event,data,context);
-  }
+  };
 };
 
+/**
+ * Let a module securely accept submodules
+ * and share protected methods with them
+ */
+var Modular = function(base, protected) {
+  var self = this, __modules = {}, __inits = [];
+
+  var _registerInitializer = function(callback) {
+    console.log('reg init');
+    __inits.push(callback);
+    return protected();
+  };
+
+  this.init = function() {
+    console.log('inits',__inits);
+    for(var i = 0; i < __inits.length; i++) {
+      __inits[i]();
+    }
+  };
+
+  this.register = function(module, init) {
+      if (typeof module.name == undefined || typeof module.instance == undefined) return;
+      if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
+      if (init) init(_registerInitializer);
+  };
+};
+
+var Extend = function(base, ext) {
+  var _base;
+  var o = {};
+  // for(var i in base) {
+  //   if (base.hasOwnProperty(i)) {
+  //     var cb = base[i];
+  //     o[i] = function() { cb.apply(o,arguments); };
+  //   }
+  // }
+  for(var i in base) {
+    if (base.hasOwnProperty(i)) {
+      o[i] = base[i];
+    }
+  }
+  for(var i in ext) {
+    if (ext.hasOwnProperty(i)) {
+      o[i] = ext[i];
+    }
+  }
+  return o;
+};
 var HoneyBadger = (function($this){
 
 	var ts,tp,socket,host = "ws://"+location.host+"/admin/";
 
 	var self = this;
 	var __cbqueue = {},
-		__modules = {},
-		__inits = [],
+		__logverbose = false,
 		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
 
-	var Emit = new Emitter(self);
-
-	var _sealed = function(){
-		return {
-			DataManager:{},
-			module:{
-				register:function(module, init) {
-					if (typeof module.name == undefined || typeof module.instance == undefined) return;
-					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-					if (init) init(_registerInitializer);
-				}
-			},
-			init: _init
-		};
-	}
-
-	var _unsealed = function(){
-		var hb = _sealed();
-		hb.__devmode = __devmode;
-		hb.on = self.on;
-		hb.exec = _exec;
-		return hb;
-	};
-
-	var _registerInitializer = function(callback) {
-		__inits.push(callback);
-		return _unsealed();
-	};
+	var public = {}, protected = {};
+	var Emit = new Emitter(protected);
+	var Modules = new Modular(this, function(){ return Extend(public,protected); });
 
 	console.log('HoneyBadger starting up');
 	var _init = function() {
@@ -103,11 +126,10 @@ var HoneyBadger = (function($this){
 		connect();
 
 		console.log('HoneyBadger initializing submodules');
-		for(var i=0; i<__inits.length; i++) {
-			__inits[i]();
-		}
+		Modules.init();
+
 		console.log('HoneyBadger initializing complete!');
-	}
+	};
 
 	var connect = function() {
 		if (ts) clearInterval(ts);
@@ -135,14 +157,14 @@ var HoneyBadger = (function($this){
 		var args = args || [];
 		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
-		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		if( __devmode && __logverbose ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 
 	var receive = function(e) {
 
 		if (e.data === 'pong') return;
-		if ( __devmode ){ console.dir(e); }
+		if ( __devmode && __logverbose ){ console.dir(e); }
 
 		var d = JSON.parse(e.data);
 		var msig = d.msig || null;
@@ -157,12 +179,15 @@ var HoneyBadger = (function($this){
 		}
 	};
 
+	public.init = _init,
+	public.module = { register: Modules.register };
 
-	var _exec = function(method, args, callback){
+	protected.exec = function(method, args, callback){
 		send(method, args, callback);
-	}
+	};
 
-	return _sealed();
+	return public;
+
 }(HoneyBadger||{}));
 +(function($this){
 	var self = this,
@@ -174,7 +199,10 @@ var HoneyBadger = (function($this){
 	var _construct = function() {
 		console.log('DataManager constructor');
 		$this.on('readyStateChange',function(readyState){
-			if (readyState === 1) self.refresh();
+			if (readyState === 1) {
+				Emit('ready',true);
+				self.refresh();
+			}
 		});
 	};
 
@@ -198,6 +226,7 @@ var HoneyBadger = (function($this){
 		$this.exec('list',null,function(e){
 			if (!e.err) { sources = e.body; }
 			if (callback) callback(e);
+			Emit('sources',sources);
 			promise.complete();
 		});
 		return promise;
@@ -208,6 +237,7 @@ var HoneyBadger = (function($this){
 		$this.exec('getExtractorList',null,function(e){
 			if (!e.err) { extractors = e.body; }
 			if (callback) callback(e);
+			Emit('extractors',extractors);
 			promise.complete();
 		});
 		return promise;
@@ -218,6 +248,7 @@ var HoneyBadger = (function($this){
 		$this.exec('getTransformerList',null,function(e){
 			if (!e.err) { transformers = e.body; }
 			if (callback) callback(e);
+			Emit('transformers',transformers);
 			promise.complete();
 		});
 		return promise;
@@ -228,12 +259,14 @@ var HoneyBadger = (function($this){
 		$this.exec('getLoaderList',null,function(e){
 			if(!e.err) { loaders = e.body; }
 			if (callback) callback(e);
+			Emit('loaders',loaders);
 			promise.complete();
 		});
 		return promise;
 	};
 
 	this.refresh = function(callback){
+		//TODO: add parallelized promises
 		this.loadSources().then(this.loadExtractors).then(this.loadTransformers).then(this.loadLoaders).then(function(){
 			if (callback) callback();
 			Emit('refresh',{
@@ -243,9 +276,6 @@ var HoneyBadger = (function($this){
 				loaders: loaders
 			});
 		});
-		// this.loadExtractors();
-		// this.loadTransformers();
-		// this.loadLoaders();
 	};
 
 	this.getSources = function(){

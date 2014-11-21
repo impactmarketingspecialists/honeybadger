@@ -4,38 +4,12 @@ var HoneyBadger = (function($this){
 
 	var self = this;
 	var __cbqueue = {},
-		__modules = {},
-		__inits = [],
+		__logverbose = false,
 		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
 
-	var Emit = new Emitter(self);
-
-	var _sealed = function(){
-		return {
-			DataManager:{},
-			module:{
-				register:function(module, init) {
-					if (typeof module.name == undefined || typeof module.instance == undefined) return;
-					if (typeof __modules[module.name] == undefined) __modules[module.name] = module.instance
-					if (init) init(_registerInitializer);
-				}
-			},
-			init: _init
-		};
-	}
-
-	var _unsealed = function(){
-		var hb = _sealed();
-		hb.__devmode = __devmode;
-		hb.on = self.on;
-		hb.exec = _exec;
-		return hb;
-	};
-
-	var _registerInitializer = function(callback) {
-		__inits.push(callback);
-		return _unsealed();
-	};
+	var public = {}, protected = {};
+	var Emit = new Emitter(protected);
+	var Modules = new Modular(this, function(){ return Extend(public,protected); });
 
 	console.log('HoneyBadger starting up');
 	var _init = function() {
@@ -44,11 +18,10 @@ var HoneyBadger = (function($this){
 		connect();
 
 		console.log('HoneyBadger initializing submodules');
-		for(var i=0; i<__inits.length; i++) {
-			__inits[i]();
-		}
+		Modules.init();
+
 		console.log('HoneyBadger initializing complete!');
-	}
+	};
 
 	var connect = function() {
 		if (ts) clearInterval(ts);
@@ -76,14 +49,14 @@ var HoneyBadger = (function($this){
 		var args = args || [];
 		var msig = (callback) ? (new Date().getTime() * Math.random(1000)).toString(36) : null;
 		if (msig) { __cbqueue[msig] = callback }
-		if( __devmode ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
+		if( __devmode && __logverbose ){ console.trace(); console.dir({method:method,msig:msig,args:args}); }
 		socket.send(JSON.stringify({method:method,msig:msig,args:args}));
 	};
 
 	var receive = function(e) {
 
 		if (e.data === 'pong') return;
-		if ( __devmode ){ console.dir(e); }
+		if ( __devmode && __logverbose ){ console.dir(e); }
 
 		var d = JSON.parse(e.data);
 		var msig = d.msig || null;
@@ -98,10 +71,13 @@ var HoneyBadger = (function($this){
 		}
 	};
 
+	public.init = _init,
+	public.module = { register: Modules.register };
 
-	var _exec = function(method, args, callback){
+	protected.exec = function(method, args, callback){
 		send(method, args, callback);
-	}
+	};
 
-	return _sealed();
+	return public;
+
 }(HoneyBadger||{}));

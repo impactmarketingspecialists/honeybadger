@@ -9251,7 +9251,7 @@ var Admin = (function($this,$){
 			 * 
 			 * @type {Funtion} Our public init() method.
 			 */
-			init: $this.init // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
+			init: function() { console.log($this); $this.init; } // we'll just call our parent's init to make sure HoneyBadger connects fire up modules
 		};
 	}
 
@@ -9266,6 +9266,7 @@ var Admin = (function($this,$){
 	 */
 	var _unsealed = function(){
 		var o = _sealed();
+		o.hb = $this;
 		return o;
 	};
 
@@ -9364,7 +9365,9 @@ var Admin = (function($this,$){
 	});
 
 	HoneyBadger.Admin = _sealed();
-	return _sealed();
+	return {
+		init: HoneyBadger.init
+	};
 
 }(HoneyBadger,jQuery));
 	var DataManager = new (function(){
@@ -10599,7 +10602,7 @@ var Admin = (function($this,$){
 
 +(function($admin,$){
 
-	$admin.View = this;
+	var self = $admin.View = this;
 
 	var _construct = function() {
 		console.log('Admin.View constructor');
@@ -10609,9 +10612,12 @@ var Admin = (function($this,$){
 	var _init = function() {
 		// Our parent already listens for DOM ready
 		console.log('Admin.View initialized');
-		HoneyBadger.DataManager.on('refresh',function(){
-			console.log('Data Sources Refreshed');
-		});
+
+		// HoneyBadger.on('readyStateChange',self.connection());
+		HoneyBadger.DataManager.on('sources',self.sources());
+		// HoneyBadger.DataManager.on('extractors',self.extractors());
+		// HoneyBadger.DataManager.on('transformers',self.transformers());
+		// HoneyBadger.DataManager.on('loaders',self.loaders());
 	};
 
 	$admin.module.register({
@@ -10623,10 +10629,10 @@ var Admin = (function($this,$){
 		_construct();
 	});
 
-	function update(element,data)
-	{
-		var connectionStatus = function(d) {
-			if (d.online && d.online === true) {
+	this.connection = function() {
+		return function render(readyState) {
+			console.log('ready');
+			if (readyState === 1) {
 				$('#connection').addClass('online').removeClass('offline');
 				$('#connection .status').text('Online');
 			}
@@ -10635,13 +10641,17 @@ var Admin = (function($this,$){
 				$('#connection .status').text('Offline');
 			}
 		};
-
-		var sourceLists = function(d) {
+	};
+	
+	this.sources = function(){
+		// Do some preloader stuff here
+		return function render(data) {
+			console.log('Sources',data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
-			$(d).each(function(index, item){
+			$(data).each(function(index, item){
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('sourceEditor');
 					setupWizard('sourceEditor', DataManager.getSource(item.id).value);
@@ -10651,11 +10661,15 @@ var Admin = (function($this,$){
 				else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
 		};
+	};
 
-		var extractorLists = function(d) {
+	this.extractors = function(){
+
+		return function render(data) {
+			console.log('Extractors',data);
 			$('#extractorList > tbody').html('');
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
-			$(d).each(function(index, item){
+			$(data).each(function(index, item){
 				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('extractorWizard');
 					setupWizard('extractorWizard', item.value);
@@ -10665,11 +10679,14 @@ var Admin = (function($this,$){
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
 		};
+	};
 
-		var transformerLists = function(d) {
+	this.transformers = function(){
+
+		return function render(data) {
 			$('#transformerList > tbody').html('');
 			$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
-			$(d).each(function(index, item){
+			$(data).each(function(index, item){
 				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('transformWizard');
 					setupWizard('transformWizard', item.value);
@@ -10679,10 +10696,13 @@ var Admin = (function($this,$){
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
 		};
+	};
 
-		var loaderLists = function(d) {
+	this.loaders = function(){
+
+		return function render(data) {
 			$('#loaderList > tbody').html('');
-			$(d).each(function(index, item){
+			$(data).each(function(index, item){
 				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('loaderWizard');
 					setupWizard('loaderWizard', item.value);
@@ -10690,6 +10710,12 @@ var Admin = (function($this,$){
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
+		};
+	};
+
+	function update(element,data)
+	{
+		var connectionStatus = function(d) {
 		};
 
 		var transformDataStructures = function(d) {

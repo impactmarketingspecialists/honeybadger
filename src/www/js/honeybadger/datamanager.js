@@ -8,7 +8,10 @@
 	var _construct = function() {
 		console.log('DataManager constructor');
 		$this.on('readyStateChange',function(readyState){
-			if (readyState === 1) self.refresh();
+			if (readyState === 1) {
+				Emit('ready',true);
+				self.refresh();
+			}
 		});
 	};
 
@@ -32,6 +35,7 @@
 		$this.exec('list',null,function(e){
 			if (!e.err) { sources = e.body; }
 			if (callback) callback(e);
+			Emit('sources',sources);
 			promise.complete();
 		});
 		return promise;
@@ -42,6 +46,7 @@
 		$this.exec('getExtractorList',null,function(e){
 			if (!e.err) { extractors = e.body; }
 			if (callback) callback(e);
+			Emit('extractors',extractors);
 			promise.complete();
 		});
 		return promise;
@@ -52,6 +57,7 @@
 		$this.exec('getTransformerList',null,function(e){
 			if (!e.err) { transformers = e.body; }
 			if (callback) callback(e);
+			Emit('transformers',transformers);
 			promise.complete();
 		});
 		return promise;
@@ -62,12 +68,14 @@
 		$this.exec('getLoaderList',null,function(e){
 			if(!e.err) { loaders = e.body; }
 			if (callback) callback(e);
+			Emit('loaders',loaders);
 			promise.complete();
 		});
 		return promise;
 	};
 
 	this.refresh = function(callback){
+		//TODO: add parallelized promises
 		this.loadSources().then(this.loadExtractors).then(this.loadTransformers).then(this.loadLoaders).then(function(){
 			if (callback) callback();
 			Emit('refresh',{
@@ -77,9 +85,6 @@
 				loaders: loaders
 			});
 		});
-		// this.loadExtractors();
-		// this.loadTransformers();
-		// this.loadLoaders();
 	};
 
 	this.getSources = function(){
