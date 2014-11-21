@@ -1,21 +1,25 @@
 +(function($admin,$){
 
+	// console.log($admin);
 	var self = $admin.View = this;
+	var private = {}, protected = {};
+	var $HB, $DM;
 
 	var _construct = function() {
 		console.log('Admin.View constructor');
-
+		$HB = $admin._parent;
+		$DM = $HB.DataManager;
 	};
 
 	var _init = function() {
 		// Our parent already listens for DOM ready
 		console.log('Admin.View initialized');
 
-		// HoneyBadger.on('readyStateChange',self.connection());
-		// HoneyBadger.DataManager.on('sources',self.sources());
-		HoneyBadger.DataManager.on('extractors',self.extractors());
-		HoneyBadger.DataManager.on('transformers',self.transformers());
-		HoneyBadger.DataManager.on('loaders',self.loaders());
+		$HB.on('readyStateChange',self.connection());
+		$DM.on('sources',self.sources());
+		$DM.on('extractors',self.extractors());
+		$DM.on('transformers',self.transformers());
+		$DM.on('loaders',self.loaders());
 	};
 
 	$admin.module.register({
@@ -23,13 +27,12 @@
 		instance: this
 	},function(_unsealed){
 		// Initialize module
-		$admin = _unsealed(_init); // fire constructor when DOM ready
-		_construct();
+		$admin = _unsealed(_init); // fire initializer when DOM ready
+		_construct(); // run constructor now
 	});
 
 	this.connection = function() {
 		return function render(readyState) {
-			console.log('ready');
 			if (readyState === 1) {
 				$('#connection').addClass('online').removeClass('offline');
 				$('#connection .status').text('Online');
@@ -44,7 +47,6 @@
 	this.sources = function(){
 		// Do some preloader stuff here
 		return function render(data) {
-			console.log('Sources',data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
@@ -64,7 +66,6 @@
 	this.extractors = function(){
 
 		return function render(data) {
-			console.log('Extractors',data);
 			$('#extractorList > tbody').html('');
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
 			$(data).each(function(index, item){
@@ -113,9 +114,6 @@
 
 	function update(element,data)
 	{
-		var connectionStatus = function(d) {
-		};
-
 		var transformDataStructures = function(d) {
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');

@@ -9197,7 +9197,7 @@ var Admin = (function($this,$){
 	var Modules = new Modular(this, function(){ return Extend(public,protected); });
 
 	HoneyBadger.Admin = public;
-	
+
 	/**
 	 * Our module's actual constructor
 	 * This happens immediately before any initialization
@@ -9206,6 +9206,17 @@ var Admin = (function($this,$){
 	 */
 	var _construct = function() {
 		console.log('Admin constructor');
+		protected._parent = $this;
+
+		if ($this.__devmode) {
+			/**
+			 * Add the livereload script - we'll add it manually so
+			 * that you don't need the browser plugin and you can do
+			 * it from across hosts.
+			 */
+			console.log('__devmode enabled: Adding livereload script');
+			$(document.body).append('<script src="http://'+document.location.hostname+':35729/livereload.js?snipver=1"></script>');
+		}
 	};
 
 	/**
@@ -9230,17 +9241,6 @@ var Admin = (function($this,$){
 	 * @return {void} Initializer
 	 */
 	var _init = function() {
-
-		if ($this.__devmode) {
-			/**
-			 * Add the livereload script - we'll add it manually so
-			 * that you don't need the browser plugin and you can do
-			 * it from across hosts.
-			 */
-			$(document.body).append('<script src="http://'+document.location.hostname+':35729/livereload.js?snipver=1"></script>');
-		}
-		
-
 		// HoneyBadger doesn't use jQuery, but the Admin does
 		$(document).ready(function(){
 
@@ -10516,22 +10516,26 @@ var Admin = (function($this,$){
 
 +(function($admin,$){
 
+	// console.log($admin);
 	var self = $admin.View = this;
+	var private = {}, protected = {};
+	var $HB, $DM;
 
 	var _construct = function() {
 		console.log('Admin.View constructor');
-
+		$HB = $admin._parent;
+		$DM = $HB.DataManager;
 	};
 
 	var _init = function() {
 		// Our parent already listens for DOM ready
 		console.log('Admin.View initialized');
 
-		// HoneyBadger.on('readyStateChange',self.connection());
-		// HoneyBadger.DataManager.on('sources',self.sources());
-		HoneyBadger.DataManager.on('extractors',self.extractors());
-		HoneyBadger.DataManager.on('transformers',self.transformers());
-		HoneyBadger.DataManager.on('loaders',self.loaders());
+		$HB.on('readyStateChange',self.connection());
+		$DM.on('sources',self.sources());
+		$DM.on('extractors',self.extractors());
+		$DM.on('transformers',self.transformers());
+		$DM.on('loaders',self.loaders());
 	};
 
 	$admin.module.register({
@@ -10539,13 +10543,12 @@ var Admin = (function($this,$){
 		instance: this
 	},function(_unsealed){
 		// Initialize module
-		$admin = _unsealed(_init); // fire constructor when DOM ready
-		_construct();
+		$admin = _unsealed(_init); // fire initializer when DOM ready
+		_construct(); // run constructor now
 	});
 
 	this.connection = function() {
 		return function render(readyState) {
-			console.log('ready');
 			if (readyState === 1) {
 				$('#connection').addClass('online').removeClass('offline');
 				$('#connection .status').text('Online');
@@ -10560,7 +10563,6 @@ var Admin = (function($this,$){
 	this.sources = function(){
 		// Do some preloader stuff here
 		return function render(data) {
-			console.log('Sources',data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
@@ -10580,7 +10582,6 @@ var Admin = (function($this,$){
 	this.extractors = function(){
 
 		return function render(data) {
-			console.log('Extractors',data);
 			$('#extractorList > tbody').html('');
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
 			$(data).each(function(index, item){
@@ -10629,9 +10630,6 @@ var Admin = (function($this,$){
 
 	function update(element,data)
 	{
-		var connectionStatus = function(d) {
-		};
-
 		var transformDataStructures = function(d) {
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');

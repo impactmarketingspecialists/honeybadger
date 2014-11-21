@@ -74,6 +74,8 @@ var HoneyBadger = (function($this){
 	public.init = _init,
 	public.module = { register: Modules.register };
 
+	protected.__devmode = __devmode;
+	protected.__logverbose = __logverbose;
 	protected.exec = function(method, args, callback){
 		send(method, args, callback);
 	};

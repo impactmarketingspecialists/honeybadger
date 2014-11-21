@@ -36,14 +36,17 @@ var Emitter = function (context){
 
   var _register = [];
   context.on = function(event, callback) {
-    var s = _register.map(function(i){
-      if (i.event !== event && i.context !== context && i.callback !== callback) return i;
-    });
-    if (!s.length) _register.push({
+    // var s = _register.map(function(i){
+    //   if (i.event !== event && i.context !== context && i.callback !== callback) return i;
+    // });
+    // if (!s.length)
+    
+    _register.push({
       event: event,
       context: context,
       callback: callback
     });
+
   };
 
   var _emit = function(event, data, context){
@@ -89,14 +92,13 @@ var Extend = function(base, ext) {
   for(var i in base) {
     if (base.hasOwnProperty(i)) {
       var cb = base[i];
-      o[i] = function() { cb.apply(o,arguments); };
+      if (typeof cb == Function) {
+        o[i] = function() { cb.apply(o,arguments); };
+      } else {
+        o[i] = base[i];
+      }
     }
   }
-  // for(var i in base) {
-  //   if (base.hasOwnProperty(i)) {
-  //     o[i] = base[i];
-  //   }
-  // }
   for(var i in ext) {
     if (ext.hasOwnProperty(i)) {
       o[i] = ext[i];

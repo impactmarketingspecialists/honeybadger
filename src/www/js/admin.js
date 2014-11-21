@@ -6,7 +6,7 @@ var Admin = (function($this,$){
 	var Modules = new Modular(this, function(){ return Extend(public,protected); });
 
 	HoneyBadger.Admin = public;
-	
+
 	/**
 	 * Our module's actual constructor
 	 * This happens immediately before any initialization
@@ -15,6 +15,17 @@ var Admin = (function($this,$){
 	 */
 	var _construct = function() {
 		console.log('Admin constructor');
+		protected._parent = $this;
+
+		if ($this.__devmode) {
+			/**
+			 * Add the livereload script - we'll add it manually so
+			 * that you don't need the browser plugin and you can do
+			 * it from across hosts.
+			 */
+			console.log('__devmode enabled: Adding livereload script');
+			$(document.body).append('<script src="http://'+document.location.hostname+':35729/livereload.js?snipver=1"></script>');
+		}
 	};
 
 	/**
@@ -39,17 +50,6 @@ var Admin = (function($this,$){
 	 * @return {void} Initializer
 	 */
 	var _init = function() {
-
-		if ($this.__devmode) {
-			/**
-			 * Add the livereload script - we'll add it manually so
-			 * that you don't need the browser plugin and you can do
-			 * it from across hosts.
-			 */
-			$(document.body).append('<script src="http://'+document.location.hostname+':35729/livereload.js?snipver=1"></script>');
-		}
-		
-
 		// HoneyBadger doesn't use jQuery, but the Admin does
 		$(document).ready(function(){
 
