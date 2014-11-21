@@ -9550,6 +9550,7 @@ var Admin = (function($this,$){
 		$('#ext-test').click(function(){
 			$('#extraction-result').html('');
 			$DM.extractor.sample(ext(),function(e){
+				console.log(e);
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#extractorWizard [am-Button~=next]').prop('disabled',false);
@@ -10214,6 +10215,7 @@ var Admin = (function($this,$){
 		console.log('Admin.View initialized');
 
 		$HB.on('readyStateChange',self.connection());
+		$HB.on('log-stream',self.livelog());
 		$DM.on('sources',self.sources());
 		$DM.on('extractors',self.extractors());
 		$DM.on('transformers',self.transformers());
@@ -10228,6 +10230,12 @@ var Admin = (function($this,$){
 		$admin = _unsealed(_init); // fire initializer when DOM ready
 		_construct(); // run constructor now
 	});
+
+	this.livelog = function() {
+		return function render(data) {
+			$('#'+data.target).append(data.body);
+		};
+	};
 
 	this.connection = function() {
 		return function render(readyState) {

@@ -67,7 +67,7 @@ var HoneyBadger = (function($this){
 		}
 
 		if (d.event == 'log-stream') {
-			// $('#'+d.target).append(d.body);
+			Emit('log-stream',d);
 		}
 	};
 

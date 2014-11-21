@@ -264,6 +264,7 @@
 		$('#ext-test').click(function(){
 			$('#extraction-result').html('');
 			$DM.extractor.sample(ext(),function(e){
+				console.log(e);
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
 					$('#extractorWizard [am-Button~=next]').prop('disabled',false);

@@ -16,6 +16,7 @@
 		console.log('Admin.View initialized');
 
 		$HB.on('readyStateChange',self.connection());
+		$HB.on('log-stream',self.livelog());
 		$DM.on('sources',self.sources());
 		$DM.on('extractors',self.extractors());
 		$DM.on('transformers',self.transformers());
@@ -30,6 +31,12 @@
 		$admin = _unsealed(_init); // fire initializer when DOM ready
 		_construct(); // run constructor now
 	});
+
+	this.livelog = function() {
+		return function render(data) {
+			$('#'+data.target).append(data.body);
+		};
+	};
 
 	this.connection = function() {
 		return function render(readyState) {
