@@ -100,8 +100,10 @@ module.exports = new (function(){
             source.type = 'dsn'; // Set the document type to Data Source Name
             source.status = 'active'; // Activate the source
             source.activatedOn = Date.now();
-            db.insert(source, null, callback);
-            refreshSources();
+            db.insert(source, null, function(err, body){
+                refreshSources();
+                if (callback) callback(err, body);
+            });
         };
 
         if (source._id) _updateSource();
@@ -125,8 +127,10 @@ module.exports = new (function(){
             extractor.type = 'extractor'; // Set the document type to Data Source Name
             extractor.status = 'active'; // Activate the source
             extractor.activatedOn = Date.now();
-            db.insert(extractor, null, callback);
-            refreshExtractors();
+            db.insert(extractor, null, function(err,body){
+                refreshExtractors();
+                if (callback) callback(err, body);
+            });
         };
 
         if (extractor._id) _updateExtractor();
@@ -150,8 +154,10 @@ module.exports = new (function(){
             transformer.type = 'transformer'; // Set the document type to Data Source Name
             transformer.status = 'active'; // Activate the source
             transformer.activatedOn = Date.now();
-            db.insert(transformer, null, callback);
-            refreshTransformers();
+            db.insert(transformer, null, function(err,body){
+                refreshTransformers();
+                if (callback) callback(err, body);
+            });
         };
 
         if (transformer._id) _updateTransformer();
@@ -175,8 +181,10 @@ module.exports = new (function(){
             loader.type = 'loader'; // Set the document type to Data Source Name
             loader.status = 'active'; // Activate the source
             loader.activatedOn = Date.now();
-            db.insert(loader, null, callback);
-            refreshLoaders();
+            db.insert(loader, null, function(err, body){
+                refreshLoaders();
+                if (callback) callback(err, body);
+            });
         };
 
         if (loader._id) _updateLoader();

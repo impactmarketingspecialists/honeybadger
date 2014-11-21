@@ -9380,6 +9380,10 @@ var Admin = (function($this,$){
 			Admin.Validator.source.validate();
 		});
 
+		$('#sourceEditor [am-Button~=save]').click(function(){
+			Admin.Validator.source.save();
+		});
+
 		/**
 		 * From the source Wizard; display source options based on selected source type
 		 */
@@ -10119,11 +10123,11 @@ var Admin = (function($this,$){
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
-				$('#sourceEditorSave').prop('disabled',false);
+				$('#sourceEditor [am-Button~=save]').prop('disabled',false);
 			} else {
 				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
-				$('#sourceEditorSave').prop('disabled',true);
+				$('#sourceEditor [am-Button~=save]').prop('disabled',true);
 			}
 		});
 	};
@@ -10171,8 +10175,8 @@ var Admin = (function($this,$){
 			break;
 		}
 
-		send('saveSource',[src],function(e){
-			DataManager.refresh();
+		$DM.saveSource(src,function(e){
+			$DM.refresh();
 		});
 
 		sourceModalReset();
@@ -10230,6 +10234,7 @@ var Admin = (function($this,$){
 	this.sources = function() {
 		// Do some preloader stuff here
 		return function render(data) {
+			console.log(data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');

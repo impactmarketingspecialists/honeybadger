@@ -47,6 +47,7 @@
 	this.sources = function() {
 		// Do some preloader stuff here
 		return function render(data) {
+			console.log(data);
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');

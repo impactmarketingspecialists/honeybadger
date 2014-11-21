@@ -203,4 +203,8 @@
 		$this.exec('validateSource', [source], callback);
 	};
 
+	this.saveSource = function(source, callback){
+		$this.exec('saveSource', [source], callback);
+	};
+
 }(HoneyBadger||{}));

@@ -60,11 +60,11 @@
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
-				$('#sourceEditorSave').prop('disabled',false);
+				$('#sourceEditor [am-Button~=save]').prop('disabled',false);
 			} else {
 				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
-				$('#sourceEditorSave').prop('disabled',true);
+				$('#sourceEditor [am-Button~=save]').prop('disabled',true);
 			}
 		});
 	};
@@ -112,8 +112,8 @@
 			break;
 		}
 
-		send('saveSource',[src],function(e){
-			DataManager.refresh();
+		$DM.saveSource(src,function(e){
+			$DM.refresh();
 		});
 
 		sourceModalReset();

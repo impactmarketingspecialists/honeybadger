@@ -94,6 +94,10 @@
 			Admin.Validator.source.validate();
 		});
 
+		$('#sourceEditor [am-Button~=save]').click(function(){
+			Admin.Validator.source.save();
+		});
+
 		/**
 		 * From the source Wizard; display source options based on selected source type
 		 */
