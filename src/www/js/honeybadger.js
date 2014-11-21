@@ -81,7 +81,7 @@ var HoneyBadger = (function($this){
 
 	var receive = function(e) {
 
-		if( __devmode ){ console.dir(e.data); }
+		if( __devmode ){ console.dir(e); }
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);

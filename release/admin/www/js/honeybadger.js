@@ -140,7 +140,7 @@ var HoneyBadger = (function($this){
 
 	var receive = function(e) {
 
-		if( __devmode ){ console.dir(e.data); }
+		if( __devmode ){ console.dir(e); }
 		if (e.data === 'pong') return;
 
 		var d = JSON.parse(e.data);
@@ -169,7 +169,6 @@ var HoneyBadger = (function($this){
 		extractors = [],
 		transformers = [],
 		loaders = [];
-
 
 	var _construct = function() {
 		console.log('DataManager constructor');
@@ -342,6 +341,8 @@ var HoneyBadger = (function($this){
 		$this = _unsealed(_init); // fire constructor when DOM ready
 		_construct();
 	});
+
+	HoneyBadger.DataManager = this;
 
 }(HoneyBadger||{}));
 +(function($this){

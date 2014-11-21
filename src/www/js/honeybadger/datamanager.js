@@ -5,7 +5,6 @@
 		transformers = [],
 		loaders = [];
 
-
 	var _construct = function() {
 		console.log('DataManager constructor');
 		$this.on('readyStateChange',function(readyState){
@@ -177,5 +176,7 @@
 		$this = _unsealed(_init); // fire constructor when DOM ready
 		_construct();
 	});
+
+	HoneyBadger.DataManager = this;
 
 }(HoneyBadger||{}));
