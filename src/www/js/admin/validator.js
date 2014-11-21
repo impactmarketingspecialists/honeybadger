@@ -113,7 +113,7 @@
 		}
 
 		$DM.saveSource(src,function(e){
-			$DM.refresh();
+			$DM.loadSources();
 		});
 
 		sourceModalReset();

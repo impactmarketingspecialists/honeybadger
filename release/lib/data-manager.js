@@ -5,7 +5,7 @@ module.exports = new (function(){
         loaders = [],
         programs = [];
 
-    var refreshSources = function(){
+    var refreshSources = function(callback){
         db.view('sources', 'list', function(err, body) {
             if(!err) {
                 sources = [];
@@ -13,10 +13,12 @@ module.exports = new (function(){
                     sources.push(doc);
                });
             } else console.trace(err);
+            if(callback) callback(err, body);
         });
     };
 
-    var refreshExtractors = function(){
+    var refreshExtractors = function(callback){
+        console.log('refresh extractors');
         db.view('extractors', 'list', function(err, body) {
             if(!err) {
                 extractors = [];
@@ -24,10 +26,11 @@ module.exports = new (function(){
                     extractors.push(doc);
                });
             } else console.trace(err);
+            if(callback) callback(err, body);
         });
     };
 
-    var refreshTransformers = function(){
+    var refreshTransformers = function(callback){
         db.view('transformers', 'list', function(err, body) {
             if(!err) {
                 transformers = [];
@@ -35,10 +38,11 @@ module.exports = new (function(){
                     transformers.push(doc);
                });
             } else console.trace(err);
+            if(callback) callback(err, body);
         });
     };
 
-    var refreshLoaders = function(){
+    var refreshLoaders = function(callback){
         db.view('loaders', 'list', function(err, body) {
             if(!err) {
                 loaders = [];
@@ -46,6 +50,7 @@ module.exports = new (function(){
                     loaders.push(doc);
                });
             } else console.trace(err);
+            if(callback) callback(err, body);
         });
     };
 
@@ -119,7 +124,6 @@ module.exports = new (function(){
                 callback({err:true,body:'Document has no _rev; cannot update'});
                 return false;
             }
-
             db.insert(extractor, extractor._id, callback);
         };
 
@@ -128,8 +132,9 @@ module.exports = new (function(){
             extractor.status = 'active'; // Activate the source
             extractor.activatedOn = Date.now();
             db.insert(extractor, null, function(err,body){
-                refreshExtractors();
-                if (callback) callback(err, body);
+                refreshExtractors(function(){
+                    if (callback) callback(err, body);
+                });
             });
         };
 

@@ -9515,8 +9515,8 @@ var Admin = (function($this,$){
 			var finish = function(){
 				$('#extractorWizard').modal('hide');
 				$DM.extractor.validate(ext());
-				$DM.extractor.save(ext());
-			}
+				$DM.extractor.save(ext(),function() { $DM.loadExtractors(); });
+			};
 
 			if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
 
@@ -10188,7 +10188,7 @@ var Admin = (function($this,$){
 		}
 
 		$DM.saveSource(src,function(e){
-			$DM.refresh();
+			$DM.loadSources();
 		});
 
 		sourceModalReset();
