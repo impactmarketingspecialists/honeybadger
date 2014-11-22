@@ -13,7 +13,7 @@ var fs = require('fs')
     streamTransform = require('stream-transform'),
     utility = require('../lib/utility'),
     DataManager = require('../lib/data-manager'),
-    WSAPI = require('../lib/data-manager-api'),
+    WSAPI = require('../lib/api/admin'),
     http_port = 8090;
 
 var baseURL = '/admin';

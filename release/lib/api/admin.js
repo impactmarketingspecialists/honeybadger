@@ -23,7 +23,7 @@ module.exports = {
     browseFTP: function(source, callback){
         DataManager.getSource(source.id, function(error, body){
             if (!error && body.source.type === 'FTP') {
-                var ftp = require('./ftp-extractor');
+                var ftp = require('lib/helpers/ftp');
                 ftp.browse(body.source, function(err, list){
                     if (err) return callback('onFTPBrowse',err,null);
                     return callback('onFTPBrowse',null,{success:true, list: list});
