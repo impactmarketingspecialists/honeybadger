@@ -32,7 +32,7 @@
 
 	this.loadSources = function(callback){
 		var promise = Promise.create(self.loadSources);
-		$this.exec('list',null,function(e){
+		$this.exec('source.list',null,function(e){
 			if (!e.err) { sources = e.body; }
 			if (callback) callback(e);
 			Emit('sources',sources);
@@ -43,7 +43,7 @@
 
 	this.loadExtractors = function(callback){
 		var promise = Promise.create(self.loadExtractors);
-		$this.exec('getExtractorList',null,function(e){
+		$this.exec('extractor.list',null,function(e){
 			if (!e.err) { extractors = e.body; }
 			if (callback) callback(e);
 			Emit('extractors',extractors);
@@ -54,7 +54,7 @@
 
 	this.loadTransformers = function(callback){
 		var promise = Promise.create(self.loadTransformers);
-		$this.exec('getTransformerList',null,function(e){
+		$this.exec('transformer.list',null,function(e){
 			if (!e.err) { transformers = e.body; }
 			if (callback) callback(e);
 			Emit('transformers',transformers);
@@ -65,7 +65,7 @@
 
 	this.loadLoaders = function(callback){
 		var promise = Promise.create(self.loadLoaders);
-		$this.exec('getLoaderList',null,function(e){
+		$this.exec('loader.list',null,function(e){
 			if(!e.err) { loaders = e.body; }
 			if (callback) callback(e);
 			Emit('loaders',loaders);
@@ -141,11 +141,11 @@
 	};
 
 	this.extractor.save = function(ext, callback){
-		$this.exec('saveExtractor', [ext], callback);
+		$this.exec('extractor.save', [ext], callback);
 	};
 
 	this.extractor.sample = function(ext, callback){
-		$this.exec('testExtractor', [ext], callback);
+		$this.exec('extractor.test', [ext], callback);
 	};
 
 	this.transformer = {};
@@ -154,11 +154,11 @@
 	};
 
 	this.transformer.save = function(trn, callback){
-		$this.exec('saveTransformer', [trn], callback);
+		$this.exec('transformer.save', [trn], callback);
 	};
 
 	this.transformer.sample = function(trn, callback){
-		$this.exec('testTransformer', [trn], callback);
+		$this.exec('transformer.test', [trn], callback);
 	};
 
 	this.loader = {};
@@ -175,39 +175,39 @@
 	};
 
 	this.loader.save = function(ldr, callback){
-		$this.exec('saveLoader', [ldr], callback);
+		$this.exec('loader.save', [ldr], callback);
 	};
 
 	this.loader.sample = function(ldr, callback){
-		$this.exec('testLoader', [ldr], callback);
+		$this.exec('loader.test', [ldr], callback);
 	};
 
 	this.validateSource = function(source, callback){
-		$this.exec('validateSource', [source], callback);
+		$this.exec('source.test', [source], callback);
 	};
 
 	this.saveSource = function(source, callback){
-		$this.exec('saveSource', [source], callback);
+		$this.exec('source.save', [source], callback);
 	};
 
 	this.ftpBrowse = function(source, callback)
 	{
-		$this.exec('browseFTP',[source],callback);
+		$this.exec('ftp.browse',[source],callback);
 	};
 
 	this.retsExplore = function(source, callback)
 	{
-		$this.exec('exploreRETS',[source],callback);
+		$this.exec('rets.getClassifications',[source],callback);
 	};
 
 	this.retsBrowse = function(source, callback)
 	{
-		$this.exec('browseRETS',[source],callback);
+		$this.exec('rets.getMetadataResources',[source],callback);
 	};
 
 	this.retsInspect = function(source, callback)
 	{
-		$this.exec('inspectRETS',[source],callback);
+		$this.exec('rets.getMetadataTable',[source],callback);
 	};
 
 }(HoneyBadger||{}));

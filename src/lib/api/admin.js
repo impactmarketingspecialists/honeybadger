@@ -1,150 +1,88 @@
-// TODO: This API backend is dedicated just to the Data Manager console
+var ftp = require('../helpers/transports/ftp');
+
 module.exports = {
-    list: function(callback){
+    "source.list": function(callback){
         process.nextTick(function(){
-            callback('onList', null, DataManager.sources);
+            callback('onSourceList', null, DataManager.sources);
         });
     },
-    getExtractorList: function(callback){
+    "source.test": function(source, callback) {
+
+        switch(source.type)
+        {
+            case "FTP":
+                console.log('FTP Client Test');
+                var client = require('ftp');
+                var c = new client();
+
+                c.on('ready', function() {
+                    c.list(function(err, list) {
+                      if (err) {
+                        process.nextTick(function(){
+                            callback('onvalidate',err,null);
+                        });
+                        return;
+                      }
+                      c.end();
+                      process.nextTick(function(){
+                        callback('onvalidate',null,{success:true})
+                      })
+                    });
+                });
+
+                c.on('error', function(e) {
+                    console.trace(e);
+                    process.nextTick(function(){
+                        callback('onvalidate',e,null);
+                    });
+                });
+
+                c.connect({
+                    host: source.uri,
+                    port: source.port,
+                    user: source.auth.username,
+                    password: source.auth.password
+                });
+            break;
+            case "RETS":
+                var librets = require('rets-client');
+
+                var uri = url.parse(source.uri);
+
+                var client = librets.createConnection({
+                    host: uri.hostname,
+                    port: uri.port,
+                    protocol: uri.protocol,
+                    path: uri.path,
+                    user: source.auth.username,
+                    pass: source.auth.password,
+                    version: source.version || '1.7.2',
+                    agent: { user: source.auth.userAgentHeader, password: source.auth.userAgentPassword }
+                });
+
+                client.once('connection.success',function(client){
+                    console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                    callback('onvalidate',null,{success:true});
+                });
+
+                client.once('connection.error',function(error, client){
+                    console.error( 'Connection failed: %s.', error.message );
+                    callback('onvalidate',error, null);
+                });
+            break;
+        }
+    },
+    "source.save": function(source, callback) {
+        DataManager.sourceSave(source, function(err, body){
+            callback('onsave',err,body);
+        });
+    },
+    "extractor.list": function(callback) {
         process.nextTick(function(){
             callback('onExtractorList', null, DataManager.extractors);
         });
     },
-    getTransformerList: function(callback){
-        process.nextTick(function(){
-            callback('onTransformerList', null, DataManager.transformers);
-        });
-    },
-    getLoaderList: function(callback){
-        process.nextTick(function(){
-            callback('onLoaderList', null, DataManager.loaders);
-        });
-    },
-    browseFTP: function(source, callback){
-        DataManager.getSource(source.id, function(error, body){
-            if (!error && body.source.type === 'FTP') {
-                var ftp = require('lib/helpers/ftp');
-                ftp.browse(body.source, function(err, list){
-                    if (err) return callback('onFTPBrowse',err,null);
-                    return callback('onFTPBrowse',null,{success:true, list: list});
-                });
-            }
-        });
-    },
-    browseRETS: function(source, callback, client){
-        DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                path: uri.path,
-                protocol: uri.protocol,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getClassifications( source.source.rets.resource, function has_meta( error, meta ) {
-                    if( error ) {
-                        console.log( 'Error while fetching classifications: %s.', error.message );
-                        callback('onRETSBrowse',error, null);
-                    } else {
-                        // console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
-                        // console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
-                        callback('onRETSBrowse',null,{success:true, meta:meta});
-                    }
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSBrowse',error, null);
-            });
-        });
-    },
-    exploreRETS: function(source, callback, client){
-        DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                protocol: uri.protocol,
-                path: uri.path,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getMetadataResources('0', function( error, data ) {
-                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                    callback('onRETSExplore',null,{success:true, meta:data});
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSExplore',error, null);
-            });
-        });
-    },
-    inspectRETS: function(source, callback, client){
-        DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                protocol: uri.protocol,
-                path: uri.path,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
-                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                    callback('onRETSInspect',null,{success:true, meta:data});
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSInspect',error, null);
-            });
-        });
-    },
-    extractRETS: function() {
-        // Fetch classifications
-        // client.searchQuery({
-        //     SearchType: 'Property',
-        //     Class: 'A',
-        //     Query: '(status=Listed)',
-        //     Limit: 10
-        // }, function( error, data ) {
-        //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-        // });
-    },
-    testExtractor: function(extractor, callback, client){
-
+    "extractor.test": function(extractor, callback, client) {
         var clog = function(e){
             client.send('{ "event":"log-stream", "target": "extraction-log-body", "body":'+JSON.stringify(e)+'}');
         };
@@ -358,14 +296,18 @@ module.exports = {
                 callback('onExtractorTest',err,null);
             }
         });
-
     },
-    saveExtractor: function(extractor, callback) {
+    "extractor.save": function(extractor, callback) {
         DataManager.extractorSave(extractor, function(err, body){
             callback('onExtractorSave',err,body);
         });
     },
-    testTransformer: function(transformer, callback, client) {
+    "transformer.list": function(callback){
+        process.nextTick(function(){
+            callback('onTransformerList', null, DataManager.transformers);
+        });
+    },
+    "transformer.test": function(transformer, callback, client) {
 
         var clog = function(e){
             client.send('{ "event":"log-stream", "target": "transformer-log-body", "body":'+JSON.stringify(e)+'}');
@@ -670,91 +612,17 @@ module.exports = {
             }
         })
     },
-    saveTransformer: function(transformer, callback) {
+    "transformer.save": function(transformer, callback) {
         DataManager.transformerSave(transformer, function(err, body){
             callback('onTransformerSave',err,body);
         });
     },
-    validateLoaderConnection: function(loader, callback) {
-        switch(loader.target.type)
-        {
-            case "mysql":
-                var mysql = require('mysql');
-
-                var dsn = utility.dsn(loader.target.dsn);
-                var connection = mysql.createConnection({
-                    host: dsn.host,
-                    user: dsn.user,
-                    password: dsn.password,
-                    database: dsn.database
-                });
-                connection.query('SHOW tables', function(err, res){
-                    if (err) {
-                        console.trace(err);
-                        callback('onLoaderValidateConnection',err,null);
-                        return;
-                    }
-                    callback('onLoaderValidateConnection',null,{tables:res});
-                });
-            break;
-            case "couchdb":
-            break;
-            case "ftp":
-            break;
-        }
+    "loader.list": function(callback) {
+        process.nextTick(function(){
+            callback('onLoaderList', null, DataManager.loaders);
+        });
     },
-    createLoaderSchema: function(loader, callback) {
-        switch(loader.target.type)
-        {
-            case "mysql":
-                var mysql = require('mysql');
-
-                var dsn = utility.dsn(loader.target.dsn);
-                var connection = mysql.createConnection({
-                    host: dsn.host,
-                    user: dsn.user,
-                    password: dsn.password,
-                    database: dsn.database
-                });
-
-                var qry = 'CREATE TABLE `'+loader.target.schema.name+'` ( `id` INT NOT NULL AUTO_INCREMENT, ';
-                loader.target.schema.fields.forEach(function(item, index){
-                    qry += '`'+item.key+'` ';
-                    switch(item.type) {
-                        case "string":
-                            qry += 'VARCHAR(255) NULL,'
-                        break;
-                        case "boolean":
-                            qry += 'INT NULL,'
-                        break;
-                        case "float":
-                            qry += 'FLOAT NULL,'
-                        break;
-                        case "date":
-                            qry += 'DATE NULL,'
-                        break;
-                        case "text":
-                            qry += 'TEXT NULL,'
-                        break;
-                    }
-                })
-                qry += 'PRIMARY KEY (`id`), UNIQUE INDEX `id_UNIQUE` (`id` ASC));'
-                connection.query(qry, function(err, res){
-                    if (err) {
-                        console.trace(err);
-                        callback('onLoaderSchemaCreate',err,null);
-                        return;
-                    }
-                    callback('onLoaderSchemaCreate',null,{res:res});
-                });
-            break;
-            case "couchdb":
-            break;
-            case "ftp":
-            break;
-        }
-    },
-    testLoader: function(loader, callback, client) {
+    "loader.test": function(loader, callback, client) {
         var clog = function(e){
             client.send('{ "event":"log-stream", "target": "loader-log-body", "body":'+JSON.stringify(e)+'}');
         };
@@ -1109,82 +977,211 @@ module.exports = {
                 }
             })            
         })
-
     },
-    saveLoader: function(loader, callback) {
+    "loader.save": function(loader, callback) {
         DataManager.loaderSave(loader, function(err, body){
             callback('onLoaderSave',err,body);
         });
     },
-    validateSource: function(source, callback) {
+    "ftp.browse": function(source, callback){
+        DataManager.getSource(source.id, function(error, body){
+            if (!error && body.source.type === 'FTP') {
+                ftp.browse(body.source, function(err, list){
+                    if (err) return callback('onFTPBrowse',err,null);
+                    return callback('onFTPBrowse',null,{success:true, list: list});
+                });
+            }
+        });
+    },
+    "rets.getClassifications": function(source, callback, client) {
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
 
-        switch(source.type)
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                path: uri.path,
+                protocol: uri.protocol,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.7.2',
+                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                client.getClassifications( source.source.rets.resource, function has_meta( error, meta ) {
+                    if( error ) {
+                        console.log( 'Error while fetching classifications: %s.', error.message );
+                        callback('onRETSBrowse',error, null);
+                    } else {
+                        // console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
+                        // console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
+                        callback('onRETSBrowse',null,{success:true, meta:meta});
+                    }
+                });
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSBrowse',error, null);
+            });
+        });
+    },
+    "rets.getMetadataResources": function(source, callback, client) {
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
+
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                protocol: uri.protocol,
+                path: uri.path,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.7.2',
+                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                client.getMetadataResources('0', function( error, data ) {
+                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                    callback('onRETSExplore',null,{success:true, meta:data});
+                });
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSExplore',error, null);
+            });
+        });
+    },
+    "rets.getMetadataTable": function(source, callback, client) {
+        DataManager.getSource(source.id,function(err,src){
+            var librets = require('rets-client');
+
+            var uri = url.parse(source.source.uri);
+
+            var client = librets.createConnection({
+                host: uri.hostname,
+                port: uri.port,
+                protocol: uri.protocol,
+                path: uri.path,
+                user: source.source.auth.username,
+                pass: source.source.auth.password,
+                version: source.source.version || '1.7.2',
+                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
+            });
+
+            client.once('connection.success',function(client){
+                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
+                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
+                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+                    callback('onRETSInspect',null,{success:true, meta:data});
+                });
+            });
+
+            client.once('connection.error',function(error, client){
+                console.error( 'Connection failed: %s.', error.message );
+                callback('onRETSInspect',error, null);
+            });
+        });
+    },
+    "rets.query": function() {
+        // Fetch classifications
+        // client.searchQuery({
+        //     SearchType: 'Property',
+        //     Class: 'A',
+        //     Query: '(status=Listed)',
+        //     Limit: 10
+        // }, function( error, data ) {
+        //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+        // });
+    },
+    validateLoaderConnection: function(loader, callback) {
+        switch(loader.target.type)
         {
-            case "FTP":
-                console.log('FTP Client Test');
-                var client = require('ftp');
-                var c = new client();
+            case "mysql":
+                var mysql = require('mysql');
 
-                c.on('ready', function() {
-                    c.list(function(err, list) {
-                      if (err) {
-                        process.nextTick(function(){
-                            callback('onvalidate',err,null);
-                        });
+                var dsn = utility.dsn(loader.target.dsn);
+                var connection = mysql.createConnection({
+                    host: dsn.host,
+                    user: dsn.user,
+                    password: dsn.password,
+                    database: dsn.database
+                });
+                connection.query('SHOW tables', function(err, res){
+                    if (err) {
+                        console.trace(err);
+                        callback('onLoaderValidateConnection',err,null);
                         return;
-                      }
-                      c.end();
-                      process.nextTick(function(){
-                        callback('onvalidate',null,{success:true})
-                      })
-                    });
-                });
-
-                c.on('error', function(e) {
-                    console.trace(e);
-                    process.nextTick(function(){
-                        callback('onvalidate',e,null);
-                    });
-                });
-
-                c.connect({
-                    host: source.uri,
-                    port: source.port,
-                    user: source.auth.username,
-                    password: source.auth.password
+                    }
+                    callback('onLoaderValidateConnection',null,{tables:res});
                 });
             break;
-            case "RETS":
-                var librets = require('rets-client');
-
-                var uri = url.parse(source.uri);
-
-                var client = librets.createConnection({
-                    host: uri.hostname,
-                    port: uri.port,
-                    protocol: uri.protocol,
-                    path: uri.path,
-                    user: source.auth.username,
-                    pass: source.auth.password,
-                    version: source.version || '1.7.2',
-                    agent: { user: source.auth.userAgentHeader, password: source.auth.userAgentPassword }
-                });
-
-                client.once('connection.success',function(client){
-                    console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                    callback('onvalidate',null,{success:true});
-                });
-
-                client.once('connection.error',function(error, client){
-                    console.error( 'Connection failed: %s.', error.message );
-                    callback('onvalidate',error, null);
-                });
+            case "couchdb":
+            break;
+            case "ftp":
             break;
         }
     },
-    saveSource: function(source, callback) {
-        DataManager.sourceSave(source, function(err, body){
-            callback('onsave',err,body);
-        });
+    createLoaderSchema: function(loader, callback) {
+        switch(loader.target.type)
+        {
+            case "mysql":
+                var mysql = require('mysql');
+
+                var dsn = utility.dsn(loader.target.dsn);
+                var connection = mysql.createConnection({
+                    host: dsn.host,
+                    user: dsn.user,
+                    password: dsn.password,
+                    database: dsn.database
+                });
+
+                var qry = 'CREATE TABLE `'+loader.target.schema.name+'` ( `id` INT NOT NULL AUTO_INCREMENT, ';
+                loader.target.schema.fields.forEach(function(item, index){
+                    qry += '`'+item.key+'` ';
+                    switch(item.type) {
+                        case "string":
+                            qry += 'VARCHAR(255) NULL,'
+                        break;
+                        case "boolean":
+                            qry += 'INT NULL,'
+                        break;
+                        case "float":
+                            qry += 'FLOAT NULL,'
+                        break;
+                        case "date":
+                            qry += 'DATE NULL,'
+                        break;
+                        case "text":
+                            qry += 'TEXT NULL,'
+                        break;
+                    }
+                })
+                qry += 'PRIMARY KEY (`id`), UNIQUE INDEX `id_UNIQUE` (`id` ASC));'
+                connection.query(qry, function(err, res){
+                    if (err) {
+                        console.trace(err);
+                        callback('onLoaderSchemaCreate',err,null);
+                        return;
+                    }
+                    callback('onLoaderSchemaCreate',null,{res:res});
+                });
+            break;
+            case "couchdb":
+            break;
+            case "ftp":
+            break;
+        }
     }
 };
