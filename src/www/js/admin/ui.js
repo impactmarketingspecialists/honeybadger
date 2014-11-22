@@ -87,6 +87,37 @@
 		resetWizard('loaderWizard');
 		// $('.wizard section.step').first().show();
 
+		/**
+		 * Dialog Wizard navigation
+		 * 
+		 * This provides a generic mechanism for handling the
+		 * prev/next/finish buttons and back & forth navigation
+		 * of the Dialog wizards.
+		 */
+		$('[am-Dialog]').each(function(index,item){
+			var _id = $(item).prop('id');
+			$('[am-Button~=next]',item).click(function(){
+				$('#'+_id+' section.step.active').hide().removeClass('active').next().show().addClass('active');
+				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
+				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',false);
+				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) {
+					$('#'+_id+' [am-Button~=next]').hide();
+					$('#'+_id+' [am-Button~=finish]').show();
+				}
+			});
+
+			$('#'+_id+' [am-Button~=prev]').click(function(){
+				$('#'+_id+' section.step.active').hide().removeClass('active').prev().show().addClass('active');
+				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
+				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',true);
+				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) {
+					$('#'+_id+' [am-Button~=finish]').hide();
+					$('#'+_id+' [am-Button~=next]').show();
+				}
+			});
+		});
+
+
 		/**************** UI Bindings ***************/
 		/**************** Sources ***************/
 
@@ -221,54 +252,6 @@
 			});
 		});
 
-		$('[am-Dialog]').each(function(index,item){
-			var _id = $(item).prop('id');
-			$('[am-Button~=next]',item).click(function(){
-				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) return finish();
-
-				$('#'+_id+' section.step.active').hide().removeClass('active').next().show().addClass('active');
-				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',false);
-				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) $('#'+_id+' [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
-			});
-			$('#'+_id+' [am-Button~=prev]').click(function(){
-				$('#'+_id+' section.step.active').hide().removeClass('active').prev().show().addClass('active');
-				$('#'+_id+' .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-				if ($('#'+_id+' section.step.active').is($('#'+_id+' section.step').first())) $('#'+_id+' [am-Button~=prev]').prop('disabled',true);
-				if (!$('#'+_id+' section.step.active').is($('#'+_id+' section.step').last())) $('#'+_id+' [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
-			});
-
-		});
-
-		/**
-		 * From the extractor wizard: bindings for the Next button
-		 */
-		// $('#extractorWizard [am-Button~=next]').click(function(){
-
-		// 	var finish = function(){
-		// 		$('#extractorWizard').modal('hide');
-		// 		$DM.extractor.validate(ext());
-		// 		$DM.extractor.save(ext(),function() { $DM.loadExtractors(); });
-		// 	};
-
-		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) return finish();
-
-		// 	$('#extractorWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
-		// 	$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-		// 	if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',false);
-		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',true);
-		// });
-
-		/**
-		 * From the extractor wizard: bindings for the Back button
-		 */
-		// $('#extractorWizard [am-Button~=prev]').click(function(){
-		// 	$('#extractorWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
-		// 	$('#extractorWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-		// 	if ($('#extractorWizard section.step.active').is($('#extractorWizard section.step').first())) $('#extractorWizard [am-Button~=prev]').prop('disabled',true);
-		// 	if (!$('#extractorWizard section.step.active').is($('#extractorWizard section.step').last())) $('#extractorWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
-		// });
-
 		/**
 		 * From the extractor wizard: bindings for unarchive options
 		 */
@@ -286,9 +269,9 @@
 				// console.log(e);
 				if (!e.err) {
 					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
-					$('#extractorWizard [am-Button~=next]').prop('disabled',false);
+					$('#extractorWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
-					$('#extractorWizard [am-Button~=next]').prop('disabled',true);
+					$('#extractorWizard [am-Button~=finish]').prop('disabled',true);
 					$('#extraction-result').html('<p class="bg-danger">Extractor Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
 				}
 			});
@@ -302,6 +285,17 @@
 			$('#extraction-result').html('');
 		});
 
+		/**
+		 * Hook to the Dialog finish button
+		 */
+		$('#extractorWizard [am-Button~=finish]').click(function(){
+			$('#extractorWizard').modal('hide');
+			$DM.extractor.validate(ext());
+			$DM.extractor.save(ext(),function() { $DM.loadExtractors(); });
+		});
+
+
+
 		/**************** UI Bindings ***************/
 		/**************** Transformer ***************/
 
@@ -310,35 +304,6 @@
 		 * Setup dialog button to be next vs save
 		 */
 		$('#transformWizard [am-Button~=finish]').hide();
-
-		/**
-		 * Transform Wizard next button
-		 */
-		$('#transformWizard [am-Button~=next]').click(function(){
-
-			var finish = function(){
-				$('#transformWizard').modal('hide');
-				$DM.transformer.validate(trn());
-				$DM.transformer.save(trn(),function() { $DM.loadTransformers(); });
-			}
-
-			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) return finish();
-
-			$('#transformWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
-			$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizard [am-Button~=prev]').prop('disabled',false);
-			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizard [am-Button~=next]').text('Finish').removeClass('btn-primary').addClass('btn-success').prop('disabled',false);
-		});
-
-		/**
-		 * Back button handling for the transform wizard
-		 */
-		$('#transformWizard [am-Button~=prev]').click(function(){
-			$('#transformWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
-			$('#transformWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-			if ($('#transformWizard section.step.active').is($('#transformWizard section.step').first())) $('#transformWizard [am-Button~=prev]').prop('disabled',true);
-			if (!$('#transformWizard section.step.active').is($('#transformWizard section.step').last())) $('#transformWizard [am-Button~=next]').text('Next').removeClass('btn-success').addClass('btn-primary').prop('disabled',false);
-		});
 
 		/**
 		 * Input type selection for the transformer
@@ -394,10 +359,10 @@
 			$DM.transformer.sample(trn(),function(e){
 				if (!e.err) {
 					$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
-					$('#transformWizard [am-Button~=next]').prop('disabled',false);
+					$('#transformWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
 					$('#transformer-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
-					$('#transformWizard [am-Button~=next]').prop('disabled',true);
+					$('#transformWizard [am-Button~=finish]').prop('disabled',true);
 				}
 			});
 		});
@@ -410,38 +375,24 @@
 			$('#transformer-result').html('');
 		});
 
+		/**
+		 * Hook to the Dialog finish button
+		 */
+		$('#transformWizard [am-Button~=finish]').click(function(){
+			$('#transformWizard').modal('hide');
+			$DM.transformer.validate(trn());
+			$DM.transformer.save(trn(),function() { $DM.loadTransformers(); });
+		});
+
+
 		/**************** UI Bindings ***************/
 		/****************  Loaders  ***************/
 
 
 		/**
-		 * Loader Wizard next button
+		 * Setup dialog button to be next vs save
 		 */
-		$('#loaderWizardNext').click(function(){
-
-			var finish = function(){
-				$('#loaderWizard').modal('hide');
-				$DM.loader.validate(ldr());
-				$DM.loader.save(ldr());
-			}
-
-			if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) return finish();
-
-			$('#loaderWizard section.step.active').hide().removeClass('active').next().show().addClass('active');
-			$('#loaderWizard .navigator .step.bg-primary').removeClass('bg-primary').next().addClass('bg-primary');
-			if (!$('#loaderWizard section.step.active').is($('#loaderWizard section.step').first())) $('#loaderWizardBack').removeAttr('disabled');
-			if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) $('#loaderWizardNext').text('Finish').removeClass('btn-primary').addClass('btn-success').attr('disabled','disabled');
-		});
-
-		/**
-		 * Loader wizard back button
-		 */
-		$('#loaderWizardBack').click(function(){
-			$('#loaderWizard section.step.active').hide().removeClass('active').prev().show().addClass('active');
-			$('#loaderWizard .navigator .step.bg-primary').removeClass('bg-primary').prev().addClass('bg-primary');
-			if ($('#loaderWizard section.step.active').is($('#loaderWizard section.step').first())) $('#loaderWizardBack').attr('disabled','disabled');
-			if (!$('#loaderWizard section.step.active').is($('#loaderWizard section.step').last())) $('#loaderWizardNext').text('Next').removeClass('btn-success').addClass('btn-primary').removeAttr('disabled');
-		});
+		$('#loaderWizard [am-Button~=finish]').hide();
 
 		/**
 		 * When choosing a transformer to feed the loader
@@ -506,8 +457,9 @@
 				if (!e.err) {
 					$(btn).removeClass('btn-primary').addClass('btn-success')
 					$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+					$('#loaderWizard [am-Button~=next]').prop('disabled',false);
 				} else {
-					$(btn).removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+					$(btn).prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
 					$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
 				}
 
@@ -524,7 +476,7 @@
 					$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
 					$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
 				} else {
-					$('#ldr-create-schema').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
+					$('#ldr-create-schema').prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
 					$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
 				}
 
@@ -545,10 +497,10 @@
 			$DM.loader.sample(ldr(),function(e){
 				if (!e.err) {
 					$('#loader-result').html('<p class="bg-success">Loader Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
-					$('#loaderWizardNext').removeAttr('disabled');
+					$('#loaderWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
 					$('#loader-result').html('<p class="bg-danger">Loader Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
-					$('#loaderWizardNext').attr('disabled','disabled');
+					$('#loaderWizard [am-Button~=finish]').prop('disabled',true);
 				}
 			});
 		});
@@ -559,6 +511,15 @@
 		$('#ldr-test-clear').click(function(){
 			$('#loader-log-body').html('');
 			$('#loader-result').html('');
+		});
+
+		/**
+		 * Hook to the Dialog finish button
+		 */
+		$('#loaderWizard [am-Button~=finish]').click(function(){
+			$('#loaderWizard').modal('hide');
+			$DM.loader.validate(ldr());
+			$DM.loader.save(ldr());
 		});
 
 
