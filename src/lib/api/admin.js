@@ -1,4 +1,9 @@
 var ftp = require('../helpers/transports/ftp');
+var rets = require('../helpers/transports/rets');
+
+var clog = function(target, data){
+    client.send('{ "event":"log-stream", "target": "'+target+'", "body":'+((typeof data === 'string')?data:JSON.stringify(e))+'}');
+};
 
 module.exports = {
     "source.list": function(callback){
@@ -8,66 +13,23 @@ module.exports = {
     },
     "source.test": function(source, callback) {
 
+        console.log(source.type+' Client Test');
+
+        /**
+         * Testing a source really just means validating access.
+         * That may mean validating credentials, a URL or other
+         * data endpoint.
+         */
         switch(source.type)
         {
             case "FTP":
-                console.log('FTP Client Test');
-                var client = require('ftp');
-                var c = new client();
-
-                c.on('ready', function() {
-                    c.list(function(err, list) {
-                      if (err) {
-                        process.nextTick(function(){
-                            callback('onvalidate',err,null);
-                        });
-                        return;
-                      }
-                      c.end();
-                      process.nextTick(function(){
-                        callback('onvalidate',null,{success:true})
-                      })
-                    });
-                });
-
-                c.on('error', function(e) {
-                    console.trace(e);
-                    process.nextTick(function(){
-                        callback('onvalidate',e,null);
-                    });
-                });
-
-                c.connect({
-                    host: source.uri,
-                    port: source.port,
-                    user: source.auth.username,
-                    password: source.auth.password
+                ftp.validate(source, function(err,body){
+                    (!err) ? callback('onvalidate',null,{success:true,body:body}) : callback('onvalidate',err, null);
                 });
             break;
             case "RETS":
-                var librets = require('rets-client');
-
-                var uri = url.parse(source.uri);
-
-                var client = librets.createConnection({
-                    host: uri.hostname,
-                    port: uri.port,
-                    protocol: uri.protocol,
-                    path: uri.path,
-                    user: source.auth.username,
-                    pass: source.auth.password,
-                    version: source.version || '1.7.2',
-                    agent: { user: source.auth.userAgentHeader, password: source.auth.userAgentPassword }
-                });
-
-                client.once('connection.success',function(client){
-                    console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                    callback('onvalidate',null,{success:true});
-                });
-
-                client.once('connection.error',function(error, client){
-                    console.error( 'Connection failed: %s.', error.message );
-                    callback('onvalidate',error, null);
+                rets.validate(source, function(err,body){
+                    (!err) ? callback('onvalidate',null,{success:true,body:body}) : callback('onvalidate',err, null);
                 });
             break;
         }
@@ -83,9 +45,6 @@ module.exports = {
         });
     },
     "extractor.test": function(extractor, callback, client) {
-        var clog = function(e){
-            client.send('{ "event":"log-stream", "target": "extraction-log-body", "body":'+JSON.stringify(e)+'}');
-        };
 
         //We want to pipe extraction events back to the client
         clog('Testing extraction from source: '+ extractor.source);
@@ -983,7 +942,7 @@ module.exports = {
             callback('onLoaderSave',err,body);
         });
     },
-    "ftp.browse": function(source, callback){
+    "ftp.browse": function(source, callback) {
         DataManager.getSource(source.id, function(error, body){
             if (!error && body.source.type === 'FTP') {
                 ftp.browse(body.source, function(err, list){
@@ -1094,16 +1053,16 @@ module.exports = {
             });
         });
     },
-    "rets.query": function() {
+    "rets.query": function(_type, _class, _query, _limit, callback, client) {
         // Fetch classifications
-        // client.searchQuery({
-        //     SearchType: 'Property',
-        //     Class: 'A',
-        //     Query: '(status=Listed)',
-        //     Limit: 10
-        // }, function( error, data ) {
-        //     console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-        // });
+        client.searchQuery({
+            SearchType: _type || 'Property',
+            Class: _class || 'A',
+            Query: _query || '(status=Listed)',
+            Limit: _limit || 10
+        }, function( error, data ) {
+            console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+        });
     },
     validateLoaderConnection: function(loader, callback) {
         switch(loader.target.type)
