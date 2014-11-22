@@ -113,7 +113,7 @@ var HoneyBadger = (function($this){
 	var self = this;
 	var __cbqueue = {},
 		__logverbose = false,
-		__devmode = ( window.location.host == "localhost:8090" || window.location.host.indexOf('192.168') > -1 ) ? true : false;
+		__devmode = ( window.location.host.indexOf("localhost") > -1 || window.location.host.indexOf('192.168') > -1 ) ? true : false;
 
 	var public = {}, protected = {};
 	var Emit = new Emitter(protected);
