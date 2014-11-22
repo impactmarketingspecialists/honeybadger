@@ -86,7 +86,7 @@ module.exports = function(grunt) {
         {
           expand: true,
           cwd: 'src',
-          src: ['data-manager.js'],
+          src: ['admin.js'],
           dest: 'release/admin'
         },
         {
