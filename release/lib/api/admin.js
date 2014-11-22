@@ -1,5 +1,6 @@
 var ftp = require('../helpers/transports/ftp');
 var rets = require('../helpers/transports/rets');
+var csv = require('../helpers/csv');
 
 var clog = function(target, client){
     return function(data){
@@ -86,51 +87,32 @@ module.exports = {
                             _log('<div class="text-success">Completed reading source file from remote file-system.</div>');
                         });
 
-                        var parseCSV = function(delimiter,quotes,escape){
-                            var errors = false;
-                            _log('<div class="text-info">Streaming to CSV extraction engine.</div>');
-                            var libcsv = require('csv-parse');
-                            var headers = null;
-                            _log('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
-                            _log('<div class="text-info">Using quote character: '+quotes+'</div>');
-                            _log('<div class="text-info">Using escape character: "</div>');
-                            var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-                                if (head.length <= 1) {
-                                    errors = true;
-                                    _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                    process.nextTick(function(){
-                                        callback('onExtractorTest','Unable to parse column headers from data stream',null);
-                                    });
-                                } else {
-                                    headers = head;
-                                    _log('<div class="text-success">CSV extraction engine was found the following column headers.</div>');
-                                    _log('<pre>'+head.join("\n")+'</pre>');
-                                }
-                            }});
+                        var _delim = { csv: ',', tsv: "\t", pipe: '|' };
+                        var _quot = { default: '', quotes: '"' };
 
-                            parser.on('finish',function(){
-                                _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                        csv.parse(_delim[ extractor.target.format || csv ], _quot.default, stream, function(err,res){
+                            if (err === 'headers') {
+                                _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                 process.nextTick(function(){
-                                    if (!errors) callback('onExtractorTest',null,{headers:headers});
-                                })
-                            });
-
-                            parser.on('error',function(err){
+                                    callback('onExtractorTest','Unable to parse column headers from data stream',null);
+                                });
+                                return;
+                            } else if (err) {
                                 console.log(err);
                                 _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                 process.nextTick(function(){
                                     callback('onExtractorTest','Unable to parse data stream',null);
-                                })
+                                });
+                                return;
+                            }
+
+                            _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
+                            _log('<pre>'+res.headers.join("\n")+'</pre>');
+                            _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                            process.nextTick(function(){
+                                callback('onExtractorTest',null,{headers:res.headers});
                             });
-
-                            stream.pipe(parser);
-                        };
-
-
-                        var _delin = { csv: ',', tsv: "\t", pipe: '|' };
-                        var _esc = { default: '', quotes: '"' };
-
-                        parseCSV( _delin[ extractor.target.format || csv ], _esc.default );
+                        });
                     });
                 });
             } else if (src.source.type === 'RETS') {
