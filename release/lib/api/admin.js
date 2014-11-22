@@ -126,25 +126,11 @@ module.exports = {
                             stream.pipe(parser);
                         };
 
-                        console.log(extractor.target)
 
-                        switch(extractor.target.format)
-                        {
-                            case "csv":
-                                parseCSV(',','');
-                            break;
-                            case "tsv":
-                                parseCSV("\t",'');
-                            break;
-                            case "pipe":
-                                parseCSV('|','');
-                            break;
-                            default:
-                                _log('<div class="text-danger">Invalid target format.</div>');
-                                process.nextTick(function(){
-                                    callback('onExtractorTest','Invalid target format',null);
-                                });                                    
-                        }
+                        var _delin = { csv: ',', tsv: "\t", pipe: '|' };
+                        var _esc = { default: '', quotes: '"' };
+
+                        parseCSV( _delin[ extractor.target.format || csv ], _esc.default );
                     });
                 });
             } else if (src.source.type === 'RETS') {
