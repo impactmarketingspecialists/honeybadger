@@ -1,8 +1,10 @@
 var ftp = require('../helpers/transports/ftp');
 var rets = require('../helpers/transports/rets');
 
-var clog = function(target, data){
-    client.send('{ "event":"log-stream", "target": "'+target+'", "body":'+((typeof data === 'string')?data:JSON.stringify(e))+'}');
+var clog = function(target, client){
+    return function(data){
+        client.send('{ "event":"log-stream", "target": "'+target+'", "body":'+JSON.stringify(data)+'}');
+    };
 };
 
 module.exports = {
@@ -46,48 +48,156 @@ module.exports = {
     },
     "extractor.test": function(extractor, callback, client) {
 
+        var _log = clog('extractor-log-body',client);
+        _log('Testing extraction from source: '+ extractor.source);
+        
         //We want to pipe extraction events back to the client
-        clog('Testing extraction from source: '+ extractor.source);
         DataManager.getSource(extractor.source,function(err, body){
-            if (!err) {
-                clog('<div class="text-success">Extraction source is valid.</div>');
-                var src = body;
-                if (src.source.type === 'FTP') {
+            if (err) {
+                console.trace(err);
+                _log('<div class="text-danger">Extraction source is bad.</div>');
+                return callback('onExtractorTest',err,null);
+            }
 
-                    clog('<div class="text-info">Extraction source is an FTP resource.</div>');
-                    var client = require('ftp');
-                    var c = new client();
+            _log('<div class="text-success">Extraction source is valid.</div>');
+            var source = body;
 
-                    c.on('ready', function() {
-                        clog('<div class="text-success">Connection established.</div>');
-                        clog('<div class="text-info">Searching for extraction target.</div>');
+            /**
+             * We're going to leave in a bunch of extra steps here for the sake
+             * of verbosity to the client. I had intended to simply this all down
+             * to just instantiating an extractor and running a test, but I
+             * decided that it was nice to have the extra info pumping to the UI.
+             */
+            if (source.source.type === 'FTP') {
+                _log('<div class="text-info">Extraction source is an FTP resource.</div>');
 
-                        c.get(extractor.target.res, function(err, stream){
-                            if (err) {
-                                clog('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
-                                clog(err);
-                                console.log(err);
+                ftp.validate(source.source, function(err,body){
+                    (!err) ? _log('<div class="text-success">Connection established.</div>') : _log('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
+                    if (err) return callback('onExtractorTest',err,null);
+
+                    _log('<div class="text-info">Searching for extraction target.</div>');
+                    ftp.get(source.source, extractor.target.res, function(err,stream){
+                        (!err) ? _log('<div class="text-success">Connection established.</div>') : _log('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
+                        if (err) return callback('onExtractorTest',err,null);
+
+                        _log('<div class="text-success">Discovered source file on remote file-system.</div>');
+
+                        stream.once('close', function(){ 
+                            _log('<div class="text-success">Completed reading source file from remote file-system.</div>');
+                        });
+
+                        var parseCSV = function(delimiter,quotes,escape){
+                            var errors = false;
+                            _log('<div class="text-info">Streaming to CSV extraction engine.</div>');
+                            var libcsv = require('csv-parse');
+                            var headers = null;
+                            _log('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
+                            _log('<div class="text-info">Using quote character: '+quotes+'</div>');
+                            _log('<div class="text-info">Using escape character: "</div>');
+                            var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
+                                if (head.length <= 1) {
+                                    errors = true;
+                                    _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
+                                    process.nextTick(function(){
+                                        callback('onExtractorTest','Unable to parse column headers from data stream',null);
+                                    });
+                                } else {
+                                    headers = head;
+                                    _log('<div class="text-success">CSV extraction engine was found the following column headers.</div>');
+                                    _log('<pre>'+head.join("\n")+'</pre>');
+                                }
+                            }});
+
+                            parser.on('finish',function(){
+                                _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                                 process.nextTick(function(){
-                                    callback('onExtractorTest',err,null);
-                                });
-                                return;
-                            }
-
-                            clog('<div class="text-success">Discovered source file on remote file-system.</div>');
-                            stream.once('close', function(){ 
-                                clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
-                                c.end(); 
+                                    if (!errors) callback('onExtractorTest',null,{headers:headers});
+                                })
                             });
 
-                            var parseCSV = function(delimiter,quotes,escape){
-                                var errors = false;
-                                clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
+                            parser.on('error',function(err){
+                                console.log(err);
+                                _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
+                                process.nextTick(function(){
+                                    callback('onExtractorTest','Unable to parse data stream',null);
+                                })
+                            });
+
+                            stream.pipe(parser);
+                        };
+
+                        console.log(extractor.target)
+
+                        switch(extractor.target.format)
+                        {
+                            case "csv":
+                                parseCSV(',','');
+                            break;
+                            case "tsv":
+                                parseCSV("\t",'');
+                            break;
+                            case "pipe":
+                                parseCSV('|','');
+                            break;
+                            default:
+                                _log('<div class="text-danger">Invalid target format.</div>');
+                                process.nextTick(function(){
+                                    callback('onExtractorTest','Invalid target format',null);
+                                });                                    
+                        }
+                    });
+                });
+            } else if (src.source.type === 'RETS') {
+                clog('<div class="text-info">Extraction source is a RETS resource.</div>');
+                var librets = require('rets-client');
+
+                var uri = url.parse(src.source.uri);
+
+                var client = librets.createConnection({
+                    host: uri.hostname,
+                    port: uri.port,
+                    protocol: uri.protocol,
+                    path: uri.path,
+                    user: src.source.auth.username,
+                    pass: src.source.auth.password,
+                    version: src.source.version || '1.7.2',
+                    agent: { user: src.source.auth.userAgentHeader, password: src.source.auth.userAgentPassword }
+                });
+
+                client.once('connection.success',function(client){
+                    console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+                    clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
+                    clog('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
+                    clog('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
+                    clog('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
+                    clog('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
+                    var qry = {
+                        SearchType: extractor.target.type,
+                        Class: extractor.target.class,
+                        Query: extractor.target.res,
+                        Format: 'COMPACT-DECODED',
+                        Limit: 1
+                    };
+                    client.searchQuery(qry, function( error, data ) {
+
+                        if (error) {
+                            clog('<div class="text-danger">Query did not execute.</div>');
+                            clog('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
+                            console.log(error);
+                            callback('onExtractorTest',error, null);
+                            return;
+                        } else if (data.type == 'status') {
+                            clog('<div class="text-warning">'+data.text+'</div>');
+                            if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                            callback('onExtractorTest',null,{data:data});
+                            return;
+                        } else {
+                            if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                            else if (data.data && data.data.length) {
                                 var libcsv = require('csv-parse');
                                 var headers = null;
-                                clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
-                                clog('<div class="text-info">Using quote character: '+quotes+'</div>');
-                                clog('<div class="text-info">Using escape character: "</div>');
-                                var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
+                                var errors = false;
+                                var parser = libcsv({delimiter:'\t', quote: '', columns: function(head){
                                     if (head.length <= 1) {
                                         errors = true;
                                         clog('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
@@ -96,7 +206,7 @@ module.exports = {
                                         });
                                     } else {
                                         headers = head;
-                                        clog('<div class="text-success">CSV extraction engine was found the following column headers.</div>');
+                                        clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
                                         clog('<pre>'+head.join("\n")+'</pre>');
                                     }
                                 }});
@@ -104,7 +214,8 @@ module.exports = {
                                 parser.on('finish',function(){
                                     clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                                     process.nextTick(function(){
-                                        if (!errors) callback('onExtractorTest',null,{headers:headers});
+                                        clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
+                                        if (!errors) callback('onExtractorTest',null,{headers:headers, data:data});
                                     })
                                 });
 
@@ -116,143 +227,17 @@ module.exports = {
                                     })
                                 });
 
-                                stream.pipe(parser);
-                            };
-
-                            console.log(extractor.target)
-
-                            switch(extractor.target.format)
-                            {
-                                case "csv":
-                                    parseCSV(',','');
-                                break;
-                                case "tsv":
-                                    parseCSV("\t",'');
-                                break;
-                                case "pipe":
-                                    parseCSV('|','');
-                                break;
-                                default:
-                                    clog('<div class="text-danger">Invalid target format.</div>');
-                                    process.nextTick(function(){
-                                        callback('onExtractorTest','Invalid target format',null);
-                                    });                                    
+                                parser.write(data.data);
+                                parser.end();
                             }
-
-                        });
-
+                        }
                     });
+                });
 
-                    c.on('error', function(e) {
-                        clog('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
-                        clog(e);
-                        process.nextTick(function(){
-                            callback('onExtractorTest',e,null);
-                        });
-                    });
-
-                    c.connect({
-                        host: src.source.uri,
-                        port: src.source.port,
-                        user: src.source.auth.username,
-                        password: src.source.auth.password
-                    });
-                } else if (src.source.type === 'RETS') {
-                    clog('<div class="text-info">Extraction source is a RETS resource.</div>');
-                    var librets = require('rets-client');
-
-                    var uri = url.parse(src.source.uri);
-
-                    var client = librets.createConnection({
-                        host: uri.hostname,
-                        port: uri.port,
-                        protocol: uri.protocol,
-                        path: uri.path,
-                        user: src.source.auth.username,
-                        pass: src.source.auth.password,
-                        version: src.source.version || '1.7.2',
-                        agent: { user: src.source.auth.userAgentHeader, password: src.source.auth.userAgentPassword }
-                    });
-
-                    client.once('connection.success',function(client){
-                        console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                        clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
-                        clog('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
-                        clog('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
-                        clog('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-                        clog('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
-                        var qry = {
-                            SearchType: extractor.target.type,
-                            Class: extractor.target.class,
-                            Query: extractor.target.res,
-                            Format: 'COMPACT-DECODED',
-                            Limit: 1
-                        };
-                        client.searchQuery(qry, function( error, data ) {
-
-                            if (error) {
-                                clog('<div class="text-danger">Query did not execute.</div>');
-                                clog('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                                console.log(error);
-                                callback('onExtractorTest',error, null);
-                                return;
-                            } else if (data.type == 'status') {
-                                clog('<div class="text-warning">'+data.text+'</div>');
-                                if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                callback('onExtractorTest',null,{data:data});
-                                return;
-                            } else {
-                                if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                else if (data.data && data.data.length) {
-                                    var libcsv = require('csv-parse');
-                                    var headers = null;
-                                    var errors = false;
-                                    var parser = libcsv({delimiter:'\t', quote: '', columns: function(head){
-                                        if (head.length <= 1) {
-                                            errors = true;
-                                            clog('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                            process.nextTick(function(){
-                                                callback('onExtractorTest','Unable to parse column headers from data stream',null);
-                                            });
-                                        } else {
-                                            headers = head;
-                                            clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                                            clog('<pre>'+head.join("\n")+'</pre>');
-                                        }
-                                    }});
-
-                                    parser.on('finish',function(){
-                                        clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                                        process.nextTick(function(){
-                                            clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
-                                            if (!errors) callback('onExtractorTest',null,{headers:headers, data:data});
-                                        })
-                                    });
-
-                                    parser.on('error',function(err){
-                                        console.log(err);
-                                        clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                        process.nextTick(function(){
-                                            callback('onExtractorTest','Unable to parse data stream',null);
-                                        })
-                                    });
-
-                                    parser.write(data.data);
-                                    parser.end();
-                                }
-                            }
-                        });
-                    });
-
-                    client.once('connection.error',function(error, client){
-                        console.error( 'Connection failed: %s.', error.message );
-                        callback('onExtractorTest',error, null);
-                    });
-                }
-            }
-            else {
-                clog('<div class="text-danger">Extraction source is bad.</div>');
-                callback('onExtractorTest',err,null);
+                client.once('connection.error',function(error, client){
+                    console.error( 'Connection failed: %s.', error.message );
+                    callback('onExtractorTest',error, null);
+                });
             }
         });
     },

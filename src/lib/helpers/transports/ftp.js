@@ -72,10 +72,12 @@ Object.defineProperties(module.exports,{
 
 			c.on('ready', function() {
 				c.get(target, function(err, stream){
-					stream.once('close', function(){ 
+					if (!err) stream.once('close', function(){ 
 						c.end(); 
+					}); else c.end();
+					process.nextTick(function(){
+						if (callback) callback(err, stream);
 					});
-					callback(err, stream);
 				});
 			});
 
