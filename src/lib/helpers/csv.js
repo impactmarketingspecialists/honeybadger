@@ -2,7 +2,7 @@ var libftp = require('ftp');
 
 Object.defineProperties(module.exports,{
 	parse: {
-		value: function(delimiter, quotes, stream, callback){
+		value: function(delimiter, quotes, data, callback){
             var libcsv = require('csv-parse');
             var errors = false;
             var headers = null;
@@ -29,7 +29,11 @@ Object.defineProperties(module.exports,{
                 })
             });
 
-            stream.pipe(parser);
+            if (typeof data.pipe === 'function') data.pipe(parser);
+            else if (typeof data.data !== 'undefined') {
+                parser.write(data.data);
+                parser.end();
+            }
 		},
 		enumerable: true
 	}

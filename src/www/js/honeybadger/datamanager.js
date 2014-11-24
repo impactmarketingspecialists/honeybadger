@@ -197,16 +197,18 @@
 
 	this.retsExplore = function(source, callback)
 	{
-		$this.exec('rets.getClassifications',[source],callback);
+		$this.exec('rets.getMetadataResources',[source],callback);
 	};
 
 	this.retsBrowse = function(source, callback)
 	{
-		$this.exec('rets.getMetadataResources',[source],callback);
+		$this.exec('rets.getClassifications',[source],callback);
+		// $this.exec('rets.getMetadataTable',[source],callback);
 	};
 
 	this.retsInspect = function(source, callback)
 	{
+		// $this.exec('rets.getMetadataResources',[source],callback);
 		$this.exec('rets.getMetadataTable',[source],callback);
 	};
 
