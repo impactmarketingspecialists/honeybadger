@@ -29,8 +29,17 @@ Object.defineProperties(module.exports,{
                 })
             });
 
-            if (typeof data.pipe === 'function') data.pipe(parser);
-            else if (typeof data.data !== 'undefined') {
+            /**
+             * Let's see if data has a pipe() method.
+             *
+             * I'm using this as a dirty method to see if data
+             * is a stream. We like streams :) we'll return it so
+             * it's chainable.
+             */
+            if (typeof data.pipe === 'function') {
+                data.pipe(parser);
+                return data;
+            } else if (typeof data.data !== 'undefined') {
                 parser.write(data.data);
                 parser.end();
             }

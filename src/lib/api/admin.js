@@ -881,104 +881,27 @@ module.exports = {
             }
         });
     },
-    "rets.getClassifications": function(source, callback, client) {
+    "rets.getClassifications": function(source, callback) {
         DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                path: uri.path,
-                protocol: uri.protocol,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getClassifications( source.source.rets.resource, function has_meta( error, meta ) {
-                    if( error ) {
-                        console.log( 'Error while fetching classifications: %s.', error.message );
-                        callback('onRETSBrowse',error, null);
-                    } else {
-                        // console.log( 'Fetched %d classifications.', Object.keys( meta.data ).length );
-                        // console.log( 'Classification keys: %s.', Object.keys( meta.data ) );
-                        callback('onRETSBrowse',null,{success:true, meta:meta});
-                    }
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSBrowse',error, null);
+            rets.getClassifications(source.source, function(err, data){
+                if (!err) callback('onRETSBrowse',null,{success:true, meta:data});
+                else callback('onRETSBrowse',err,null);
             });
         });
     },
-    "rets.getMetadataResources": function(source, callback, client) {
+    "rets.getMetadataResources": function(source, callback) {
         DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                protocol: uri.protocol,
-                path: uri.path,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getMetadataResources('0', function( error, data ) {
-                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                    callback('onRETSExplore',null,{success:true, meta:data});
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSExplore',error, null);
+            rets.getMetadataResources(source.source, function(err, data){
+                if (!err) callback('onRETSExplore',null,{success:true, meta:data});
+                else callback('onRETSExplore',err,null);
             });
         });
     },
     "rets.getMetadataTable": function(source, callback, client) {
         DataManager.getSource(source.id,function(err,src){
-            var librets = require('rets-client');
-
-            var uri = url.parse(source.source.uri);
-
-            var client = librets.createConnection({
-                host: uri.hostname,
-                port: uri.port,
-                protocol: uri.protocol,
-                path: uri.path,
-                user: source.source.auth.username,
-                pass: source.source.auth.password,
-                version: source.source.version || '1.7.2',
-                agent: { user: source.source.auth.userAgentHeader, password: source.source.auth.userAgentPassword }
-            });
-
-            client.once('connection.success',function(client){
-                console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-                client.getMetadataTable(source.source.rets.resource, source.source.rets.classification, function( error, data ) {
-                    // console.log( require( 'util' ).inspect( error, { showHidden: false, colors: true, depth: 5 } ) )
-                    // console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-                    callback('onRETSInspect',null,{success:true, meta:data});
-                });
-            });
-
-            client.once('connection.error',function(error, client){
-                console.error( 'Connection failed: %s.', error.message );
-                callback('onRETSInspect',error, null);
+            rets.getMetadataTable(source.source, function(err, data){
+                if (!err) callback('onRETSInspect',null,{success:true, meta:data});
+                else callback('onRETSInspect',err,null);
             });
         });
     },
