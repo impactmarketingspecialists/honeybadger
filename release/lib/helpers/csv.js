@@ -20,13 +20,13 @@ Object.defineProperties(module.exports,{
             parser.on('finish',function(){
                 process.nextTick(function(){
                     if (!errors) callback(null,{headers:headers});
-                })
+                });
             });
 
             parser.on('error',function(err){
                 process.nextTick(function(){
                     callback(err,null);
-                })
+                });
             });
 
             /**
