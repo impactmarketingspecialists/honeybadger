@@ -57,13 +57,30 @@
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
+
+			/**
+			 * Reset the list of sources in the extractor dialog
+			 */
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
+
 			$(data).each(function(index, item){
+
+				/**
+				 * Add Source & Edit Dialog Hooks
+				 * 
+				 * Add the source to the sources page and setup
+				 * a click handler for editing.
+				 */
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					$admin.UI.showWizard('sourceEditor');
 					$admin.UI.setupWizard('sourceEditor', $DM.getSource(item.id).value);
 				}));
+
+				/**
+				 * Add an option to the list of sources in the extractor dialog.
+				 */
 				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
+
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
@@ -79,6 +96,8 @@
 				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('extractorWizard');
 					setupWizard('extractorWizard', item.value);
+
+					$('#extractorWizard [am-Button~=next]').prop("disabled", false);
 				}));
 				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');

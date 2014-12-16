@@ -9438,6 +9438,7 @@ var Admin = (function($this,$){
 		$('#extractorWizard [am-Button~=finish]').hide();
 
 		/**
+		 * FTP Extractor Browse Button
 		 * From the extractor Wizard; if selected source is FTP, bind to the browse button
 		 * to find a target from the FTP source
 		 */
@@ -9919,21 +9920,39 @@ var Admin = (function($this,$){
 				else if (data.source.type == 'XML') $('#source_XML').show();	
 			break;
 			case "extractorWizard":
+
+				/**
+				 * Load Saved Extractor for Editing
+				 */
+				
+				/**
+				 * Populate the first page of the extractor dialog
+				 */
 				$('#extractorName').val(data.name);
 				$('#ext-source-select').val(data.source);
 				$('#ext-source-select').val(data.source);
-				if (data.target.type == 'file') {
-					$('#ftpFileName').val(data.target.res);
-					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
-				}
 
+				/**
+				 * Setup the wizard based on the source type
+				 */
 				var type = $DM.getSource(data.source).value.source.type;
 				$('#extractorWizard .source-options').hide();
 				if (type === 'FTP') {
+					if (data.target.type == 'file') {
+					}
+					console.log(data);
+					$('#ftpFileName').val(data.target.res);
+					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
 					$('#ext-ftp-browser .files').empty();
 					$('#ext-ftp-options').show();
+					$('.ext-ftp-options').show();
+					$('.ext-rets-options').hide();
+					$('#ext-rets-options').hide();
 				}
 				else if (type === 'RETS') {
+					$('#ext-ftp-options').hide();
+					$('.ext-ftp-options').hide();
+					$('.ext-rets-options').show();
 					$('#ext-rets-options').show();
 				}
 			break;
@@ -10247,13 +10266,30 @@ var Admin = (function($this,$){
 			$('#activeSources > tbody').html('');
 			$('#inactiveSources > tbody').html('');
 			$('#sourceList > tbody').html('');
+
+			/**
+			 * Reset the list of sources in the extractor dialog
+			 */
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
+
 			$(data).each(function(index, item){
+
+				/**
+				 * Add Source & Edit Dialog Hooks
+				 * 
+				 * Add the source to the sources page and setup
+				 * a click handler for editing.
+				 */
 				$('#sourceList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					$admin.UI.showWizard('sourceEditor');
 					$admin.UI.setupWizard('sourceEditor', $DM.getSource(item.id).value);
 				}));
+
+				/**
+				 * Add an option to the list of sources in the extractor dialog.
+				 */
 				$('#ext-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
+
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
@@ -10269,6 +10305,8 @@ var Admin = (function($this,$){
 				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('extractorWizard');
 					setupWizard('extractorWizard', item.value);
+
+					$('#extractorWizard [am-Button~=next]').prop("disabled", false);
 				}));
 				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');

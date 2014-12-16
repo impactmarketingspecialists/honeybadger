@@ -152,6 +152,7 @@
 		$('#extractorWizard [am-Button~=finish]').hide();
 
 		/**
+		 * FTP Extractor Browse Button
 		 * From the extractor Wizard; if selected source is FTP, bind to the browse button
 		 * to find a target from the FTP source
 		 */
@@ -633,21 +634,39 @@
 				else if (data.source.type == 'XML') $('#source_XML').show();	
 			break;
 			case "extractorWizard":
+
+				/**
+				 * Load Saved Extractor for Editing
+				 */
+				
+				/**
+				 * Populate the first page of the extractor dialog
+				 */
 				$('#extractorName').val(data.name);
 				$('#ext-source-select').val(data.source);
 				$('#ext-source-select').val(data.source);
-				if (data.target.type == 'file') {
-					$('#ftpFileName').val(data.target.res);
-					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
-				}
 
+				/**
+				 * Setup the wizard based on the source type
+				 */
 				var type = $DM.getSource(data.source).value.source.type;
 				$('#extractorWizard .source-options').hide();
 				if (type === 'FTP') {
+					if (data.target.type == 'file') {
+					}
+					console.log(data);
+					$('#ftpFileName').val(data.target.res);
+					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
 					$('#ext-ftp-browser .files').empty();
 					$('#ext-ftp-options').show();
+					$('.ext-ftp-options').show();
+					$('.ext-rets-options').hide();
+					$('#ext-rets-options').hide();
 				}
 				else if (type === 'RETS') {
+					$('#ext-ftp-options').hide();
+					$('.ext-ftp-options').hide();
+					$('.ext-rets-options').show();
 					$('#ext-rets-options').show();
 				}
 			break;
