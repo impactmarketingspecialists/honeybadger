@@ -82,13 +82,23 @@
 						<label><input type="radio" name="ext-archive-format" value="gzip"/> .tar.gz</label>
 					</fieldset>
 				</div>
-				<div class="form-group" id="ext-delimited-text-opts">
-					<label>Text Deliniator</label>
-					<fieldset class="checkbox inline-fieldset">
-						<label><input type="radio" name="ext-text-format" value="csv" checked/> , Comma</label> &nbsp;
-						<label><input type="radio" name="ext-text-format" value="tsv"/> \t Tab</label> &nbsp;
-						<label><input type="radio" name="ext-text-format" value="pipe"/> | Pipe</label>
-					</fieldset>					
+				<div id="ext-delimited-text-opts">
+					<div class="form-group">
+						<label>Text Delimiter</label>
+						<fieldset class="checkbox inline-fieldset">
+							<label><input type="radio" name="ext-csv-delimiter" value="csv" checked/> , Comma</label> &nbsp;
+							<label><input type="radio" name="ext-csv-delimiter" value="tsv"/> \t Tab</label> &nbsp;
+							<label><input type="radio" name="ext-csv-delimiter" value="pipe"/> | Pipe</label>
+						</fieldset>
+					</div>
+					<div class="form-group">
+						<label>Escape Character</label>
+						<fieldset class="checkbox inline-fieldset">
+							<label><input type="radio" name="ext-csv-escape" value="none"/> None</label> &nbsp;
+							<label><input type="radio" name="ext-csv-escape" value="dquote" checked/> Double Quote (")</label> &nbsp;
+							<label><input type="radio" name="ext-csv-escape" value="squote"/> Single Quote (')</label>
+						</fieldset>
+					</div>			
 				</div>
 			</div>
 			<div class="ext-rets-options">

@@ -87,10 +87,16 @@ module.exports = {
                             _log('<div class="text-success">Completed reading source file from remote file-system.</div>');
                         });
 
+                        /**
+                         * We can only do CSV for the moment
+                         */
+                        if (extractor.target.format !== 'delimited-text') return;
+
                         var _delim = { csv: ',', tsv: "\t", pipe: '|' };
                         var _quot = { default: '', quotes: '"' };
 
-                        csv.parse(_delim[ extractor.target.format || csv ], _quot.default, stream, function(err,res){
+
+                        csv.parse(_delim[ extractor.target.options.delimiter || csv ], _quot.default, stream, function(err,res){
                             if (err === 'headers') {
                                 _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                 process.nextTick(function(){

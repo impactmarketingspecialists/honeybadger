@@ -645,6 +645,7 @@
 				$('#extractorName').val(data.name);
 				$('#ext-source-select').val(data.source);
 				$('#ext-source-select').val(data.source);
+				$('[name=ext-data-format]').val(data.target.format);
 
 				/**
 				 * Setup the wizard based on the source type
@@ -652,16 +653,20 @@
 				var type = $DM.getSource(data.source).value.source.type;
 				$('#extractorWizard .source-options').hide();
 				if (type === 'FTP') {
-					if (data.target.type == 'file') {
-					}
-					console.log(data);
+
 					$('#ftpFileName').val(data.target.res);
-					$('#extractorWizard input[value='+data.target.format+']').prop('checked',true);
 					$('#ext-ftp-browser .files').empty();
 					$('#ext-ftp-options').show();
 					$('.ext-ftp-options').show();
 					$('.ext-rets-options').hide();
 					$('#ext-rets-options').hide();
+
+					
+					if (data.target.format === 'delimited-text') {
+						$('#extractorWizard [name=ext-unarchive][value='+data.target.options.unarchive+']').prop('checked',true);
+						$('#extractorWizard [name=ext-csv-delimiter][value='+data.target.options.delimiter+']').prop('checked',true);
+						$('#extractorWizard [name=ext-csv-escape][value='+data.target.options.escape+']').prop('checked',true);
+					}
 				}
 				else if (type === 'RETS') {
 					$('#ext-ftp-options').hide();
@@ -726,17 +731,33 @@
 	 */
 	var ext = function(){
 		var stype = $DM.getSource($('#ext-source-select').val()).value.source.type;
-		console.log(stype);
-		return {
+
+		var extractor = {
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
 			target: {
 				type: (stype == 'RETS') ? $('#ext-rets-resource').val() : "file",
 				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
 				res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
-				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-text-format]:checked').val()
+				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-data-format]').val()
 			}
 		};
+
+		switch(stype){
+			case "FTP":
+				if (extractor.target.format === 'delimited-text') {
+					extractor.target.options = {
+						unarchive: $('[name=ext-unarchive]:checked').val(),
+						delimiter: $('[name=ext-csv-delimiter]:checked').val(),
+						escape: $('[name=ext-csv-escape]:checked').val()
+					};
+				}
+			break;
+			case "RETS":
+			break;
+		}
+
+		return extractor;
 	};
 
 	/**
