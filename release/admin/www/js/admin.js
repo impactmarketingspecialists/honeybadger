@@ -9911,6 +9911,9 @@ var Admin = (function($this,$){
 				$('#sourceEditor').attr('data-id',data._id);
 				$('#sourceEditor').attr('data-rev',data._rev);
 
+				$('#sourceEditor [am-Button~=finish]').prop('disabled',true).show();
+				$('#sourceEditor [am-Button~=next]').prop('disabled',true).hide();
+
 				$('#sourcename').val(data.name);
 				$('#sourcetype').val(data.source.type);
 				if (data.source.type == 'RETS') {
@@ -9991,6 +9994,9 @@ var Admin = (function($this,$){
 				}
 			break;
 			case "transformWizard":
+				$('#transformWizard').attr('data-id',data._id);
+				$('#transformWizard').attr('data-rev',data._rev);
+
 				$('#transformerName').val(data.name);
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
@@ -10000,6 +10006,9 @@ var Admin = (function($this,$){
 				});
 			break;
 			case "loaderWizard":
+				$('#loaderWizard').attr('data-id',data._id);
+				$('#loaderWizard').attr('data-rev',data._rev);
+
 				$('#loaderName').val(data.name);
 				$('#ldr-source-select').val(data.transform);
 				$('#ldr-target-type').val(data.target.type);
@@ -10047,9 +10056,6 @@ var Admin = (function($this,$){
 	var ext = function(){
 		var stype = $DM.getSource($('#ext-source-select').val()).value.source.type;
 
-		var id = $('#extractorWizard').attr('data-id');
-		var _rev = $('#extractorWizard').attr('data-rev');
-
 		var extractor = {
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
@@ -10061,6 +10067,8 @@ var Admin = (function($this,$){
 			}
 		};
 
+		var id = $('#extractorWizard').attr('data-id');
+		var _rev = $('#extractorWizard').attr('data-rev');
 		if (id && _rev) {
 			extractor._id = id;
 			extractor._rev = _rev;
@@ -10099,6 +10107,13 @@ var Admin = (function($this,$){
 				map: $('#trn-map').val()
 			}
 		};
+
+		var id = $('#transformWizard').attr('data-id');
+		var _rev = $('#transformWizard').attr('data-rev');
+		if (id && _rev) {
+			transform._id = id;
+			transform._rev = _rev;
+		}
 
 		$('#transformNormalize .item input:text:enabled').each(function(index,item){
 			transform.transform.input.push($('.name', $(item).parent().parent()).text());
@@ -10319,6 +10334,7 @@ var Admin = (function($this,$){
 	};
 	
 	this.sources = function() {
+		console.log('LOADING SOURCES');
 		// Do some preloader stuff here
 		return function render(data) {
 			$('#activeSources > tbody').html('');

@@ -327,6 +327,13 @@ var HoneyBadger = (function($this){
 	this.source = function(name, type, properties){
 
 	};
+	this.validateSource = function(source, callback){
+		$this.exec('source.test', [source], callback);
+	};
+
+	this.saveSource = function(source, callback){
+		$this.exec('source.save', [source], callback);
+	};
 
 	this.extractor = {};
 	this.extractor.validate = function(){
@@ -375,13 +382,6 @@ var HoneyBadger = (function($this){
 		$this.exec('loader.test', [ldr], callback);
 	};
 
-	this.validateSource = function(source, callback){
-		$this.exec('source.test', [source], callback);
-	};
-
-	this.saveSource = function(source, callback){
-		$this.exec('source.save', [source], callback);
-	};
 
 	this.ftpBrowse = function(source, callback)
 	{

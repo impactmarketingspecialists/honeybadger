@@ -97,7 +97,12 @@ module.exports = new (function(){
             }
             source.type = 'dsn'; // Set the document type to Data Source Name // added by dan to ensure these are set since they do not have a field to change them
             source.status = 'active'; // Activate the source // added by dan to ensure these are set since they do not have a field to change them
-            db.insert(source, source._id, callback);
+            source.activatedOn = Date.now();
+            db.insert(source, null, function(err, body){
+                refreshSources(function(){
+                    if (callback) callback(err, body);
+                });
+            });
         };
 
         var _newSource = function(){
@@ -105,8 +110,9 @@ module.exports = new (function(){
             source.status = 'active'; // Activate the source
             source.activatedOn = Date.now();
             db.insert(source, null, function(err, body){
-                refreshSources();
-                if (callback) callback(err, body);
+                refreshSources(function(){
+                    if (callback) callback(err, body);
+                });
             });
         };
 
@@ -159,7 +165,13 @@ module.exports = new (function(){
                 return false;
             }
 
-            db.insert(transformer, transformer._id, callback);
+            transformer.type = 'transformer'; // Set the document type to Data Source Name
+            transformer.status = 'active'; // Activate the source
+            transformer.activatedOn = Date.now();
+            db.insert(transformer, transformer._id, function(err,body){
+                refreshTransformers();
+                if (callback) callback(err, body);
+            });
         };
 
         var _newTransformer = function(){

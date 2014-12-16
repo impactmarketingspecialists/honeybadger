@@ -52,6 +52,7 @@
 	};
 	
 	this.sources = function() {
+		console.log('LOADING SOURCES');
 		// Do some preloader stuff here
 		return function render(data) {
 			$('#activeSources > tbody').html('');
