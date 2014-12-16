@@ -9972,6 +9972,22 @@ var Admin = (function($this,$){
 					$('.ext-ftp-options').hide();
 					$('.ext-rets-options').show();
 					$('#ext-rets-options').show();
+
+					$('#extractorWizard .rets-resource').removeClass('hide').show();
+					$('#extractorWizard .rets-classification').removeClass('hide').show();
+					// $('#ext-rets-resource')
+
+					$('#ext-rets-query').val(data.target.res);					
+					$DM.retsExplore( { source: { rets: { resource: data.target.res } } }, function(e){
+						if (e.body.meta) {
+							$('#ext-rets-resource').html('<option>-- Select a data resource --</option>');
+							$.each(e.body.meta.data,function(index,item){
+								// console.log(item);
+								$('#ext-rets-resource').append('<option value="'+item.ResourceID[0]+'">'+item.VisibleName[0]+'</option>');
+								$('#ext-rets-options .rets-resource').removeClass('hide').show();
+							});
+						}
+					});
 				}
 			break;
 			case "transformWizard":
