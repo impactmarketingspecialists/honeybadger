@@ -9702,7 +9702,8 @@ var Admin = (function($this,$){
 
 			$DM.transformer.sample(s.value,function(e){
 				if (!e.err) {
-					update('loaderDefinition',e.body);
+					Admin.View.loaderDefinition()(e.body);
+					// update('loaderDefinition',e.body);
 					trnSample = e.body;
 				} 
 			});
@@ -9954,7 +9955,8 @@ var Admin = (function($this,$){
 
 				$DM.transformer.sample($DM.getTransformer(data.transform).value,function(e){
 					if (!e.err) {
-						update('loaderDefinition',e.body);
+						Admin.View.loaderDefinition()(e.body);
+						// update('loaderDefinition',e.body);
 						trnSample = e.body;
 					} 
 				});
