@@ -308,7 +308,7 @@ module.exports = {
                     rets.validate(source.source, function(err,client){
                         (!err)? _log('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>'):
                                 _log('<div class="text-danger">There was an error connecting to the RETS resource.</div>');
-                        if (err) return callback('onExtractorTest',err,null);
+                        if (err) return callback('onTransformerTest',err,null);
 
                         _log('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
                         _log('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
@@ -327,12 +327,12 @@ module.exports = {
                                 _log('<div class="text-danger">Query did not execute.</div>');
                                 _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
                                 console.log(error);
-                                callback('onExtractorTest',error, null);
+                                callback('onTransformerTest',error, null);
                                 return;
                             } else if (data.type == 'status') {
                                 _log('<div class="text-warning">'+data.text+'</div>');
                                 if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                callback('onExtractorTest',null,{data:data});
+                                callback('onTransformerTest',null,{data:data});
                                 return;
                             } else {
                                 if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
@@ -340,29 +340,60 @@ module.exports = {
 
                                     _log('<div class="text-success">RETS query received '+data.data.length+' records back.</div>');
 
-                                    csv.parse('\t', '', data, function(err,res){
+                                    var rawheaders = [];
+                                    var headers = [];
+                                    var records = [];
+                                    var trnheaders = [];
+                                    var errors = false;
+
+                                    var xfm = streamTransform(function(record, cb){
+                                        if (records.length >= 10) {
+                                            process.nextTick(function(){
+                                                _log('<div class="text-success">Transform completed successfully.</div>');
+                                                if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
+                                            });
+                                            return;
+                                        }
+
+                                        var rec = {};
+                                        var rstr = '{\n';
+                                        transformer.transform.normalize.forEach(function(item, index){
+                                            var i = rawheaders.indexOf(item.in);
+                                            if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                            rec[item.out] = record[i];
+                                            rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
+                                        });
+                                        rstr += '}'
+
+                                        records.push(rec);
+                                        _log('<pre>'+rstr+'</pre>');
+
+                                        cb(null, record.join('|'));
+                                    }, {parallel: 1});
+
+                                    csv.parse('\t', '"', data, function(err,res){
                                         if (err === 'headers') {
                                             _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                             process.nextTick(function(){
-                                                callback('onExtractorTest','Unable to parse column headers from data stream',null);
+                                                callback('onTransformerTest','Unable to parse column headers from data stream',null);
                                             });
                                             return;
                                         } else if (err) {
                                             console.log(err);
                                             _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                             process.nextTick(function(){
-                                                callback('onExtractorTest','Unable to parse data stream',null);
+                                                callback('onTransformerTest','Unable to parse data stream',null);
                                             });
                                             return;
                                         }
 
+                                        rawheaders = res.headers; 
+
                                         _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
                                         _log('<pre>'+res.headers.join("\n")+'</pre>');
                                         _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                                        process.nextTick(function(){
-                                            callback('onExtractorTest',null,{headers:res.headers});
-                                        });
-                                    });
+                                        
+                                    }).pipe(xfm);
 
                                 }
                             }
@@ -373,298 +404,6 @@ module.exports = {
             });
 
 
-        //         clog('Testing transformer from extractor: '+ extractor.name);
-        //         clog('Testing extractor from source: '+ extractor.source);
-        //         DataManager.getSource(extractor.source,function(err, body){
-        //             if (!err) {
-        //                 clog('<div class="text-success">Extraction source is valid.</div>');
-        //                 var src = body;
-        //                 if (src.source.type === 'FTP') {
-
-        //                     clog('<div class="text-info">Extraction source is an FTP resource.</div>');
-        //                     var client = require('ftp');
-        //                     var c = new client();
-
-        //                     c.on('ready', function() {
-        //                         clog('<div class="text-success">Connection established.</div>');
-        //                         clog('<div class="text-info">Searching for extraction target.</div>');
-
-        //                         c.get(extractor.target.res, function(err, stream){
-        //                             if (err) {
-        //                                 clog('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
-        //                                 clog(err);
-        //                                 console.log(err);
-        //                                 process.nextTick(function(){
-        //                                     callback('onTransformerTest',err,null);
-        //                                 });
-        //                                 return;
-        //                             }
-
-        //                             clog('<div class="text-success">Discovered source file on remote file-system.</div>');
-        //                             stream.once('close', function(){ 
-        //                                 clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
-        //                                 c.end(); 
-        //                             });
-
-        //                             var parseCSV = function(delimiter,quotes,escape){
-        //                                 var libcsv = require('csv-parse');
-        //                                 var errors = false;
-
-        //                                 var rawheaders = [];
-        //                                 var headers = [];
-        //                                 var records = [];
-        //                                 var trnheaders = [];
-
-        //                                 transformer.transform.normalize.forEach(function(item, index){
-        //                                     trnheaders.push(item.in);
-        //                                 });
-
-        //                                 clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
-        //                                 clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
-        //                                 clog('<div class="text-info">Using quote character: '+quotes+'</div>');
-        //                                 clog('<div class="text-info">Using escape character: "</div>');
-
-        //                                 var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-        //                                     clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-        //                                     clog('<pre>'+head.join("\n")+'</pre>');
-        //                                     clog('<div class="text-info">Transformer wants the following columns.</div>');
-        //                                     clog('<pre>'+trnheaders.join("\n")+'</pre>');
-        //                                     clog('<div class="text-info">Transformer sampling 10 records...</div>');
-
-        //                                     rawheaders = head;
-        //                                 }});
-
-        //                                 parser.on('finish',function(){
-        //                                     clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-        //                                 });
-
-        //                                 parser.on('error',function(err){
-        //                                     console.log(err);
-        //                                     clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-        //                                     process.nextTick(function(){
-        //                                         callback('onTransformerTest','Unable to parse data stream',null);
-        //                                     })
-        //                                 });
-
-        //                                 var xfm = streamTransform(function(record, cb){
-        //                                     if (records.length >= 10) {
-        //                                         process.nextTick(function(){
-        //                                             clog('<div class="text-success">Transform completed successfully.</div>');
-        //                                             if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
-        //                                         });
-        //                                         return;
-        //                                     }
-
-        //                                     var rec = {};
-        //                                     var rstr = '{\n';
-        //                                     transformer.transform.normalize.forEach(function(item, index){
-        //                                         var i = rawheaders.indexOf(item.in);
-        //                                         if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-        //                                         rec[item.out] = record[i];
-        //                                         rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
-        //                                     });
-        //                                     rstr += '}'
-
-        //                                     records.push(rec);
-        //                                     clog('<pre>'+rstr+'</pre>');
-
-        //                                     cb(null, record.join('|'));
-        //                                 }, {parallel: 1});
-
-        //                                 stream.pipe(parser).pipe(xfm);
-        //                             };
-
-        //                             switch(extractor.target.format)
-        //                             {
-        //                                 case "csv":
-        //                                     parseCSV(',','');
-        //                                 break;
-        //                                 case "tsv":
-        //                                     parseCSV("\t",'');
-        //                                 break;
-        //                                 case "pipe":
-        //                                     parseCSV('|','');
-        //                                 break;
-        //                                 default:
-        //                                     process.nextTick(function(){
-        //                                         callback('onTransformerTest','Invalid target format',null);
-        //                                     });                                    
-        //                             }
-
-        //                         });
-
-        //                     });
-
-        //                     c.on('error', function(e) {
-        //                         clog('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
-        //                         clog(e);
-        //                         process.nextTick(function(){
-        //                             callback('onTransformerTest',e,null);
-        //                         });
-        //                     });
-
-        //                     c.connect({
-        //                         host: src.source.uri,
-        //                         port: src.source.port,
-        //                         user: src.source.auth.username,
-        //                         password: src.source.auth.password
-        //                     });
-        //                 } else if (src.source.type === 'RETS') {
-        //                     clog('<div class="text-info">Extraction source is a RETS resource.</div>');
-        //                     var librets = require('rets-client');
-
-        //                     var uri = url.parse(src.source.uri);
-
-        //                     var client = librets.createConnection({
-        //                         host: uri.hostname,
-        //                         port: uri.port,
-        //                         protocol: uri.protocol,
-        //                         path: uri.path,
-        //                         user: src.source.auth.username,
-        //                         pass: src.source.auth.password,
-        //                         version: src.source.version || '1.7.2',
-        //                         agent: { user: src.source.auth.userAgentHeader, password: src.source.auth.userAgentPassword }
-        //                     });
-
-        //                     client.once('connection.success',function(client){
-        //                         console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-        //                         clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
-        //                         clog('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
-        //                         clog('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
-        //                         clog('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-        //                         clog('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
-        //                         var qry = {
-        //                             SearchType: extractor.target.type,
-        //                             Class: extractor.target.class,
-        //                             Query: extractor.target.res,
-        //                             Format: 'COMPACT-DECODED',
-        //                             Limit: 10
-        //                         };
-                                
-        //                         client.searchQuery(qry, function( error, data ) {
-
-        //                             var parseCSV = function(delimiter,quotes,escape){
-        //                                 var libcsv = require('csv-parse');
-        //                                 var errors = false;
-
-        //                                 var rawheaders = [];
-        //                                 var headers = [];
-        //                                 var records = [];
-        //                                 var trnheaders = [];
-
-        //                                 transformer.transform.normalize.forEach(function(item, index){
-        //                                     trnheaders.push(item.in);
-        //                                 });
-
-        //                                 clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
-        //                                 clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
-        //                                 clog('<div class="text-info">Using quote character: '+quotes+'</div>');
-        //                                 clog('<div class="text-info">Using escape character: "</div>');
-
-        //                                 var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-        //                                     clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-        //                                     clog('<pre>'+head.join("\n")+'</pre>');
-        //                                     clog('<div class="text-info">Transformer wants the following columns.</div>');
-        //                                     clog('<pre>'+trnheaders.join("\n")+'</pre>');
-        //                                     clog('<div class="text-info">Transformer sampling 10 records...</div>');
-
-        //                                     rawheaders = head;
-        //                                 }});
-
-        //                                 parser.on('finish',function(){
-        //                                     clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-        //                                 });
-
-        //                                 parser.on('error',function(err){
-        //                                     console.log(err);
-        //                                     clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-        //                                     process.nextTick(function(){
-        //                                         callback('onTransformerTest','Unable to parse data stream',null);
-        //                                     })
-        //                                 });
-
-        //                                 var xfm = streamTransform(function(record, cb){
-        //                                     var rec = {};
-        //                                     var rstr = '{\n';
-        //                                     transformer.transform.normalize.forEach(function(item, index){
-        //                                         var i = rawheaders.indexOf(item.in);
-        //                                         if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-        //                                         rec[item.out] = record[i];
-        //                                         rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
-        //                                     });
-        //                                     rstr += '}'
-
-        //                                     records.push(rec);
-        //                                     clog('<pre>'+rstr+'</pre>');
-
-        //                                     if (records.length >= 1) {
-        //                                         clog('<div class="text-success">Successfully extracted and parsed '+data.data.length+' records.</div>');
-        //                                         process.nextTick(function(){
-        //                                             clog('<div class="text-success">Transform completed successfully.</div>');
-        //                                             if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
-        //                                             else callback('onTransformerTest',errors,null);
-        //                                         });
-        //                                         return;
-        //                                     }
-
-        //                                     cb(null, record.join("\t"));
-        //                                 }, {parallel: 1});
-
-        //                                 parser.pipe(xfm);
-        //                                 return parser;
-        //                             };
-
-        //                             if (error) {
-        //                                 clog('<div class="text-danger">Query did not execute.</div>');
-        //                                 clog('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-        //                                 console.log(error);
-        //                                 callback('onExtractorTest',error, null);
-        //                                 return;
-        //                             } else if (data.type == 'status') {
-        //                                 clog('<div class="text-warning">'+data.text+'</div>');
-        //                                 if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-        //                                 callback('onExtractorTest',null,{data:data});
-        //                                 return;
-        //                             } else {
-        //                                 if (!data.data || !data.data.length) {
-        //                                     clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-        //                                     callback('onExtractorTest',null,{data:data});
-        //                                     return;
-        //                                 }
-        //                                 if (data.data && data.data.length) {
-        //                                     clog('<div class="text-info">Parsing extracted records.</div>');
-        //                                     var p = parseCSV("\t",'');
-        //                                     p.write(data.data);
-        //                                     p.end();
-        //                                 }
-        //                             }
-        //                         }, function(stream){
-        //                             console.log('stream');
-        //                             stream.once('close', function(){ 
-        //                                 clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
-        //                                 console.log('stream CLOSE');
-        //                             });
-        //                             stream.once('end', function(){ 
-        //                                 clog('<div class="text-success">Completed reading source file from remote file-system.</div>');
-        //                                 console.log('stream END');
-        //                             });
-
-        //                             stream.pipe(process.stdout);
-        //                         });
-        //                     });
-
-        //                     client.once('connection.error',function(error, client){
-        //                         console.error( 'Connection failed: %s.', error.message );
-        //                         callback('onExtractorTest',error, null);
-        //                     });
-        //                 }
-        //             }
-        //             else {
-        //                 clog('<div class="text-danger">Extraction source is bad.</div>');
-        //                 callback('onTransformerTest',err,null);
-        //             }
-        //         });
-        //     }
         });
     },
     "transformer.save": function(transformer, callback) {

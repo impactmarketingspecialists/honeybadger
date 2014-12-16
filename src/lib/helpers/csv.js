@@ -45,6 +45,7 @@ Object.defineProperties(module.exports,{
             } else if (typeof data.data !== 'undefined') {
                 parser.write(data.data);
                 parser.end();
+                return parser;
             }
 		},
 		enumerable: true
