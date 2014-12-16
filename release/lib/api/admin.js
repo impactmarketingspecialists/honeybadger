@@ -212,7 +212,7 @@ module.exports = {
                 if (err) {
                     console.trace(err);
                     _log('<div class="text-danger">Extraction source is bad.</div>');
-                    return callback('onExtractorTest',err,null);
+                    return callback('onTransformerTest',err,null);
                 }
 
                 _log('<div class="text-success">Extraction source is valid.</div>');
@@ -229,12 +229,12 @@ module.exports = {
 
                     ftp.validate(source.source, function(err,body){
                         (!err) ? _log('<div class="text-success">Connection established.</div>') : _log('<div class="text-danger">There was an error connecting to the FTP resource.</div>');
-                        if (err) return callback('onExtractorTest',err,null);
+                        if (err) return callback('onTransformerTest',err,null);
 
                         _log('<div class="text-info">Searching for extraction target.</div>');
                         ftp.get(source.source, extractor.target.res, function(err,stream){
                             (!err) ? _log('<div class="text-success">Connection established.</div>') : _log('<div class="text-danger">Unable to retrieve source file from remote file-system.</div>');
-                            if (err) return callback('onExtractorTest',err,null);
+                            if (err) return callback('onTransformerTest',err,null);
 
                             _log('<div class="text-success">Discovered source file on remote file-system.</div>');
 
@@ -249,41 +249,9 @@ module.exports = {
                             var headers = [];
                             var records = [];
                             var trnheaders = [];
-
-                            transformer.transform.normalize.forEach(function(item, index){
-                                trnheaders.push(item.in);
-                            });
-
-                            // clog('<div class="text-info">Streaming to CSV extraction engine.</div>');
-                            // clog('<div class="text-info">Using CSV delimiter: '+delimiter+'</div>');
-                            // clog('<div class="text-info">Using quote character: '+quotes+'</div>');
-                            // clog('<div class="text-info">Using escape character: "</div>');
-
-                            // var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-                            //     clog('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                            //     clog('<pre>'+head.join("\n")+'</pre>');
-                            //     clog('<div class="text-info">Transformer wants the following columns.</div>');
-                            //     clog('<pre>'+trnheaders.join("\n")+'</pre>');
-                            //     clog('<div class="text-info">Transformer sampling 10 records...</div>');
-
-                            //     rawheaders = head;
-                            // }});
-
-                            // parser.on('finish',function(){
-                            //     clog('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                            // });
-
-                            // parser.on('error',function(err){
-                            //     console.log(err);
-                            //     clog('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                            //     process.nextTick(function(){
-                            //         callback('onTransformerTest','Unable to parse data stream',null);
-                            //     })
-                            // });
-
+                            var errors = false;
 
                             var xfm = streamTransform(function(record, cb){
-                                console.log(record);
                                 if (records.length >= 10) {
                                     process.nextTick(function(){
                                         _log('<div class="text-success">Transform completed successfully.</div>');
@@ -312,29 +280,25 @@ module.exports = {
                                 if (err === 'headers') {
                                     _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                     process.nextTick(function(){
-                                        callback('onExtractorTest','Unable to parse column headers from data stream',null);
+                                        callback('onTransformerTest','Unable to parse column headers from data stream',null);
                                     });
                                     return;
                                 } else if (err) {
                                     console.log(err);
                                     _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                     process.nextTick(function(){
-                                        callback('onExtractorTest','Unable to parse data stream',null);
+                                        callback('onTransformerTest','Unable to parse data stream',null);
                                     });
                                     return;
                                 }
+
+                                rawheaders = res.headers;
 
                                 _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
                                 _log('<pre>'+res.headers.join("\n")+'</pre>');
                                 _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
 
-
-                                // process.nextTick(function(){
-                                //     callback('onTransformerTest',null,{headers:res.headers});
-                                // });
-                            });
-
-                            stream.pipe(xfm);
+                            }).pipe(xfm);
 
                         });
                     });
