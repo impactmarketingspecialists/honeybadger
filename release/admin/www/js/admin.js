@@ -9921,6 +9921,8 @@ var Admin = (function($this,$){
 			break;
 			case "extractorWizard":
 
+				$('#extractorWizard').attr('data-id',data._id);
+				$('#extractorWizard').attr('data-rev',data._rev);
 				/**
 				 * Load Saved Extractor for Editing
 				 */
@@ -10018,6 +10020,9 @@ var Admin = (function($this,$){
 	var ext = function(){
 		var stype = $DM.getSource($('#ext-source-select').val()).value.source.type;
 
+		var id = $('#extractorWizard').attr('data-id');
+		var _rev = $('#extractorWizard').attr('data-rev');
+
 		var extractor = {
 			name: $('#extractorName').val(),
 			source: $('#ext-source-select').val(),
@@ -10028,6 +10033,11 @@ var Admin = (function($this,$){
 				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-data-format]').val()
 			}
 		};
+
+		if (id && _rev) {
+			extractor._id = id;
+			extractor._rev = _rev;
+		}
 
 		switch(stype){
 			case "FTP":

@@ -123,7 +123,15 @@ module.exports = new (function(){
                 callback({err:true,body:'Document has no _rev; cannot update'});
                 return false;
             }
-            db.insert(extractor, extractor._id, callback);
+            extractor.type = 'extractor'; // Set the document type to Data Source Name
+            extractor.status = 'active'; // Activate the source
+            extractor.activatedOn = Date.now();
+
+            db.insert(extractor, extractor._id, function(err,body){
+               refreshExtractors(function(){
+                    if (callback) callback(err, body);
+                });
+            });
         };
 
         var _newExtractor = function(){
