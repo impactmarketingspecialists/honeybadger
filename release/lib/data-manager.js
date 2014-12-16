@@ -169,8 +169,9 @@ module.exports = new (function(){
             transformer.status = 'active'; // Activate the source
             transformer.activatedOn = Date.now();
             db.insert(transformer, transformer._id, function(err,body){
-                refreshTransformers();
-                if (callback) callback(err, body);
+                refreshTransformers(function(){
+                    if (callback) callback(err, body);
+                });
             });
         };
 
@@ -179,8 +180,9 @@ module.exports = new (function(){
             transformer.status = 'active'; // Activate the source
             transformer.activatedOn = Date.now();
             db.insert(transformer, null, function(err,body){
-                refreshTransformers();
-                if (callback) callback(err, body);
+                refreshTransformers(function(){
+                    if (callback) callback(err, body);
+                });
             });
         };
 
@@ -198,7 +200,14 @@ module.exports = new (function(){
                 return false;
             }
 
-            db.insert(loader, loader._id, callback);
+            loader.type = 'loader'; // Set the document type to Data Source Name
+            loader.status = 'active'; // Activate the source
+            loader.activatedOn = Date.now();
+            db.insert(loader, loader._id, function(err, body){
+                refreshLoaders(function(){
+                    if (callback) callback(err, body);
+                });
+            });
         };
 
         var _newLoader = function(){
@@ -206,8 +215,9 @@ module.exports = new (function(){
             loader.status = 'active'; // Activate the source
             loader.activatedOn = Date.now();
             db.insert(loader, null, function(err, body){
-                refreshLoaders();
-                if (callback) callback(err, body);
+                refreshLoaders(function(){
+                    if (callback) callback(err, body);
+                });
             });
         };
 
