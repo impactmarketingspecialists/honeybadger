@@ -9978,8 +9978,21 @@ var Admin = (function($this,$){
 					$('.ext-rets-options').show();
 					$('#ext-rets-options').show();
 
+					/**
+					 * We need to load the RETS metadata and re-select the saved options.
+					 *
+					 * Let's show the fields so that we can gracefully handle issues
+					 * in the future (like and expired-non working value - if the MLS changes
+					 * their class/resource names).
+					 *
+					 * TODO: add visual handler if one of the calls fails
+					 */
 					$('#extractorWizard .rets-resource').removeClass('hide').show();
+					$('#extractorWizard .rets-classification').removeClass('hide').show();
 
+					/**
+					 * We'll start with getting resources
+					 */
 					$DM.retsExplore( { source: source }, function(e){
 						if (e.body.meta) {
 							$('#ext-rets-resource').html('<option>-- Select a data resource --</option>');
@@ -9987,8 +10000,14 @@ var Admin = (function($this,$){
 								$('#ext-rets-resource').append('<option value="'+item.ResourceID[0]+'">'+item.VisibleName[0]+'</option>');
 								$('#ext-rets-options .rets-resource').removeClass('hide').show();
 							});
+							/**
+							 * Set the value back to what the user had before
+							 */
 							$('#ext-rets-resource').val(data.target.type);
 
+							/**
+							 * Fetch the various classes
+							 */
 							source.rets = { resource: data.target.type };
 							$DM.retsBrowse({ source: source }, function(e){
 								if (e.body.meta) {
@@ -9997,13 +10016,20 @@ var Admin = (function($this,$){
 										$('#ext-rets-class').append('<option value="'+item.ClassName[0]+'">'+item.VisibleName[0] + ((item.StandardName[0]) ? ' : '+item.StandardName[0] : '') +'</option>');
 										$('#ext-rets-options .rets-classification').removeClass('hide').show();
 									});
+									/**
+									 * Set the value back to what the user had before
+									 * This time - trigger the change so that our UI bindings
+									 * will auto-load the metadata fields to display on the next screen
+									 */
 									$('#ext-rets-class').val(data.target.class).trigger('change');
 								}
 							});
 						}
 					});
 
-					$('#extractorWizard .rets-classification').removeClass('hide').show();
+					/**
+					 * Reset the RETS query to what the user had before
+					 */
 					$('#ext-rets-query').val(data.target.res);
 				}
 			break;
