@@ -9952,7 +9952,9 @@ var Admin = (function($this,$){
 				/**
 				 * Setup the wizard based on the source type
 				 */
-				var type = $DM.getSource(data.source).value.source.type;
+				var source = $DM.getSource(data.source).value.source;
+				var type = source.type;
+
 				$('#extractorWizard .source-options').hide();
 				if (type === 'FTP') {
 
@@ -9977,20 +9979,32 @@ var Admin = (function($this,$){
 					$('#ext-rets-options').show();
 
 					$('#extractorWizard .rets-resource').removeClass('hide').show();
-					$('#extractorWizard .rets-classification').removeClass('hide').show();
-					// $('#ext-rets-resource')
 
-					$('#ext-rets-query').val(data.target.res);					
-					$DM.retsExplore( { source: { rets: { resource: data.target.res } } }, function(e){
+					$DM.retsExplore( { source: source }, function(e){
 						if (e.body.meta) {
 							$('#ext-rets-resource').html('<option>-- Select a data resource --</option>');
 							$.each(e.body.meta.data,function(index,item){
-								// console.log(item);
 								$('#ext-rets-resource').append('<option value="'+item.ResourceID[0]+'">'+item.VisibleName[0]+'</option>');
 								$('#ext-rets-options .rets-resource').removeClass('hide').show();
 							});
+							$('#ext-rets-resource').val(data.target.type);
+
+							source.rets = { resource: data.target.type };
+							$DM.retsBrowse({ source: source }, function(e){
+								if (e.body.meta) {
+									$('#ext-rets-class').html('<option>-- Select a data class --</option>')
+									$.each(e.body.meta.data,function(index,item){
+										$('#ext-rets-class').append('<option value="'+item.ClassName[0]+'">'+item.VisibleName[0] + ((item.StandardName[0]) ? ' : '+item.StandardName[0] : '') +'</option>');
+										$('#ext-rets-options .rets-classification').removeClass('hide').show();
+									});
+									$('#ext-rets-class').val(data.target.class).trigger('change');
+								}
+							});
 						}
 					});
+
+					$('#extractorWizard .rets-classification').removeClass('hide').show();
+					$('#ext-rets-query').val(data.target.res);
 				}
 			break;
 			case "transformWizard":
@@ -10001,6 +10015,8 @@ var Admin = (function($this,$){
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
 				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
+
+
 				$DM.extractor.sample($DM.getExtractor(data.extractor).value,function(e){
 					if (!e.err) Admin.View.transformDataStructures()(e.body);
 				});
