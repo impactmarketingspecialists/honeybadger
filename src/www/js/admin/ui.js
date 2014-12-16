@@ -282,7 +282,7 @@
 		 * Clear the log window
 		 */
 		$('#ext-test-clear').click(function(){
-			$('#extraction-log-body').html('');
+			$('#extractor-log-body').html('');
 			$('#extraction-result').html('');
 		});
 
@@ -594,6 +594,17 @@
 		$('#'+id+' section.step').hide().first().show();
 		$('#'+id+' .files').empty();
 		$('input[type=text], input[type=password], select, textarea','#'+id).val('');
+
+		/**
+		 * Reset the modal buttons
+		 */
+		$('#'+id+' section.step').hide().removeClass('active').first().show().addClass('active');
+		$('#'+id+' [am-Button~=prev]').show().prop('disabled',true);
+		$('#'+id+' [am-Button~=next]').show().prop('disabled',false);
+		$('#'+id+' [am-Button~=finish]').prop('disabled',true).hide();
+
+		$('#'+id+' .body.logger').html('');
+		$('#'+id+' .wizard-result').html('');
 	};
 
 	/**

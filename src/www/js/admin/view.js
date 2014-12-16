@@ -61,6 +61,7 @@
 			/**
 			 * Reset the list of sources in the extractor dialog
 			 */
+			var cval = $('#ext-source-select').val();
 			$('#ext-source-select').html('<option value="">-- Select Source --</option>');
 
 			$(data).each(function(index, item){
@@ -84,6 +85,8 @@
 				if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
+
+			$('#ext-source-select').val(cval);
 		};
 	};
 
