@@ -38,13 +38,13 @@ wss.on('connection',function(ws) {
     // var connection = request.accept(null, request.origin);
     // clients.push(connection);
 
-    console.log('WebSocket connection accepted');
+    // console.log('WebSocket connection accepted');
 
     ws.on('message',function(message, flags){
-        console.log('WebSocket message received',message);
+        // console.log('WebSocket message received',message);
         
         if (!message) { 
-            console.log('WebSocket empty message');
+            // console.log('WebSocket empty message');
             ws.send('Error: malformed request');
             return false; 
         }
@@ -53,12 +53,12 @@ wss.on('connection',function(ws) {
 
         var data = JSON.parse(message);
         if (!data) {
-            console.log('WebSocket bad message');
+            // console.log('WebSocket bad message');
             ws.send('Error: malformed request');
             return false; 
         }
         
-        console.log('Trying method:', data.method);
+        // console.log('Trying method:', data.method);
 
         if (WSAPI[data.method]) {
             var args = [];
@@ -68,7 +68,7 @@ wss.on('connection',function(ws) {
                 });
             }
             args.push(function(event, err, body){
-                console.log('Send response');
+                // console.log('Send response');
                 ws.send(JSON.stringify({
                     event: event,
                     msig: data.msig || null,
@@ -80,7 +80,7 @@ wss.on('connection',function(ws) {
             // console.dir(args);
             WSAPI[data.method].apply(this, args);
         } else {
-            console.log('Method '+data.method+' does not exist');
+            // console.log('Method '+data.method+' does not exist');
             ws.send('Error: malformed request');
             return false;         	
         }
@@ -88,7 +88,7 @@ wss.on('connection',function(ws) {
 
     ws.on('close',function(connection){
     	// clients.slice(clients.indexOf(connection),1);
-        console.log('Websocket connection closed');
+        // console.log('Websocket connection closed');
     });
 });
 

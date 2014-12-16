@@ -18,7 +18,6 @@ module.exports = new (function(){
     };
 
     var refreshExtractors = function(callback){
-        console.log('refresh extractors');
         db.view('extractors', 'list', function(err, body) {
             if(!err) {
                 extractors = [];
