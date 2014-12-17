@@ -9612,7 +9612,6 @@ var Admin = (function($this,$){
 				else return null;
 			}).pop();
 			if (!s) return;
-			console.log(s);
 			$DM.extractor.sample(s.value,function(e){
 				if (!e.err) {
 					Admin.View.transformDataStructures()(e.body);
@@ -10037,17 +10036,23 @@ var Admin = (function($this,$){
 				$('#transformWizard').attr('data-id',data._id);
 				$('#transformWizard').attr('data-rev',data._rev);
 
-
 				$('#transformerName').val(data.name);
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
 
-				console.log($('#trn-source-select').children(),data.extractor);
-				
-				$('#trn-source-select').prop('disabled',false).val(data.extractor);
+				/**
+				 * Set the users selected extractor
+				 * Also fire the change event so the metadata will load
+				 */
+				$('#trn-source-select').prop('disabled',false).val(data.extractor).trigger('change');
+				$('#trn-transform-type').val((data.transform.normalize.length)?'normalize':'normalize').trigger('change');
 
-
-				$DM.extractor.sample($DM.getExtractor(data.extractor).value,function(e){
+				var extractor = $DM.getExtractor(data.extractor);
+				if (!extractor) {
+					console.log('Invalid extractor, perhaps that extractor was deleted');
+					return;
+				}
+				$DM.extractor.sample(extractor.value,function(e){
 					if (!e.err) Admin.View.transformDataStructures()(e.body);
 				});
 			break;
