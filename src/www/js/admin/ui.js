@@ -759,7 +759,6 @@
 				 * Also fire the change event so the metadata will load
 				 */
 				$('#trn-source-select').prop('disabled',false).val(data.extractor).trigger('change');
-				$('#trn-transform-type').val((data.transform.normalize.length)?'normalize':'normalize').trigger('change');
 
 				var extractor = $DM.getExtractor(data.extractor);
 				if (!extractor) {
@@ -767,7 +766,34 @@
 					return;
 				}
 				$DM.extractor.sample(extractor.value,function(e){
-					if (!e.err) Admin.View.transformDataStructures()(e.body);
+					if (e.err) {
+						console.log('Error sampling the extractor', e);
+						return;
+					}
+
+					Admin.View.transformDataStructures()(e.body);
+					$('#trn-transform-type').val((data.transform.normalize.length)?'normalize':'normalize').trigger('change');
+
+					$('#transformNormalize input[type=checkbox]').prop('checked',false).trigger('change');
+
+					$(data.transform.normalize).each(function(index,item){
+						var $out = $('input[value="'+item.in+'"');
+						var $row = $out.parent().parent();
+						$out.val(item.out);
+						$row.find('input[type=checkbox]').prop('checked',true).trigger('change');
+						// $row.find('input[type=checkbox]').prop('checked',true).trigger('change');
+						// console.log();
+					});
+
+					// $('#transformNormalize .item input:text:enabled').each(function(index,item){
+					// 	transform.transform.input.push($('.name', $(item).parent().parent()).text());
+					// 	transform.transform.normalize.push({
+					// 		in: $('.name', $(item).parent().parent()).text(),
+					// 		out: $(item).val()
+					// 	});
+					// });
+
+
 				});
 			break;
 			case "loaderWizard":
