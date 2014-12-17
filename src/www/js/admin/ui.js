@@ -751,10 +751,14 @@
 				$('#transformWizard').attr('data-id',data._id);
 				$('#transformWizard').attr('data-rev',data._rev);
 
+
 				$('#transformerName').val(data.name);
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
-				$('#trn-source-select').val(data.extractor).removeAttr('disabled');
+
+				console.log($('#trn-source-select').children(),data.extractor);
+				
+				$('#trn-source-select').prop('disabled',false).val(data.extractor);
 
 
 				$DM.extractor.sample($DM.getExtractor(data.extractor).value,function(e){

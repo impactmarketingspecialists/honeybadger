@@ -249,7 +249,7 @@ module.exports = {
                             });
 
                             var _delim = { csv: ',', tsv: "\t", pipe: '|' };
-                            var _quot = { default: '', quotes: '"' };
+                            var _quot = { default: '', dquote: '"', squote: "'" };
 
                             var rawheaders = [];
                             var headers = [];
@@ -282,7 +282,7 @@ module.exports = {
                                 cb(null, record.join('|'));
                             }, {parallel: 1});
 
-                            csv.parse(_delim[ extractor.target.format || csv ], _quot.default, stream, function(err,res){
+                            csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
                                 if (err === 'headers') {
                                     _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                     process.nextTick(function(){
@@ -325,7 +325,7 @@ module.exports = {
                             Class: extractor.target.class,
                             Query: extractor.target.res,
                             Format: 'COMPACT-DECODED',
-                            Limit: 1
+                            Limit: 10
                         };
                         client.searchQuery(qry, function( error, data ) {
 
@@ -353,7 +353,7 @@ module.exports = {
                                     var errors = false;
 
                                     var xfm = streamTransform(function(record, cb){
-                                        if (records.length >= 10) {
+                                        if (records.length >= data.data.length) {
                                             process.nextTick(function(){
                                                 _log('<div class="text-success">Transform completed successfully.</div>');
                                                 if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
