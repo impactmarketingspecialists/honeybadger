@@ -10422,18 +10422,40 @@ var Admin = (function($this,$){
 
 		return function render(data) {
 			$('#extractorList > tbody').html('');
+
+			/**
+			 * Reset the list of extractors in the transform dialog
+			 */
+			var cval = $('#trn-source-select').val();
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
+
 			$(data).each(function(index, item){
+
+				/**
+				 * Add Extractor & Edit Dialog Hooks
+				 * 
+				 * Add the extractor to the extractors page and setup
+				 * a click handler for bringing up the edit dialog.
+				 */
 				$('#extractorList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('extractorWizard');
 					setupWizard('extractorWizard', item.value);
 
 					$('#extractorWizard [am-Button~=next]').prop("disabled", false);
 				}));
+				
+				/**
+				 * Add an option to the list of sources in the transform dialog.
+				 */
 				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
+
+			/**
+			 * Reset the dialog value to whatever the previous selection was
+			 */
+			$('#trn-source-select').val(cval);
 		};
 	};
 
