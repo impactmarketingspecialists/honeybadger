@@ -93,10 +93,10 @@ module.exports = {
                         if (extractor.target.format !== 'delimited-text') return;
 
                         var _delim = { csv: ',', tsv: "\t", pipe: '|' };
-                        var _quot = { default: '', quotes: '"' };
+                        var _quot = { default: '', dquote: '"', squote: "'" };
 
-
-                        csv.parse(_delim[ extractor.target.options.delimiter || csv ], _quot.default, stream, function(err,res){
+                        csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
+                            // stream.end();
                             if (err === 'headers') {
                                 _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                 process.nextTick(function(){
@@ -117,6 +117,9 @@ module.exports = {
                             _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                             process.nextTick(function(){
                                 callback('onExtractorTest',null,{headers:res.headers});
+                                ftp.abort();
+                                ftp.end();
+                                ftp.destroy();
                             });
                         });
                     });
@@ -262,6 +265,9 @@ module.exports = {
                                     process.nextTick(function(){
                                         _log('<div class="text-success">Transform completed successfully.</div>');
                                         if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
+                                        // ftp.abort();
+                                        // ftp.end();
+                                        // ftp.destroy();
                                     });
                                     return;
                                 }
@@ -463,7 +469,7 @@ module.exports = {
                     _log('<div class="text-success">Extraction source is valid.</div>');
                     var source = body;
 
-                    var testlimit = 5;
+                    var testlimit = 10000;
                     // console.log(source.source);
                     /**
                      * We're going to leave in a bunch of extra steps here for the sake
@@ -521,12 +527,11 @@ module.exports = {
                                     rstr += '}'
 
                                     connection.query(insert_query,rec,function(err,res){
-                                        console.log(err);
                                         if (!err) {
-                                            records.push(rec);
-                                            process.nextTick(function(){
-                                                _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
-                                            });
+                                            records.push(true);
+                                            // process.nextTick(function(){
+                                            //     _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                            // });
                                         } else {
                                             errors = true;
                                         }
@@ -534,6 +539,9 @@ module.exports = {
                                             process.nextTick(function(){
                                                 _log('<div class="text-success">Load completed successfully.</div>');
                                                 if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+                                                ftp.abort();
+                                                ftp.end();
+                                                ftp.destroy();
                                             });
                                             return;
                                         }
@@ -543,9 +551,9 @@ module.exports = {
                                     cb(null, record.join('|'));
 
 
-                                    process.nextTick(function(){
-                                        _log('<pre>'+rstr+'</pre>');
-                                    });
+                                    // process.nextTick(function(){
+                                    //     _log('<pre>'+rstr+'</pre>');
+                                    // });
 
                                 }, {parallel: 1});
 

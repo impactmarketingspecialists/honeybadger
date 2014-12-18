@@ -73,7 +73,6 @@ Object.defineProperties(module.exports,{
 			var c = new libftp();
 
 			c.on('ready', function() {
-				console.log(target);
 				c.get(target, function(err, stream){
 					if (!err) stream.once('close', function(){ 
 						c.end(); 
