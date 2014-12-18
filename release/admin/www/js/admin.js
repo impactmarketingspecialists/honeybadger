@@ -9319,7 +9319,8 @@ var Admin = (function($this,$){
 			sourceManager: $('#sourceManager').hide(),
 			extractorManager: $('#extractorManager').hide(),
 			transformManager: $('#transformManager').hide(),
-			loaderManager: $('#loaderManager').hide()
+			loaderManager: $('#loaderManager').hide(),
+			taskManager: $('#taskManager').hide()
 		};
 
 		$('[data-toggle="page"]').each(function(index,item){
@@ -9342,28 +9343,35 @@ var Admin = (function($this,$){
 		 */
 		$('#sourceEditor').on('show.bs.modal', function(){
 			resetWizard('sourceEditor');
-		})
+		});
 
 		/**
 		 * Detect when extractor modal is activated 
 		 */
 		$('#extractorWizard').on('show.bs.modal', function(){
 			resetWizard('extractorWizard');
-		})
+		});
 
 		/**
 		 * Detect when transformer modal is activated 
 		 */
 		$('#transformWizard').on('show.bs.modal', function(){
 			resetWizard('transformWizard');
-		})
+		});
 
 		/**
 		 * Detect when loader modal is activated 
 		 */
 		$('#loaderWizard').on('show.bs.modal', function(){
 			resetWizard('loaderWizard');
-		})
+		});
+
+		/**
+		 * Detect when task modal is activated 
+		 */
+		$('#taskWizard').on('show.bs.modal', function(){
+			resetWizard('taskWizard');
+		});
 
 		/**
 		 * Reset our wizards
@@ -9371,6 +9379,7 @@ var Admin = (function($this,$){
 		resetWizard('extractorWizard');
 		resetWizard('transformWizard');
 		resetWizard('loaderWizard');
+		resetWizard('taskWizard');
 		// $('.wizard section.step').first().show();
 
 		/**
