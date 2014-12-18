@@ -437,7 +437,7 @@ module.exports = {
             database: dsn.database
         });
 
-        var qry = 'INSERT INTO '+loader.target.schema.name+' SET ?';
+        var insert_query = 'INSERT INTO '+loader.target.schema.name+' SET ?';
 
         // console.log(transformer);
         //We want to pipe transformer events back to the client
@@ -462,6 +462,8 @@ module.exports = {
 
                     _log('<div class="text-success">Extraction source is valid.</div>');
                     var source = body;
+
+                    var testlimit = 5;
                     // console.log(source.source);
                     /**
                      * We're going to leave in a bunch of extra steps here for the sake
@@ -488,20 +490,22 @@ module.exports = {
                                 });
 
                                 var _delim = { csv: ',', tsv: "\t", pipe: '|' };
-                                var _quot = { default: '', quotes: '"' };
+                                var _quot = { default: '', dquote: '"', squote: "'" };
 
                                 var rawheaders = [];
                                 var headers = [];
-                                var records = [];
                                 var trnheaders = [];
                                 var errors = false;
 
 
+                                var xformed = [];
+                                var records = [];
+
                                 var xfm = streamTransform(function(record, cb){
-                                    if (records.length >= 10) {
+                                    if (xformed.length >= testlimit) {
                                         process.nextTick(function(){
                                             _log('<div class="text-success">Transform completed successfully.</div>');
-                                            if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+                                            // if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
                                         });
                                         return;
                                     }
@@ -516,14 +520,28 @@ module.exports = {
                                     });
                                     rstr += '}'
 
-                                    connection.query(qry,rec,function(err,res){
+                                    connection.query(insert_query,rec,function(err,res){
+                                        console.log(err);
                                         if (!err) {
-                                            _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                            records.push(rec);
+                                            process.nextTick(function(){
+                                                _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                            });
+                                        } else {
+                                            errors = true;
+                                        }
+                                        if (records.length >= testlimit) {
+                                            process.nextTick(function(){
+                                                _log('<div class="text-success">Load completed successfully.</div>');
+                                                if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+                                            });
+                                            return;
                                         }
                                     });
 
-                                    records.push(rec);
+                                    xformed.push(true);
                                     cb(null, record.join('|'));
+
 
                                     process.nextTick(function(){
                                         _log('<pre>'+rstr+'</pre>');
@@ -531,7 +549,7 @@ module.exports = {
 
                                 }, {parallel: 1});
 
-                                csv.parse(_delim[ extractor.target.format || csv ], _quot.default, stream, function(err,res){
+                                csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
                                     if (err === 'headers') {
                                         _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                         process.nextTick(function(){
@@ -574,7 +592,7 @@ module.exports = {
                                 Class: extractor.target.class,
                                 Query: extractor.target.res,
                                 Format: 'COMPACT-DECODED',
-                                Limit: 10
+                                Limit: testlimit
                             };
                             client.searchQuery(qry, function( error, data ) {
 
@@ -593,19 +611,21 @@ module.exports = {
                                     if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
                                     else if (data.data && data.data.length) {
 
-                                        _log('<div class="text-success">RETS query received '+data.data.length+' records back.</div>');
+                                        _log('<div class="text-success">RETS query found '+data.count+' records. We will sample a max of '+testlimit+'.</div>');
 
                                         var rawheaders = [];
                                         var headers = [];
-                                        var records = [];
                                         var trnheaders = [];
                                         var errors = false;
+        
+                                        var xformed = [];
+                                        var records = [];
 
                                         var xfm = streamTransform(function(record, cb){
-                                            if (records.length >= 10) {
+                                            if (xformed.length >= testlimit) {
                                                 process.nextTick(function(){ 
                                                     _log('<div class="text-success">Transform completed successfully.</div>');
-                                                    if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+                                                    // if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
                                                 });
                                                 return;
                                             }
@@ -615,18 +635,36 @@ module.exports = {
                                             transformer.transform.normalize.forEach(function(item, index){
                                                 var i = rawheaders.indexOf(item.in);
                                                 if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                                // console.log(item,i,headers[i],record[i]);
                                                 rec[item.out] = record[i];
                                                 rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
                                             });
                                             rstr += '}'
 
-                                            connection.query(qry,rec,function(err,res){
+                                            connection.query(insert_query,rec,function(err,res){
                                                 if (!err) {
-                                                    _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                                    records.push(rec);
+                                                    process.nextTick(function(){
+                                                        _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                                    });
+                                                } else {
+                                                    errors = true;
+                                                }
+                                                if (records.length >= testlimit) {
+                                                    process.nextTick(function(){
+                                                        if (!errors) {
+                                                            _log('<div class="text-success">Load completed successfully.</div>');
+                                                            callback('onLoaderTest',null,{headers:headers, records:records});
+                                                        } else {
+                                                            _log('<div class="text-danger">Load failed.</div>');
+                                                            callback('onLoaderTest',{err:"Did not load all records"},{headers:headers, records:records});
+                                                        }
+                                                    });
+                                                    return;
                                                 }
                                             });
 
-                                            records.push(rec);
+                                            xformed.push(true);
                                             cb(null, record.join('|'));
                                             
                                             process.nextTick(function(){
@@ -696,9 +734,16 @@ module.exports = {
                         return;
                     }
 
-                    console.log(res);
+                    var fields = schema.fields.map(function(i){
+                        return i.key;
+                    });
 
-                    callback('onLoaderValidate',null,{schema:res});
+                    var matches = res.filter(function(i){
+                        return (fields.indexOf(i.Field) > -1) ? true : false;
+                    });
+                    
+                    if (fields.length === matches.length) callback('onLoaderValidate',null,{schema:res,fields:fields,matches:matches});
+                    else callback('onLoaderValidate',{ err: "The fields for this loader don't match the schema on the target"},{schema:res,fields:fields,matches:matches});
                 });
             break;
             case "couchdb":

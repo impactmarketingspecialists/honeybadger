@@ -10109,10 +10109,19 @@ var Admin = (function($this,$){
 					} 
 				});
 
-				$DM.loader.validate(data, function(err, res){
-					console.log(err, res);
+				$DM.loader.validate(data, function(res){
+					if (res.err) {
+						$('#loaderSchemas .create').show();
+						$('#loaderSchemas .fields').hide();
+					}
+
 					$('#loaderSchemas .create').hide();
-					$('#loaderSchemas .fields').show();
+					$('#loaderSchemas .fields').show().find('p:first-child').hide();
+					$('#ldr-create-schema').hide();
+
+					$('#loaderSchemas input').prop('disabled',true);
+					$('#loaderSchemas select').prop('disabled',true);
+
 				});
 
 				switch(data.target.type)
@@ -10241,7 +10250,6 @@ var Admin = (function($this,$){
 				type: $(item).parent().parent().find('select').val()
 			});
 		});
-		console.log(res);
 		return res;
 	};
 
@@ -10507,9 +10515,16 @@ var Admin = (function($this,$){
 
 	this.transformers = function() {
 
+
 		return function render(data) {
 			$('#transformerList > tbody').html('');
+
+			/**
+			 * Reset the list of extractors in the transform dialog
+			 */
+			var cval = $('#ldr-source-select').val();
 			$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
+
 			$(data).each(function(index, item){
 				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('transformWizard');
@@ -10519,6 +10534,11 @@ var Admin = (function($this,$){
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
+
+			/**
+			 * Reset the dialog value to whatever the previous selection was
+			 */
+			$('#ldr-source-select').val(cval);
 		};
 	};
 
@@ -10565,6 +10585,7 @@ var Admin = (function($this,$){
 
 		return function render(data) {
 			$('#loaderSchemas .fields .maps').html('');
+
 			$.each(data.headers,function(index,item){
 				if (!item) return;
 				$('#loaderSchemas .fields .maps').append('<div class="row form-group"><div class="col-md-6"><label>'+item+'</label></div><div class="col-md-6"><select class="form-control"><option value="string">String</option><option value="float">Float</option><option value="bool">Boolean</option><option value="text">Long Text</option></select></div></div>')

@@ -823,10 +823,19 @@
 					} 
 				});
 
-				$DM.loader.validate(data, function(err, res){
-					console.log(err, res);
+				$DM.loader.validate(data, function(res){
+					if (res.err) {
+						$('#loaderSchemas .create').show();
+						$('#loaderSchemas .fields').hide();
+					}
+
 					$('#loaderSchemas .create').hide();
-					$('#loaderSchemas .fields').show();
+					$('#loaderSchemas .fields').show().find('p:first-child').hide();
+					$('#ldr-create-schema').hide();
+
+					$('#loaderSchemas input').prop('disabled',true);
+					$('#loaderSchemas select').prop('disabled',true);
+
 				});
 
 				switch(data.target.type)
@@ -955,7 +964,6 @@
 				type: $(item).parent().parent().find('select').val()
 			});
 		});
-		console.log(res);
 		return res;
 	};
 
