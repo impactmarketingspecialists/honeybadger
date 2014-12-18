@@ -673,52 +673,41 @@ module.exports = {
             callback('onLoaderSave',err,body);
         });
     },
-    "ftp.browse": function(source, callback) {
-        DataManager.getSource(source.id, function(error, body){
-            if (!error && body.source.type === 'FTP') {
-                ftp.browse(body.source, function(err, list){
-                    if (err) return callback('onFTPBrowse',err,null);
-                    return callback('onFTPBrowse',null,{success:true, list: list});
+    "loader.validate": function(loader, callback) {
+        switch(loader.target.type)
+        {
+            case "mysql":
+                var mysql = require('mysql');
+
+                var dsn = utility.dsn(loader.target.dsn);
+                var schema = loader.target.schema;
+
+                var connection = mysql.createConnection({
+                    host: dsn.host,
+                    user: dsn.user,
+                    password: dsn.password,
+                    database: dsn.database
                 });
-            }
-        });
+
+                connection.query('DESCRIBE '+schema.name, function(err, res){
+                    if (err) {
+                        console.trace(err);
+                        callback('onLoaderValidate',err,null);
+                        return;
+                    }
+
+                    console.log(res);
+
+                    callback('onLoaderValidate',null,{schema:res});
+                });
+            break;
+            case "couchdb":
+            break;
+            case "ftp":
+            break;
+        }
     },
-    "rets.getClassifications": function(source, callback) {
-        DataManager.getSource(source.id,function(err,src){
-            rets.getClassifications(source.source, function(err, data){
-                if (!err) callback('onRETSBrowse',null,{success:true, meta:data});
-                else callback('onRETSBrowse',err,null);
-            });
-        });
-    },
-    "rets.getMetadataResources": function(source, callback) {
-        DataManager.getSource(source.id,function(err,src){
-            rets.getMetadataResources(source.source, function(err, data){
-                if (!err) callback('onRETSExplore',null,{success:true, meta:data});
-                else callback('onRETSExplore',err,null);
-            });
-        });
-    },
-    "rets.getMetadataTable": function(source, callback, client) {
-        DataManager.getSource(source.id,function(err,src){
-            rets.getMetadataTable(source.source, function(err, data){
-                if (!err) callback('onRETSInspect',null,{success:true, meta:data});
-                else callback('onRETSInspect',err,null);
-            });
-        });
-    },
-    "rets.query": function(_type, _class, _query, _limit, callback, client) {
-        // Fetch classifications
-        client.searchQuery({
-            SearchType: _type || 'Property',
-            Class: _class || 'A',
-            Query: _query || '(status=Listed)',
-            Limit: _limit || 10
-        }, function( error, data ) {
-            console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
-        });
-    },
-    validateLoaderConnection: function(loader, callback) {
+    "loader.validateConnection": function(loader, callback) {
         switch(loader.target.type)
         {
             case "mysql":
@@ -746,7 +735,7 @@ module.exports = {
             break;
         }
     },
-    createLoaderSchema: function(loader, callback) {
+    "loader.createSchema": function(loader, callback) {
         switch(loader.target.type)
         {
             case "mysql":
@@ -796,5 +785,51 @@ module.exports = {
             case "ftp":
             break;
         }
+    },
+    "ftp.browse": function(source, callback) {
+        DataManager.getSource(source.id, function(error, body){
+            if (!error && body.source.type === 'FTP') {
+                ftp.browse(body.source, function(err, list){
+                    if (err) return callback('onFTPBrowse',err,null);
+                    return callback('onFTPBrowse',null,{success:true, list: list});
+                });
+            }
+        });
+    },
+    "rets.getClassifications": function(source, callback) {
+        DataManager.getSource(source.id,function(err,src){
+            rets.getClassifications(source.source, function(err, data){
+                if (!err) callback('onRETSBrowse',null,{success:true, meta:data});
+                else callback('onRETSBrowse',err,null);
+            });
+        });
+    },
+    "rets.getMetadataResources": function(source, callback) {
+        DataManager.getSource(source.id,function(err,src){
+            rets.getMetadataResources(source.source, function(err, data){
+                if (!err) callback('onRETSExplore',null,{success:true, meta:data});
+                else callback('onRETSExplore',err,null);
+            });
+        });
+    },
+    "rets.getMetadataTable": function(source, callback, client) {
+        DataManager.getSource(source.id,function(err,src){
+            rets.getMetadataTable(source.source, function(err, data){
+                if (!err) callback('onRETSInspect',null,{success:true, meta:data});
+                else callback('onRETSInspect',err,null);
+            });
+        });
+    },
+    "rets.query": function(_type, _class, _query, _limit, callback, client) {
+        // Fetch classifications
+        client.searchQuery({
+            SearchType: _type || 'Property',
+            Class: _class || 'A',
+            Query: _query || '(status=Listed)',
+            Limit: _limit || 10
+        }, function( error, data ) {
+            console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+        });
     }
+
 };

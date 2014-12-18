@@ -362,16 +362,16 @@ var HoneyBadger = (function($this){
 	};
 
 	this.loader = {};
-	this.loader.validate = function(){
-
+	this.loader.validate = function(ldr, callback){
+		$this.exec('loader.validate', [ldr], callback);
 	};
 
 	this.loader.validateConnection = function(ldr, callback){
-		$this.exec('validateLoaderConnection', [ldr], callback);
+		$this.exec('loader.validateConnection', [ldr], callback);
 	};
 
 	this.loader.createSchema = function(ldr, callback){
-		$this.exec('createLoaderSchema', [ldr], callback);
+		$this.exec('loader.createSchema', [ldr], callback);
 	};
 
 	this.loader.save = function(ldr, callback){

@@ -10109,6 +10109,12 @@ var Admin = (function($this,$){
 					} 
 				});
 
+				$DM.loader.validate(data, function(err, res){
+					console.log(err, res);
+					$('#loaderSchemas .create').hide();
+					$('#loaderSchemas .fields').show();
+				});
+
 				switch(data.target.type)
 				{
 					case "mysql":
