@@ -41,8 +41,10 @@ Object.defineProperties(module.exports,{
 		value: function(source, callback){
 			var c = new libftp();
 
+			var basepath = source.basepath || '/';
+
 			c.on('ready', function() {
-				c.list(function(err, list) {
+				c.list(basepath, function(err, list) {
 					c.end();
 					process.nextTick(function(){
 						callback(err, list);
@@ -71,6 +73,7 @@ Object.defineProperties(module.exports,{
 			var c = new libftp();
 
 			c.on('ready', function() {
+				console.log(target);
 				c.get(target, function(err, stream){
 					if (!err) stream.once('close', function(){ 
 						c.end(); 

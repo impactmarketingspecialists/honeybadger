@@ -60,7 +60,8 @@
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
-				$('#sourceEditor [am-Button~=finish]').prop('disabled',false);
+				$('#sourceEditor [am-Button~=next]').hide();
+				$('#sourceEditor [am-Button~=finish]').show().prop("disabled", false);
 			} else {
 				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');

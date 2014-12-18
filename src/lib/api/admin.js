@@ -831,9 +831,10 @@ module.exports = {
             break;
         }
     },
-    "ftp.browse": function(source, callback) {
+    "ftp.browse": function(source, basepath, callback) {
         DataManager.getSource(source.id, function(error, body){
             if (!error && body.source.type === 'FTP') {
+                body.source.basepath = basepath;
                 ftp.browse(body.source, function(err, list){
                     if (err) return callback('onFTPBrowse',err,null);
                     return callback('onFTPBrowse',null,{success:true, list: list});

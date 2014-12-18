@@ -9452,12 +9452,13 @@ var Admin = (function($this,$){
 		 * to find a target from the FTP source
 		 */
 		$('#ext-ftp-browse').click(function(){
-			$DM.ftpBrowse($DM.getSource($('#ext-source-select').val()), function(e){
+			$DM.ftpBrowse($DM.getSource($('#ext-source-select').val()), $('#ftpRootPath').val(), function(e){
 				if(!e.err && e.body.success === true) {
 					$('#ext-ftp-browser .files').empty();
 					e.body.list.forEach(function(item, index){
 						if (item.name) $('#ext-ftp-browser .files').append($('<li class="file">'+item.name+'</li>').click(function(){
-							$('#ftpFileName').val(item.name);
+							var path = ($('#ftpRootPath').val()) ? $('#ftpRootPath').val() + '/' + item.name : item.name;
+							$('#ftpFileName').val(path);
 							$('#ext-ftp-browser .files').empty();
 							// $('#extractorWizard [am-Button~=prev]').prop("disabled", false);
 							$('#extractorWizard [am-Button~=next]').prop("disabled", false);
@@ -10163,7 +10164,7 @@ var Admin = (function($this,$){
 			target: {
 				type: (stype == 'RETS') ? $('#ext-rets-resource').val() : "file",
 				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
-				res: (stype == 'RETS') ? $('#ext-rets-query').val() : ($('#ftpRootPath').val() + $('#ftpFileName').val()),
+				res: (stype == 'RETS') ? $('#ext-rets-query').val() : $('#ftpFileName').val(),
 				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-data-format]').val()
 			}
 		};
@@ -10318,7 +10319,8 @@ var Admin = (function($this,$){
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
-				$('#sourceEditor [am-Button~=finish]').prop('disabled',false);
+				$('#sourceEditor [am-Button~=next]').hide();
+				$('#sourceEditor [am-Button~=finish]').show().prop("disabled", false);
 			} else {
 				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
 				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');

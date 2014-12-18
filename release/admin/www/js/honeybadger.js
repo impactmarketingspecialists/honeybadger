@@ -383,9 +383,9 @@ var HoneyBadger = (function($this){
 	};
 
 
-	this.ftpBrowse = function(source, callback)
+	this.ftpBrowse = function(source, basepath, callback)
 	{
-		$this.exec('ftp.browse',[source],callback);
+		$this.exec('ftp.browse',[source, basepath],callback);
 	};
 
 	this.retsExplore = function(source, callback)
