@@ -74,12 +74,13 @@ Object.defineProperties(module.exports,{
 
 			c.on('ready', function() {
 				c.get(target, function(err, stream){
-					if (!err) stream.once('close', function(){ 
+					if (!err) stream.once('close', function(){
+						console.log('closing ftp data stream');
 						c.end(); 
-					}); else c.end();
-					process.nextTick(function(){
-						if (callback) callback(err, stream);
 					});
+					// process.nextTick(function(){
+					if (callback) callback(err, stream);
+					// });
 				});
 			});
 

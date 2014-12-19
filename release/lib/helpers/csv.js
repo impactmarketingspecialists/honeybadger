@@ -22,6 +22,7 @@ Object.defineProperties(module.exports,{
             parser.on('finish',function(){
                 process.nextTick(function(){
                     // Don't fire if we've already done so
+                    console.log('Parse finished')
                     if (!errors && !fired) callback(null,{headers:headers});
                 });
             });
@@ -29,6 +30,7 @@ Object.defineProperties(module.exports,{
             parser.on('error',function(err){
                 process.nextTick(function(){
                     // Don't fire if we've already done so
+                    console.log(err);
                     if (!fired) callback(err,null);
                 });
             });
