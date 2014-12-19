@@ -506,8 +506,11 @@ module.exports = {
 
                                 var xformed = [];
                                 var records = [];
+                                var loaded = 0;
+                                var processed = 0;
 
                                 var xfm = streamTransform(function(record, cb){
+                                    // console.log('processed', processed++);
                                     if (xformed.length >= testlimit) {
                                         process.nextTick(function(){
                                             _log('<div class="text-success">Transform completed successfully.</div>');
@@ -528,14 +531,16 @@ module.exports = {
 
                                     connection.query(insert_query,rec,function(err,res){
                                         if (!err) {
+                                            // console.log('\tloaded',loaded++);
                                             records.push(true);
-                                            // process.nextTick(function(){
-                                            //     _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
-                                            // });
+                                            process.nextTick(function(){
+                                                // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                            });
                                         } else {
                                             errors = true;
                                         }
                                         if (records.length >= testlimit) {
+
                                             process.nextTick(function(){
                                                 _log('<div class="text-success">Load completed successfully.</div>');
                                                 if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
@@ -577,7 +582,6 @@ module.exports = {
 
                                     _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
                                     _log('<pre>'+res.headers.join("\n")+'</pre>');
-                                    _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
 
                                 }).pipe(xfm);
 
