@@ -103,3 +103,38 @@ li.file:hover {
 	margin-left: 0.5em;
 	/*width: 10em;*/
 }
+
+#taskETLMap {
+	text-align: center;
+}
+
+#taskETLMap .section {
+	margin:1em auto;
+}
+
+#taskETLMap .title {
+	font-weight: bold;
+}
+
+#taskETLMap .source, #taskETLMap .extractor, #taskETLMap .transformer, #taskETLMap .loader {
+	display:inline-block;
+	padding:1em;
+	border:1px solid #aaa;
+	border-radius: 5px;
+}
+
+#taskETLMap .source {
+	background: green;
+}
+
+#taskETLMap .extractor {
+	background: blue;
+}
+#taskETLMap .transformer {
+	background: white;
+}
+#taskETLMap .loader {
+	background: yellow;
+}
+
+#taskETLMap .link-tools {  }

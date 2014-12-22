@@ -21,57 +21,35 @@
 				<label for="taskDescription">Task Description</label>
 				<textarea class="form-control" placeholder="BHHS Normalizer" name="taskDescription" id="taskDescription"></textarea>
 			</div>
-			{{!-- <div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label class="control-label" for="trn-source-select">Transformer Input</label>
-						<select id="trn-source-toggle" class="form-control">
-							<option value="">-- Select an input definition --</option>
-							<option value="custom">Custom source definition</option>
-							<option value="extractor-template">Use extractor as a template</option>
-							<option value="extractor-bind">Bind to an extractor</option>
-						</select>
-						
-					</div>
+			<div class="row">
+				<div class="col-md-12">
 					<div class="form-group">
 						<label class="control-label">Select Extractor</label>
-						<select id="trn-source-select" class="form-control" disabled="disabled">
+						<select id="task-extractor-select" class="form-control">
 						</select>
 					</div>
 				</div>
-				<div class="col-md-6">
-					<small>
-						<dl>
-							<dt>Custom source definition</dt>
-							<dd>Define your own fields and data types</dd>
-							<dt>Use extractor as a template</dt>
-							<dd>Start with the fields an extractor has found a go from there</dd>
-							<dt>Bind to an extractor <em>*experimental*</em></dt>
-							<dd>Always use the fields from this extractor - and adapt to changes</dd>
-						</dl>
-					</small>
-				</div>
-			</div> --}}
+			</div>
 	  	</section>
 	  	<section id="task-step-2" class="step data-structures">
 			<h4>Task Details</h4>
-			{{!-- <div class="form-group">
-				<label class="control-label">Transform Type</label>
-				<select name="trn-transform-type" id="trn-transform-type" class="form-control">
-					<option value="">-- Select a transformation type --</option>
-					<option value="normalize">Normalize</option>
-					<option value="map">Custom Mapping</option>
-				</select>
-			</div>
-			<div id="transformNormalize">
-			</div>
-			<div id="transformMapper">
-				<div class="fields">
+			<div class="row">
+				<div class="col-md-6">
+					<h5>Transformers</h5>
+					<ul id="taskTransformers">
+					</ul>
 				</div>
-				<div class="mapper form-group">
-					<textarea class="form-control" name="trn-map" id="trn-map" rows="10"></textarea>
+				<div class="col-md-6">
+					<h5>Loaders</h5>
+					<ul id="taskLoaders">
+					</ul>
 				</div>
-			</div> --}}
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h5>ETL Map</h5>
+				</div>
+			</div>
 	  	</section>
 	  	<section id="task-step-3" class="step">
 			<h4>Test Task</h4>

@@ -98,8 +98,14 @@
 			/**
 			 * Reset the list of extractors in the transform dialog
 			 */
-			var cval = $('#trn-source-select').val();
+			var trn_val = $('#trn-source-select').val();
 			$('#trn-source-select').html('<option value="">-- Select extractor --</option>');
+
+			/**
+			 * Reset the list of extractors in the task dialog
+			 */
+			var task_val = $('#task-extractor-select').val();
+			$('#task-extractor-select').html('<option value="">-- Select extractor --</option>');
 
 			$(data).each(function(index, item){
 
@@ -120,6 +126,11 @@
 				 * Add an option to the list of sources in the transform dialog.
 				 */
 				$('#trn-source-select').append('<option value="'+item.id+'">'+item.key+'</option>');
+
+				/**
+				 * Add an option to the list of sources in the transform dialog.
+				 */
+				$('#task-extractor-select').append('<option value="'+item.id+'">'+item.key+'</option>');
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
@@ -127,7 +138,12 @@
 			/**
 			 * Reset the dialog value to whatever the previous selection was
 			 */
-			$('#trn-source-select').val(cval);
+			$('#trn-source-select').val(trn_val);
+
+			/**
+			 * Reset the dialog value to whatever the previous selection was
+			 */
+			$('#task-extractor-select').val(task_val);
 		};
 	};
 

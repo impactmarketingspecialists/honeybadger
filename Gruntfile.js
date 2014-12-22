@@ -31,6 +31,7 @@ module.exports = function(grunt) {
       admin: {
         src: [
           'bower_components/jquery/dist/jquery.js',
+          'bower_components/joint/dist/joint.all.js',
           'src/www/js/admin.js',
           'src/www/js/admin/*.js'
         ],
@@ -46,6 +47,7 @@ module.exports = function(grunt) {
       },
       css: {
         src: [
+          'bower_components/joint/joint.css',
           'src/www/css/**.css',
         ],
         dest: 'release/admin/www/css/admin.css'

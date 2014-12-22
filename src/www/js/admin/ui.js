@@ -534,8 +534,158 @@
 		});
 
 
+		/**************** UI Bindings ***************/
+		/****************  Tasks  ***************/
+
+		$('#task-extractor-select').change(function(){
+
+			var _ext = $(this).val();
+			if (!_ext) return;
+
+			var extractor = $DM.getExtractor(_ext);
+			var source = $DM.getSource(extractor.value.source);
+
+			var transformers = $DM.getTransformers();
+			var loaders = $DM.getLoaders();
+
+			var _trn = [];
+			var _ldr = [];
+
+			$('#taskETLMap').html('');
+			$('#taskTransformers').html('');
+			$('#taskLoaders').html('');
+
+			var graph = new joint.dia.Graph;
+			var paper = new joint.dia.Paper({
+				el:$('#taskETLMap'),
+				// width: '100%',
+				// height: 200,
+				model: graph,
+				gridSize:1
+				// interactive:false
+			});
+
+			// paper.scale(.5);
+			// paper.$el.css('pointer-events', 'none'); // don't allow user interactions
+
+			var src_marker = new joint.shapes.basic.Rect({
+			    position: { x: 296, y: 10 },
+			    size: { width: 180, height: 30 },
+			    attrs: {
+			        rect: {
+			            fill: {
+			                type: 'linearGradient',
+			                stops: [
+			                    { offset: '0%', color: '#45484d' },
+			                    { offset: '100%', color: '#000000' }
+			                ],
+			                attrs: { x1: '0%', y1: '0%', x2: '0%', y2: '100%' }
+			            }
+			        },
+			        text: {
+			            text: source.key,
+			            fill: '#fefefe',
+			            'font-size': 18,
+			            'font-weight': 'bold', 
+			            'font-variant': 'small-caps'
+			        }
+			    }
+			});
+
+			var ext_marker = new joint.shapes.basic.Rect({
+			    position: { x: 296, y:100 },
+			    size: { width: 180, height: 30 },
+			    attrs: {
+			        rect: {
+			            fill: {
+			                type: 'linearGradient',
+			                stops: [
+			                    { offset: '0%', color: '#45484d' },
+			                    { offset: '100%', color: '#000000' }
+			                ],
+			                attrs: { x1: '0%', y1: '0%', x2: '0%', y2: '100%' }
+			            }
+			        },
+			        text: {
+			            text: extractor.key,
+			            fill: '#fefefe',
+			            'font-size': 18,
+			            'font-weight': 'bold', 
+			            'font-variant': 'small-caps'
+			        }
+			    }
+			});
+
+			var link = new joint.dia.Link({
+			    source: { id: src_marker.id },
+			    target: { id: ext_marker.id }
+			});
+
+			link.set('smooth',true);
+
+			graph.addCells([src_marker, ext_marker, link]);
+
+			// $("#taskETLMap .sources").append('<div class="source"><div class="title">'+source.key+'</div></div>');
+			// $("#taskETLMap .extractors").append('<div class="extractor"><div class="title">'+extractor.key+'</div></div>');
+
+			$(transformers).each(function(index, item){
+				if (item.value.extractor == _ext) {
+					$('#taskTransformers').append('<li>'+item.key+'</li>');
+					// $("#taskETLMap .transformers").append('<div class="transformer" data-id="'+item.id+'"><div class="title">'+item.key+'</div></div>');
+					_trn.push(item.id);
+
+					var marker = new joint.shapes.basic.Rect({
+					    position: { x: 296, y:200 },
+					    size: { width: 180, height: 30 },
+					    attrs: {
+					        rect: {
+					            fill: {
+					                type: 'linearGradient',
+					                stops: [
+					                    { offset: '0%', color: '#45484d' },
+					                    { offset: '100%', color: '#000000' }
+					                ],
+					                attrs: { x1: '0%', y1: '0%', x2: '0%', y2: '100%' }
+					            }
+					        },
+					        text: {
+					            text: item.key,
+					            fill: '#fefefe',
+					            'font-size': 18,
+					            'font-weight': 'bold', 
+					            'font-variant': 'small-caps'
+					        }
+					    }
+					});
+
+					var link = new joint.dia.Link({
+					    source: { id: ext_marker.id },
+					    target: { id: marker.id }
+					});
+
+					link.set('smooth',true);
+
+					graph.addCells([marker, link]);
+
+				}
+			});
+
+			$(loaders).each(function(index, item){
+				if (_trn.indexOf(item.value.transform) > -1) {
+					$('#taskLoaders').append('<li>'+item.key+'</li>');
+					// $("#taskETLMap [data-id="+item.value.transform+"]").append('<div class="loader" data-rel="'+item.value.transform+'" data-id="'+item.id+'"><div class="title">'+item.key+'</div></div>');
+					_ldr.push(item.id);
+				}
+			});
+
+		});
+
+
+		/**************** UI Bindings ***************/
+		/****************  Complete Init  ***************/
+
 		/**
-		 * Finish by navigating to a page
+		 * Finish init by navigating to a page
 		 */
 
 		if (document.location.hash) self.navigate(document.location.hash.replace('#',''));
