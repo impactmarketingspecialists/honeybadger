@@ -124,17 +124,17 @@ li.file:hover {
 }
 
 #taskETLMap .source {
-	background: green;
+	background: lightgreen;
 }
 
 #taskETLMap .extractor {
-	background: blue;
+	background: lightblue;
 }
 #taskETLMap .transformer {
-	background: white;
+	background: lightgrey;
 }
 #taskETLMap .loader {
-	background: yellow;
+	background: lightyellow;
 }
 
 #taskETLMap .link-tools {  }
