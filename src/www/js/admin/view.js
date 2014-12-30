@@ -160,7 +160,8 @@
 			$('#ldr-source-select').html('<option value="">-- Select transformer --</option>');
 
 			$(data).each(function(index, item){
-				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.transform.input.length+' [ '+item.value.transform.input.join(', ').substring(0,100)+'... ]</td><td>'+item.value.status+'</td></tr>')
+				var ext = $DM.getExtractor(item.value.extractor);
+				$('#transformerList > tbody').append($('<tr><td>'+item.key+'</td><td>'+ext.key+'</td><td>'+item.value.transform.input.length+' [ '+item.value.transform.input.join(', ').substring(0,100)+'... ]</td><td>'+item.value.status+'</td></tr>')
 					.click(function(){
 						showWizard('transformWizard');
 						setupWizard('transformWizard', item.value);
