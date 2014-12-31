@@ -22,6 +22,70 @@
 				<textarea class="form-control" placeholder="BHHS Normalizer" name="taskDescription" id="taskDescription"></textarea>
 			</div>
 			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="taskRundate">Run Date</label>
+						<input type="date" class="form-control" name="taskRundate" id="taskRundate" class="col-md-6"/>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="taskRuntime">Run Time</label>
+						<input type="time" class="form-control" name="taskRuntime" id="taskRuntime"/>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="taskRepeat">Task Repeat</label>
+						<select class="form-control" name="taskRepeat" id="taskRepeat">
+							<option value="once" selected="selected">Run Once</option>
+							<option value="daily">Daily</option>
+							<option value="weekly">Weekly</option>
+							<option value="monthly">Monthly</option>
+							<option value="yearly">Yearly</option>
+							<option value="periodically">Periodically</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-md-6" id="taskRepeatOptions">
+					<div class="form-group repeatOptions" id="taskRepeatWeeklyOptions">
+						<label for="taskName">Weekly</label>
+						<p>
+							every <select><option value="1">1</option></select> week on:
+						</p>
+
+						Su <input type="checkbox" name="taskRepeatWeekly-sunday"> 
+						M <input type="checkbox" name="taskRepeatWeekly-monday">
+						Tu <input type="checkbox" name="taskRepeatWeekly-tuesday">
+						W <input type="checkbox" name="taskRepeatWeekly-wednesday">
+						Th <input type="checkbox" name="taskRepeatWeekly-thursday">
+						F <input type="checkbox" name="taskRepeatWeekly-friday">
+						Sa <input type="checkbox" name="taskRepeatWeekly-saturday">
+					</div>
+					<div class="form-group repeatOptions" id="taskRepeatMonthlyOptions">
+						<label for="taskName">Monthly</label>
+						<p>
+							every <select><option value="1" size="2">1</option></select> month on the
+						</p>
+
+						<select>
+							<option value="first-day">first day</option>
+							<option value="first-monday">first Monday</option>
+							<option value="last-day">last day</option>
+						</select>
+						of the month
+					</div>
+					<div class="form-group repeatOptions" id="taskRepeatPeriodicOptions">
+						<label for="taskName">Periodically</label>
+						<p>
+							every <input type="number" value="1"/> days after last run:
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
 				<div class="col-md-12">
 					<div class="form-group">
 						<label class="control-label">Select Extractor</label>

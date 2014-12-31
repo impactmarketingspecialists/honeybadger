@@ -13075,6 +13075,35 @@ var Admin = (function($this,$){
 		/**************** UI Bindings ***************/
 		/****************  Tasks  ***************/
 
+		$('#taskRepeat').change(function(){
+			var _repeat = $(this).val();
+			switch(_repeat)
+			{
+				case 'daily':
+					$('#taskRepeatOptions').hide();
+				break;
+				case 'weekly':
+					$('.repeatOptions').hide();
+					$('#taskRepeatWeeklyOptions').show();
+					$('#taskRepeatOptions').show();
+				break;
+				case 'monthly':
+					$('.repeatOptions').hide();
+					$('#taskRepeatMonthlyOptions').show();
+					$('#taskRepeatOptions').show();
+				break;
+				case 'periodically':
+					$('.repeatOptions').hide();
+					$('#taskRepeatPeriodicOptions').show();
+					$('#taskRepeatOptions').show();
+				break;
+				default:
+					$('#taskRepeatOptions').hide();
+			}
+		});
+
+		$('#taskRepeatOptions').hide();
+
 		$('#task-extractor-select').change(function(){
 
 			var _ext = $(this).val();
@@ -13593,6 +13622,7 @@ var Admin = (function($this,$){
 		var res = {
 			name: $('#taskName').val(),
 			description: $('#taskDescription').val(),
+			runtime: $('#taskRuntime').val(),
 			extractor: $('#task-extractor-select').val()
 		};
 		return res;
