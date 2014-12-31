@@ -252,14 +252,14 @@ module.exports = new (function(){
     this.taskSave = function(task, callback) {
 
         var _updateTask = function(){
-            if (!loader._rev) {
+            if (!task._rev) {
                 console.log('Document has no _rev; cannot update');
                 console.trace();
                 callback({err:true,body:'Document has no _rev; cannot update'});
                 return false;
             }
 
-            task.type = 'loader';
+            task.type = 'task';
             task.status = 'active';
             task.activatedOn = Date.now();
             db.insert(task, task._id, function(err, body){
