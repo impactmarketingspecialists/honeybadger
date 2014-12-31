@@ -3,6 +3,7 @@ module.exports = new (function(){
         extractors = [],
         transformers = [],
         loaders = [],
+        tasks = [],
         programs = [];
 
     var refreshSources = function(callback){
@@ -53,6 +54,18 @@ module.exports = new (function(){
         });
     };
 
+    var refreshTasks = function(callback){
+        db.view('tasks', 'list', function(err, body) {
+            if(!err) {
+                tasks = [];
+                body.rows.forEach(function(doc){
+                    tasks.push(doc);
+               });
+            } else console.trace(err);
+            if(callback) callback(err, body);
+        });
+    };
+
     Object.defineProperty(this, "sources", {
         get: function() { return sources; }
     });
@@ -69,11 +82,16 @@ module.exports = new (function(){
         get: function() { return loaders; }
     });
 
+    Object.defineProperty(this, "tasks", {
+        get: function() { return tasks; }
+    });
+
     this.refresh = function(){
         refreshSources();
         refreshExtractors();
         refreshTransformers();
         refreshLoaders();
+        refreshTasks();
     };
 
     this.sourceDetail = function(id) {
@@ -223,6 +241,41 @@ module.exports = new (function(){
 
         if (loader._id) _updateLoader();
         else _newLoader();
+    };
+
+    this.taskSave = function(task, callback) {
+
+        var _updateTask = function(){
+            if (!loader._rev) {
+                console.log('Document has no _rev; cannot update');
+                console.trace();
+                callback({err:true,body:'Document has no _rev; cannot update'});
+                return false;
+            }
+
+            task.type = 'loader';
+            task.status = 'active';
+            task.activatedOn = Date.now();
+            db.insert(task, task._id, function(err, body){
+                refreshTasks(function(){
+                    if (callback) callback(err, body);
+                });
+            });
+        };
+
+        var _newTask = function(){
+            task.type = 'task';
+            task.status = 'active';
+            task.activatedOn = Date.now();
+            db.insert(task, null, function(err, body){
+                refreshTasks(function(){
+                    if (callback) callback(err, body);
+                });
+            });
+        };
+
+        if (task._id) _updateTask();
+        else _newTask();
     };
 
     this.refresh();

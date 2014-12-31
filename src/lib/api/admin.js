@@ -843,6 +843,19 @@ module.exports = {
             break;
         }
     },
+    "task.list": function(callback){
+        process.nextTick(function(){
+            callback('onTaskList', null, DataManager.tasks);
+        });
+    },
+    "task.test": function(task, callback) {
+        callback('onvalidate',null,{success:true});
+    },
+    "task.save": function(source, callback) {
+        DataManager.taskSave(source, function(err, body){
+            callback('onsave',err,body);
+        });
+    },
     "ftp.browse": function(source, basepath, callback) {
         DataManager.getSource(source.id, function(error, body){
             if (!error && body.source.type === 'FTP') {

@@ -3,7 +3,8 @@
 		sources = [],
 		extractors = [],
 		transformers = [],
-		loaders = [];
+		loaders = [],
+		tasks = [];
 
 	var _construct = function() {
 		console.log('DataManager constructor');
@@ -74,15 +75,27 @@
 		return promise;
 	};
 
+	this.loadTasks = function(callback){
+		var promise = Promise.create(self.loadTasks);
+		$this.exec('task.list',null,function(e){
+			if(!e.err) { tasks = e.body; }
+			if (callback) callback(e);
+			Emit('tasks',tasks);
+			promise.complete();
+		});
+		return promise;
+	};
+
 	this.refresh = function(callback){
 		//TODO: add parallelized promises
-		this.loadSources().then(this.loadExtractors).then(this.loadTransformers).then(this.loadLoaders).then(function(){
+		this.loadSources().then(this.loadExtractors).then(this.loadTransformers).then(this.loadLoaders).then(this.loadTasks).then(function(){
 			if (callback) callback();
 			Emit('refresh',{
 				sources: sources,
 				extractors: extractors,
 				transformers: transformers,
-				loaders: loaders
+				loaders: loaders,
+				tasks: tasks
 			});
 		});
 	};
@@ -101,6 +114,10 @@
 
 	this.getLoaders = function(){
 		return loaders;
+	};
+
+	this.getTasks = function(){
+		return tasks;
 	};
 
 	this.getSource = function(id){
@@ -126,6 +143,13 @@
 
 	this.getLoader = function(id){
 		return self.getLoaders().filter(function(e){
+			if (e.id == id) return e;
+			else return null;
+		}).pop();
+	};
+
+	this.getTask = function(id){
+		return self.getTasks().filter(function(e){
 			if (e.id == id) return e;
 			else return null;
 		}).pop();
@@ -187,6 +211,16 @@
 
 	this.loader.sample = function(ldr, callback){
 		$this.exec('loader.test', [ldr], callback);
+	};
+
+
+	this.task = {};
+	this.task.save = function(ldr, callback){
+		$this.exec('task.save', [ldr], callback);
+	};
+
+	this.task.sample = function(ldr, callback){
+		$this.exec('task.test', [ldr], callback);
 	};
 
 
