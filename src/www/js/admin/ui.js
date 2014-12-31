@@ -576,6 +576,39 @@
 
 		});
 
+		/**
+		 * Binding for running task tests
+		 */
+		$('#task-test').click(function(){
+			$('#task-result').html('');
+			$DM.task.sample(tsk(),function(e){
+				if (!e.err) {
+					$('#task-result').html('<p class="bg-success">Task Test Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',false);
+				} else {
+					$('#task-result').html('<p class="bg-danger">Task Test Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',true);
+				}
+			});
+		});
+
+		/**
+		 * Clear the loader test log
+		 */
+		$('#task-test-clear').click(function(){
+			$('#task-log-body').html('');
+			$('#task-result').html('');
+		});
+
+		/**
+		 * Hook to the Dialog finish button
+		 */
+		$('#taskWizard [am-Button~=finish]').click(function(){
+			$('#taskWizard').modal('hide');
+			$DM.task.save(tsk());
+		});
+
+
 
 		/**************** UI Bindings ***************/
 		/****************  Complete Init  ***************/
@@ -1014,5 +1047,17 @@
 		return res;
 	};
 
+	/**
+	 * Get a task definition from the UI
+	 * @return {[type]}
+	 */
+	var tsk = function(){
+		var res = {
+			name: $('#taskName').val(),
+			description: $('#taskDescription').val(),
+			extractor: $('#task-extractor-select').val()
+		};
+		return res;
+	};
 
 }(HoneyBadger.Admin, jQuery));

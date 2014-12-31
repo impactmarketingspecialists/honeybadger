@@ -13114,6 +13114,39 @@ var Admin = (function($this,$){
 
 		});
 
+		/**
+		 * Binding for running task tests
+		 */
+		$('#task-test').click(function(){
+			$('#task-result').html('');
+			$DM.task.sample(tsk(),function(e){
+				if (!e.err) {
+					$('#task-result').html('<p class="bg-success">Task Test Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',false);
+				} else {
+					$('#task-result').html('<p class="bg-danger">Task Test Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',true);
+				}
+			});
+		});
+
+		/**
+		 * Clear the loader test log
+		 */
+		$('#task-test-clear').click(function(){
+			$('#task-log-body').html('');
+			$('#task-result').html('');
+		});
+
+		/**
+		 * Hook to the Dialog finish button
+		 */
+		$('#taskWizard [am-Button~=finish]').click(function(){
+			$('#taskWizard').modal('hide');
+			$DM.task.save(tsk());
+		});
+
+
 
 		/**************** UI Bindings ***************/
 		/****************  Complete Init  ***************/
@@ -13552,6 +13585,18 @@ var Admin = (function($this,$){
 		return res;
 	};
 
+	/**
+	 * Get a task definition from the UI
+	 * @return {[type]}
+	 */
+	var tsk = function(){
+		var res = {
+			name: $('#taskName').val(),
+			description: $('#taskDescription').val(),
+			extractor: $('#task-extractor-select').val()
+		};
+		return res;
+	};
 
 }(HoneyBadger.Admin, jQuery));
 
@@ -13703,6 +13748,7 @@ var Admin = (function($this,$){
 		$DM.on('extractors',self.extractors());
 		$DM.on('transformers',self.transformers());
 		$DM.on('loaders',self.loaders());
+		$DM.on('tasks',self.tasks());
 	};
 
 	$admin.module.register({
@@ -13868,6 +13914,21 @@ var Admin = (function($this,$){
 				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'/'+item.value.target.schema.name+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('loaderWizard');
 					setupWizard('loaderWizard', item.value);
+				}));
+				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+			});
+		};
+	};
+
+	this.tasks = function() {
+
+		return function render(data) {
+			$('#taskList > tbody').html('');
+			$(data).each(function(index, item){
+				$('#taskList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.description+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+					showWizard('taskWizard');
+					setupWizard('taskWizard', item.value);
 				}));
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;

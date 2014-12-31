@@ -851,8 +851,8 @@ module.exports = {
     "task.test": function(task, callback) {
         callback('onvalidate',null,{success:true});
     },
-    "task.save": function(source, callback) {
-        DataManager.taskSave(source, function(err, body){
+    "task.save": function(task, callback) {
+        DataManager.taskSave(task, function(err, body){
             callback('onsave',err,body);
         });
     },

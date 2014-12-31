@@ -408,12 +408,12 @@ var HoneyBadger = (function($this){
 
 
 	this.task = {};
-	this.task.save = function(ldr, callback){
-		$this.exec('task.save', [ldr], callback);
+	this.task.save = function(tsk, callback){
+		$this.exec('task.save', [tsk], callback);
 	};
 
-	this.task.sample = function(ldr, callback){
-		$this.exec('task.test', [ldr], callback);
+	this.task.sample = function(tsk, callback){
+		$this.exec('task.test', [tsk], callback);
 	};
 
 

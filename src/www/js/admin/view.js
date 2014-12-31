@@ -21,6 +21,7 @@
 		$DM.on('extractors',self.extractors());
 		$DM.on('transformers',self.transformers());
 		$DM.on('loaders',self.loaders());
+		$DM.on('tasks',self.tasks());
 	};
 
 	$admin.module.register({
@@ -186,6 +187,21 @@
 				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'/'+item.value.target.schema.name+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 					showWizard('loaderWizard');
 					setupWizard('loaderWizard', item.value);
+				}));
+				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
+				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
+			});
+		};
+	};
+
+	this.tasks = function() {
+
+		return function render(data) {
+			$('#taskList > tbody').html('');
+			$(data).each(function(index, item){
+				$('#taskList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.description+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+					showWizard('taskWizard');
+					setupWizard('taskWizard', item.value);
 				}));
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
