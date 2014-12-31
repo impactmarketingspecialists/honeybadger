@@ -279,11 +279,11 @@
 			$DM.extractor.sample(ext(),function(e){
 				// console.log(e);
 				if (!e.err) {
-					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+					$('#extraction-result').html('<p class="bg-success">Extractor Test Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
 					$('#extractorWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
 					$('#extractorWizard [am-Button~=finish]').prop('disabled',true);
-					$('#extraction-result').html('<p class="bg-danger">Extractor Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+					$('#extraction-result').html('<p class="bg-danger">Extractor Test Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
 				}
 			});
 		});
@@ -368,10 +368,10 @@
 			$('#transformer-result').html('');
 			$DM.transformer.sample(trn(),function(e){
 				if (!e.err) {
-					$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+					$('#transformer-result').html('<p class="bg-success">Transform Test Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
 					$('#transformWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
-					$('#transformer-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+					$('#transformer-result').html('<p class="bg-danger">Transform Test Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
 					$('#transformWizard [am-Button~=finish]').prop('disabled',true);
 				}
 			});
@@ -467,11 +467,11 @@
 				$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
 				if (!e.err) {
 					$(btn).removeClass('btn-primary').addClass('btn-success')
-					$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+					$(btn+' .validation-status').removeClass('asterisk').addClass('ok-sign');
 					$('#loaderWizard [am-Button~=next]').prop('disabled',false);
 				} else {
 					$(btn).prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
-					$(btn+' .validation-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+					$(btn+' .validation-status').removeClass('asterisk').addClass('exclamation-sign');
 				}
 
 			});
@@ -485,10 +485,10 @@
 				$('#ldr-create-schema').removeClass('btn-danger btn-success').addClass('btn-primary');
 				if (!e.err) {
 					$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
-					$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+					$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('ok-sign');
 				} else {
 					$('#ldr-create-schema').prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
-					$('#ldr-create-schema .schema-status').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+					$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('exclamation-sign');
 				}
 
 			});
@@ -507,10 +507,10 @@
 			$('#loader-result').html('');
 			$DM.loader.sample(ldr(),function(e){
 				if (!e.err) {
-					$('#loader-result').html('<p class="bg-success">Loader Test Completed Successfully <span class="glyphicon glyphicon-ok-circle"></span></p>');
+					$('#loader-result').html('<p class="bg-success">Loader Test Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
 					$('#loaderWizard [am-Button~=finish]').prop('disabled',false);
 				} else {
-					$('#loader-result').html('<p class="bg-danger">Loader Test Failed! Check your settings and try again. <span class="glyphicon glyphicon-warning-sign"></span></p>');
+					$('#loader-result').html('<p class="bg-danger">Loader Test Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
 					$('#loaderWizard [am-Button~=finish]').prop('disabled',true);
 				}
 			});
@@ -639,7 +639,7 @@
 	 */
 	this.sourceModalReset = function(){
 		$('#validateBtn').removeAttr('disabled').removeClass('btn-danger btn-success').addClass('btn-primary');
-		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign');
+		$('#sourceValidationStatus').removeClass('ok-sign exclamation-sign');
 		$('#sourceTypeOptions .option-group').hide();
 		$('#sourceEditorSave').prop('disabled',false);
 	};

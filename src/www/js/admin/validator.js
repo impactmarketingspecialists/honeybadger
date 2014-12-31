@@ -52,19 +52,19 @@
 			break;
 		}
 
-		$('#sourceValidationStatus').removeClass('glyphicon-ok-sign glyphicon-exclamation-sign').addClass(' glyphicon-asterisk');
+		$('#sourceValidationStatus').removeClass('ok-sign exclamation-sign').addClass('asterisk');
 		// $('#validateBtn').attr('disabled','disabled');
 
 		$DM.validateSource(src,function(e){
 			$('#validateBtn').removeClass('btn-danger btn-success').addClass('btn-primary');
 			if (!e.err) {
 				$('#validateBtn').removeClass('btn-primary').addClass('btn-success')
-				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-ok-sign');
+				$('#sourceValidationStatus').removeClass('asterisk').addClass('ok-sign');
 				$('#sourceEditor [am-Button~=next]').hide();
 				$('#sourceEditor [am-Button~=finish]').show().prop("disabled", false);
 			} else {
 				$('#validateBtn').removeAttr('disabled').removeClass('btn-primary').addClass('btn-danger')
-				$('#sourceValidationStatus').removeClass('glyphicon-asterisk').addClass('glyphicon-exclamation-sign');
+				$('#sourceValidationStatus').removeClass('asterisk').addClass('exclamation-sign');
 				$('#sourceEditor [am-Button~=finish]').prop('disabled',true);
 			}
 		});

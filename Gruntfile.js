@@ -30,8 +30,7 @@ module.exports = function(grunt) {
       },
       admin: {
         src: [
-          'bower_components/jquery/dist/jquery.js',
-          'bower_components/joint/dist/joint.all.js',
+          'bower_components/bloxui/dist/js/bloxui.js',
           'src/www/js/admin.js',
           'src/www/js/admin/*.js'
         ],
@@ -47,7 +46,7 @@ module.exports = function(grunt) {
       },
       css: {
         src: [
-          'bower_components/joint/joint.css',
+          'bower_components/bloxui/dist/css/bloxui.css',
           'src/www/css/**.css',
         ],
         dest: 'release/admin/www/css/admin.css'
@@ -90,6 +89,12 @@ module.exports = function(grunt) {
           cwd: 'src',
           src: ['admin.js'],
           dest: 'release/admin'
+        },
+        {
+          expand: true,
+          cwd: 'bower_components/bloxui/dist/fonts',
+          src: ['./**'],
+          dest: 'release/admin/www/css/fonts'
         },
         {
           expand: true,
@@ -142,5 +147,6 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['copy','concat', 'newer:uglify', 'newer:cssmin','newer:assemble']);
+  grunt.registerTask('release', ['clean','copy','concat', 'newer:uglify', 'newer:cssmin','newer:assemble']);
   
 };

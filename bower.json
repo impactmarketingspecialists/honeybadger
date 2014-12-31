@@ -1,7 +1,7 @@
 {
   "name": "honeybadger",
   "dependencies": {
-    "jquery": "*",
+    "bloxui": "*",
     "joint": "~0.9.2"
   },
   "ignore": [
