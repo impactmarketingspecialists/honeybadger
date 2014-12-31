@@ -95,8 +95,14 @@ module.exports = new (function(){
     };
 
     this.sourceDetail = function(id) {
-        return sources.find(function(e) {
+        return sources.filter(function(e) {
             return e._id === id;
+        });
+    };
+
+    this.getTask = function(id){
+        return tasks.filter(function(item){
+            if (item.id === id) return item;
         });
     };
 
@@ -277,6 +283,7 @@ module.exports = new (function(){
         if (task._id) _updateTask();
         else _newTask();
     };
+
 
     this.refresh();
 });
