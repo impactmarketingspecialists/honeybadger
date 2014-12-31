@@ -966,6 +966,16 @@
 					break;
 				}
 			break;
+			case "taskWizard":
+				$('#taskWizard').attr('data-id',data._id);
+				$('#taskWizard').attr('data-rev',data._rev);
+
+				$('#taskName').val(data.name);
+				$('#taskDescription').val(data.description);
+				$('#taskRepeat').val(data.repeat);
+				$('#taskRundate').val(data.runDate);
+				$('#taskRuntime').val(data.runTime);
+			break;
 		}
 	}
 
@@ -1081,12 +1091,22 @@
 	 * @return {[type]}
 	 */
 	var tsk = function(){
+		var id = $('#taskWizard').attr('data-id');
+		var _rev = $('#taskWizard').attr('data-rev');
 		var res = {
 			name: $('#taskName').val(),
 			description: $('#taskDescription').val(),
-			runtime: $('#taskRuntime').val(),
+			runDate: $('#taskRundate').val(),
+			runTime: $('#taskRuntime').val(),
+			repeat: $('#taskRepeat').val(),
 			extractor: $('#task-extractor-select').val()
 		};
+
+		if (id && _rev) {
+			res._id = id;
+			res._rev = _rev;
+		}
+		
 		return res;
 	};
 
