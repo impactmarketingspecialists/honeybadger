@@ -1,6 +1,10 @@
 var ftp = require('./helpers/transports/ftp');
 var rets = require('./helpers/transports/rets');
 var csv = require('./helpers/csv');
+
+var streamTransform = require('stream-transform');
+
+
 var worker = function(options) {
 	this.runTask = function(task, callback) {
 		console.log('Running task', task.name);

@@ -1,3 +1,4 @@
+var url = require('url');
 var librets = require('rets-client');
 
 Object.defineProperties(module.exports,{
