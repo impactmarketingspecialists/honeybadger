@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 var fs = require('fs')
+    dnode = require('dnode'),
     nano = require('nano')('http://localhost:5984'),
     db = nano.use('honeybadger'),
     feed = db.follow({since: "now"}),
     utility = require('./lib/utility'),
     DataManager = require('./lib/data-manager'),
-    dnode = require('dnode');
+    scheduler = require('./lib/scheduler');
 
 var dnode_port = 8120;
 
@@ -43,8 +44,9 @@ var honeybadger = function(){
 
 	this.runTask = function(id){
 		var task;
-		if (task = DataManager.getTask(id)) {
-			console.log(task);
+		if (task = DataManager.getTask(id).pop()) {
+			console.log('Registering task with scheduler');
+			scheduler.addTask(task.value);
 		} else return false;
 	}
 };
