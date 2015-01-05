@@ -48,7 +48,7 @@ var rets = function( options, callback )
             // console.log(error, data);
             
             if (error) {
-                console.log(qry, error);
+                console.log(data);
             } else if (data.type == 'status') {
                 // clog('<div class="text-warning">'+data.text+'</div>');
                 // if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');

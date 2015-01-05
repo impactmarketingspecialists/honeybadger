@@ -13,6 +13,7 @@
     "ftp": "*",
     "nano": "*",
     "node-schedule": "^0.1.15",
+    "node-uuid": "^1.4.2",
     "rets": "git://github.com/dermidgen/node-rets-client.git#develop",
     "rimraf": "*",
     "stream-transform": "*",
