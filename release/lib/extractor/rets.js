@@ -1,63 +1,63 @@
 var util = require('util');
 var events = require('events');
+var url = require('url');
 var librets = require('rets-client');
 
-function rets( options, callback )
+var clients = {};
+
+var rets = function( options, callback )
 {
-	// protect scope and eliminate need for new constructor
-	if( !( this instanceof RETS ) ) {
-		return new rets( options, callback );
-	}
+    var self = this;
 
- 	events.EventEmitter.call(this);
+ 	// events.EventEmitter.call(this);
+    var uri = url.parse(options.source.uri);
 
-    this._librets = require('rets-client');
+    var client_key = uri.hostname+uri.port+':'+options.source.auth.username;
 
-    var uri = url.parse(src.source.uri);
+    if (!clients[client_key]) {
+        var client = librets.createConnection({
+            host: uri.hostname,
+            port: uri.port,
+            protocol: uri.protocol,
+            path: uri.path,
+            user: options.source.auth.username,
+            pass: options.source.auth.password,
+            version: options.source.version || '1.7.2',
+            agent: { user: options.source.auth.userAgentHeader, password: options.source.auth.userAgentPassword }
+        });
+    }
 
-    var client = librets.createConnection({
-        host: uri.hostname,
-        port: uri.port,
-        protocol: uri.protocol,
-        path: uri.path,
-        user: src.source.auth.username,
-        pass: src.source.auth.password,
-        version: src.source.version || '1.7.2',
-        agent: { user: src.source.auth.userAgentHeader, password: src.source.auth.userAgentPassword }
-    });
+    // var client = clients[client_key];
+    // console.log(clients);
 
-    clog('<div class="text-info">Connecting to RETS data source.</div>');
     client.once('connection.success',function(client){
         console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-        clog('<div class="text-success">Connected to RETS as '+client.get( 'provider.name' )+'.</div>');
-        clog('<div class="text-info">Extracting 1000 records via DMQL2 RETS Query.</div>');
-        clog('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
-        clog('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-        clog('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
-        var qry = options || {
-            SearchType: extractor.target.type,
-            Class: extractor.target.class,
-            Query: extractor.target.res,
+
+        self.emit('connect', null, 'success');
+
+        var qry = {
+            SearchType: options.target.type,
+            Class: options.target.class,
+            Query: options.target.res,
             Format: 'COMPACT-DECODED',
-            Limit: 1000
+            Limit: 10
         };
-        
+
         client.searchQuery(qry, function( error, data ) {
-            clog('<div class="text-success">Successfully retrieved RETS data from provider.</div>');
+
+            // console.log(error, data);
             
             if (error) {
-                clog('<div class="text-danger">Query did not execute.</div>');
-                clog('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
+                console.log(qry, error);
             } else if (data.type == 'status') {
-                clog('<div class="text-warning">'+data.text+'</div>');
-                if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                // clog('<div class="text-warning">'+data.text+'</div>');
+                // if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
             } else {
                 if (!data.data || !data.data.length) {
-                    clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                    // clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
                     return;
                 }
 
-                clog('<div class="text-info">Parsing extracted records.</div>');
     			self.emit('data', data);
             }
         });
@@ -68,10 +68,9 @@ function rets( options, callback )
         callback('onLoaderTest',error, null);
     });
 
-    return this;
 };
 
-util.inherits( rets, events.EventEmitter );
+util.inherits( rets, extractor );
 
 /**
  * Public static methods.
@@ -87,6 +86,7 @@ Object.defineProperties( module.exports = rets, {
   initialize: {
     value: function init( settings, callback ) {
       rets.debug( 'Initializing RETS Extractor' );
+      console.log('Init')
       return new rets( settings, callback || utility.noop )
     },
     enumerable: true,

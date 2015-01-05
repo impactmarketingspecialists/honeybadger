@@ -1,10 +1,27 @@
-module.exports = new (function(){
-    var sources = [],
-        extractors = [],
-        transformers = [],
-        loaders = [],
-        tasks = [],
-        programs = [];
+var util = require('util'),
+    events = require('events'),
+    nano = require('nano')('http://localhost:5984'),
+    db = nano.use('honeybadger'),
+    feed = db.follow({since: "now"});
+
+var sources = [],
+    extractors = [],
+    transformers = [],
+    loaders = [],
+    tasks = [],
+    programs = [];
+
+/**
+ * Follow database changes
+ */
+feed.on('change', function (change) {
+    DataManager.refresh();
+});
+feed.follow();
+
+var DataManager = function(){
+
+    var self = this;
 
     var refreshSources = function(callback){
         db.view('sources', 'list', function(err, body) {
@@ -62,7 +79,12 @@ module.exports = new (function(){
                     tasks.push(doc);
                });
             } else console.trace(err);
-            if(callback) callback(err, body);
+
+            self.emit('tasks',tasks);
+
+            if(callback) {
+                callback(err, body);
+            }
         });
     };
 
@@ -286,4 +308,7 @@ module.exports = new (function(){
 
 
     this.refresh();
-});
+};
+
+util.inherits( DataManager, events.EventEmitter );
+module.exports = new DataManager();

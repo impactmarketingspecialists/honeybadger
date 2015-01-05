@@ -4,28 +4,70 @@ var csv = require('./helpers/csv');
 
 var streamTransform = require('stream-transform');
 
+var $Extractor = require('./extractor').Factory;
 
 var worker = function(options) {
 	this.runTask = function(task, callback) {
+
+		/**
+		 * Let's get all the configs we need
+		 */
+
 		console.log('Running task', task.name);
 
-		var extractor = DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return item; }).pop().value;
-		var source = DataManager.sources.filter(function(item){ if (item.id === extractor.source) return item; }).pop().value;
-		var transformers = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return item.value; }).map(function(item){return item.value});
-		var loaders = [];
-		
-		console.log('Loaded task extraction source', source.name);
-		console.log('Loaded task extractor', extractor.name);
-		console.log('Discovered', transformers.length, 'transformers');
+		var extractor_config = DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value;
+		console.log('Loaded task extractor', extractor_config.name);
 
-		transformers.forEach(function(transform){
+		var source_config = DataManager.sources.filter(function(item){ if (item.id === extractor_config.source) return true; }).pop().value;
+		console.log('Loaded task extraction source', source_config.name);
+
+		var transformer_configs = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return true; }).map(function(item){ return item.value; });
+		console.log('Discovered', transformer_configs.length, 'transformers');
+
+		var loader_configs = [];
+		transformer_configs.forEach(function(transform){
 			console.log('Loaded task transformer', transform.name);
 			DataManager.loaders.forEach(function(loader){
-				if (loader.value.transform === transform._id) loaders.push(loader.value);
+				if (loader.value.transform === transform._id) loader_configs.push(loader.value);
 			})
 		});
 
-		console.log('Discovered', loaders.length, 'loaders');
+		console.log('Discovered', loader_configs.length, 'loaders');
+
+		/**
+		 * Let's get some instances of our etl objects
+		 */
+		var $e = $Extractor({
+			id: extractor_config._id,
+			name: extractor_config.name,
+			source: source_config.source,
+			target: extractor_config.target
+		});
+		$e.on('data',function(){
+			console.log('extractor got data');
+		});
+
+		return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         var mysql = require('mysql');
 		loaders.forEach(function(loader){
