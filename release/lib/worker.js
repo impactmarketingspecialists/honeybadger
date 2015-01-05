@@ -49,7 +49,7 @@ var worker = function(options) {
 	            // console.log(transformer);
 	            //We want to pipe transformer events back to the client
 	            db.get(transformer.extractor,function(err, extractor){
-	                if (err) { _log('Error fetching extractor'); return; }
+	                if (err) { /*_log('Error fetching extractor'); */return; }
 
 	                // _log('Testing extraction from source: '+ extractor.source);
 
@@ -64,7 +64,7 @@ var worker = function(options) {
 	                    // _log('<div class="text-success">Extraction source is valid.</div>');
 	                    var source = body;
 
-	                    var testlimit = 10000;
+	                    var testlimit = 100;
 	                    // console.log(source.source);
 	                    /**
 	                     * We're going to leave in a bunch of extra steps here for the sake
@@ -203,10 +203,12 @@ var worker = function(options) {
 	                            };
 	                            client.searchQuery(qry, function( error, data ) {
 
+	                            	console.log('RETS data recv');
+
 	                                if (error) {
 	                                    // _log('<div class="text-danger">Query did not execute.</div>');
 	                                    // _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-	                                    console.log(error);
+	                                    console.trace('RETS query error', error);
 	                                    callback('onLoaderTest',error, null);
 	                                    return;
 	                                } else if (data.type == 'status') {
@@ -232,7 +234,7 @@ var worker = function(options) {
 	                                            if (xformed.length >= testlimit) {
 	                                                process.nextTick(function(){ 
 	                                                    // _log('<div class="text-success">Transform completed successfully.</div>');
-	                                                    // if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+	                                                    if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
 	                                                });
 	                                                return;
 	                                            }
@@ -251,9 +253,10 @@ var worker = function(options) {
 	                                            connection.query(insert_query,rec,function(err,res){
 	                                                if (!err) {
 	                                                    records.push(rec);
-	                                                    process.nextTick(function(){
+	                                                    console.log('Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name);
+	                                                    // process.nextTick(function(){
 	                                                        // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
-	                                                    });
+	                                                    // });
 	                                                } else {
 	                                                    errors = true;
 	                                                }
@@ -281,7 +284,8 @@ var worker = function(options) {
 
 	                                        }, {parallel: 1});
 
-	                                        csv.parse('\t', '"', data, function(err,res){
+	                                        csv.parse('\t', '', data, function(err,res){
+	                                        	if (err) { console.trace(err); }
 	                                            if (err === 'headers') {
 	                                                // _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
 	                                                process.nextTick(function(){
