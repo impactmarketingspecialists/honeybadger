@@ -35,7 +35,6 @@ function RETS( options )
     var $this = this;
     var uri = url.parse(options.source.uri);
 
-    Extractor.call(this);
     /**
      * I'm getting some weird session overlap
      * with creating multiple instances of my
@@ -52,30 +51,40 @@ function RETS( options )
      * globals.
      */
     var librets = require('rets-client');
-    var client = librets.createConnection({
-        host: uri.hostname,
-        port: uri.port,
-        protocol: uri.protocol,
-        path: uri.path,
-        user: options.source.auth.username,
-        pass: options.source.auth.password,
-        version: options.source.version || '1.7.2',
-        agent: { user: options.source.auth.userAgentHeader, password: options.source.auth.userAgentPassword }
-    });
+    var client = null;
+    var readyState = 0;
 
-    client.once('connection.error',function(error, client){
-        console.trace( 'Connection failed: %s.', error.message );
-        log( 'Connection failed: %s.', error.message );
-        $this.emit('error', error);
-    });
+    Extractor.call(this);
 
-    client.once('connection.success',function(client){
-        log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
-        $this.emit('ready', null, 'success');
+    this.connect = function() {
+        readyState = 1; // Connecting
+        client = librets.createConnection({
+            host: uri.hostname,
+            port: uri.port,
+            protocol: uri.protocol,
+            path: uri.path,
+            user: options.source.auth.username,
+            pass: options.source.auth.password,
+            version: options.source.version || '1.7.2',
+            agent: { user: options.source.auth.userAgentHeader, password: options.source.auth.userAgentPassword }
+        });
 
-    });
+        client.once('connection.error',function(error, client){
+            readyState = -1; // Error
+            console.trace( 'Connection failed: %s.', error.message );
+            log( 'Connection failed: %s.', error.message );
+            $this.emit('error', error);
+        });
 
-    this.startExtraction = function(){
+        client.once('connection.success',function(client){
+            readyState = 2; // Connected
+            log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+            $this.emit('ready', null, 'success');
+        });
+    };
+
+    this.start = function() {
+        if (readyState < 2) throw('Extractor is not ready to start');
 
         var qry = {
             SearchType: options.target.type,
@@ -109,6 +118,8 @@ function RETS( options )
             $this.emit('data', data);
         });
     };
+
+    this.init();
 };
 
 

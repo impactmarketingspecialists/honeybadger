@@ -28,15 +28,30 @@ var log = require('debug')('HoneyBadger:Extractor');
 var util = require('util');
 var events = require('events');
 
-/** global */
+util.inherits(Extractor, events.EventEmitter );
 function Extractor(){
     events.EventEmitter.call(this);
 
+    /** 
+     * All Extractors must implement the following methods
+     * Consider this an interface of sorts.
+     *
+     * this.connect();
+     * this.start();
+     * this.pause();
+     * this.end();
+     * this.pipe();
+     * this.destroy();
+     */
+
     this.extract = function(){
-    	this.startExtraction();
-    }
+    	this.start();
+    };
+
+    this.init = function(){
+    	this.connect();
+    };
 }
-util.inherits(Extractor, events.EventEmitter );
 
 var rets = require('./extractor/rets');
 
