@@ -44,14 +44,6 @@ var readyState = 0;
 var readyStateComplete = 5;
 
 
-/**
- * Follow database changes
- */
-feed.on('change', function (change) {
-    DataManager.refresh();
-});
-feed.follow();
-
 Object.defineProperty(DataManager, "sources", {
     get: function() { return sources; }
 });
@@ -168,6 +160,13 @@ DataManager.refresh = function(){
 };
 DataManager.refresh();
 
+/**
+ * Follow database changes
+ */
+feed.on('change', function (change) {
+    DataManager.refresh();
+});
+feed.follow();
 
 DataManager.sourceDetail = function(id) {
     return sources.filter(function(e) {
