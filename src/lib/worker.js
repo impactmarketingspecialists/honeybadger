@@ -49,6 +49,10 @@ var worker = function(options) {
 			console.trace(err);
 		});
 
+		$e.on('ready',function(err, body){
+			$e.extract();
+		});
+
 		$e.on('data',function(){
 			log('extractor got data');
 		});

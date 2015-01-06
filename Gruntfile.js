@@ -99,7 +99,7 @@ module.exports = function(grunt) {
         {
           expand: true,
           cwd: 'src',
-          src: ['honeybadger.js','data-select.js','config.json','selectors.json','lib/**'],
+          src: ['index.js','honeybadger.js','data-select.js','config.json','selectors.json','lib/**'],
           dest: 'release'
         }]
       }
@@ -147,6 +147,6 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['copy','concat', 'newer:uglify', 'newer:cssmin','newer:assemble']);
-  grunt.registerTask('release', ['clean','copy','concat', 'newer:uglify', 'newer:cssmin','newer:assemble']);
+  grunt.registerTask('release', ['clean','copy','concat', 'uglify', 'cssmin','assemble']);
   
 };

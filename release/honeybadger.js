@@ -1,35 +1,40 @@
-#!/usr/bin/env node
+// Copyright Impact Marketing Specialists, Inc. and other contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var fs = require('fs')
-    dnode = require('dnode'),
-    log = require('debug')('honeybadger'),
-    utility = require('./lib/utility'),
-    DataManager = require('./lib/data-manager'),
-    scheduler = require('./lib/scheduler');
+module.exports = HoneyBadger;
 
-var dnode_port = 8120;
+/** log facility */
+var log = require('debug')('HoneyBadger');
 
-/**
- * Before we start up any services; let's see if we're getting
- * called with a control option.
- *
- * We're assuming you're starting with either:
- *  * forever start -w honeybadger.js
- *  * node honeybadger.js [command]
- *
- * In either case the first two args will be node and honeybadger
- * paths respectively. If we change this to a binary or symlink
- * later on we'll want to check those values to find where [commands]
- * really start.
- */
-// if (process.argv.length > 2) {
-// 	// We have a command - process it and exit;
-// 	log('Console args:',process.argv);
-// 	process.exit(0);
-// }
+/** core deps */
+var fs = require('fs');
+var dnode = require('dnode');
+var utility = require('./lib/utility');
+var DataManager = require('./lib/data-manager');
+var Scheduler = require('./lib/scheduler');
 
+/** constants */
+HoneyBadger.dnode_port = 8120;
 
-var honeybadger = function(){
+function HoneyBadger(){
 	var self = this;
 	var config;
 	var tasks;
@@ -37,7 +42,7 @@ var honeybadger = function(){
 
 	this.loadConfig = function(path){
 		var configpath = (path) ? path : './config.json';
-		// log('Loading config: '+configpath);
+		log('Loading config: '+configpath);
 
 		config = require(configpath);
 		return config;
@@ -56,35 +61,35 @@ var honeybadger = function(){
 	}
 
 	this.start = function(){
-		cron = new scheduler();
+		cron = new Scheduler();
 	}
 };
 
-honeybadger.main = function() {
-	log('Starting Honey Badger Service');
+HoneyBadger.Service = {
+	main: function() {
+		log('Starting Honey Badger Service');
 
-	var hb = new honeybadger();
-	var config = hb.loadConfig();
+		var hb = new HoneyBadger();
+		var config = hb.loadConfig();
 
-	if (!config) throw new Error('No config');
+		if (!config) throw new Error('No config');
 
 
-	/**
-	 * Fire up dnode and link it to honeybadger
-	 */
-	if (config.dnode) {
-		var dserver = dnode(hb);
-		var port = config.dnode_port || dnode_port;
+		/**
+		 * Fire up dnode and link it to honeybadger
+		 */
+		if (config.dnode) {
+			var dserver = dnode(hb);
+			var port = config.dnode_port || HoneyBadger.dnode_port;
 
-		dserver.listen(port);
-		log('dnode started on:', port);
+			dserver.listen(port);
+			log('Dnode services started on:', port);
+		}
+
+		DataManager.on('tasks', function(tasks){
+			hb.loadTasks(tasks);
+		});
+
+		hb.start();
 	}
-
-	DataManager.on('tasks', function(tasks){
-		hb.loadTasks(tasks);
-	});
-
-	hb.start();
 };
-
-honeybadger.main();

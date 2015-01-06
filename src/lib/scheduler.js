@@ -19,33 +19,41 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module.exports = scheduler;
+module.exports = Scheduler;
 
 /** log facility */
 var log = require('debug')('honeybadger:scheduler');
 
 /** core deps */
 var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 var	schedule = require('node-schedule');
 var	worker = require('./worker');
 
+util.inherits(Scheduler, EventEmitter);
 function Scheduler() {
+	var $this = this;
 	var tasks = [];
 
 	EventEmitter.call(this);
 
 	this.addTask = function(task){
 		var date = new Date(task.runDate);
+
 		log('Scheduling task for:', task.name, date);
+		$this.emit('add',task,date);
+
 		schedule.scheduleJob(date, function(){
 			log('Scheduled task starting up', task.name);
+			$this.emit('start',task);
+
 			var w = new worker();
 			w.runTask(task,function(){
 				log('Task complete', task.name);
+				$this.emit('complete',task);
 			});
 		});
 	};
 }
 
-util.inherits(Scheduler, EventEmitter);
 

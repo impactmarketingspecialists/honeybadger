@@ -1,11 +1,43 @@
+// Copyright Impact Marketing Specialists, Inc. and other contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+module.exports = Extractor;
+
+/** log facility */
+var log = require('debug')('HoneyBadger:Extractor');
+
+/** core deps */
 var util = require('util');
 var events = require('events');
 
 /** global */
-extractor = function(){};
-util.inherits(extractor, events.EventEmitter );
+function Extractor(){
+    events.EventEmitter.call(this);
 
-// var ftp = require('./extractor/ftp');
+    this.extract = function(){
+    	this.startExtraction();
+    }
+}
+util.inherits(Extractor, events.EventEmitter );
+
 var rets = require('./extractor/rets');
 
 /**
@@ -14,7 +46,7 @@ var rets = require('./extractor/rets');
  * @param  {object} extractor extractor configuration object
  * @return {extractor}        instance of an extractor
  */
-var factory = function(options){
+Extractor.Factory = function(options){
 	if (!options || !options.source.type) throw('No extractor source type specified');
 
 	// The type of extractor we use is based on the source we are trying to extract from
@@ -28,16 +60,11 @@ var factory = function(options){
 		case 'soap':
 		break;
 		case 'RETS':
-			return rets.initialize(options);
+			return new rets(options);
 		break;
 		case 'stream':
 		break;
 		default:
 			throw('No supported extractor found', options.source.type);
 	}
-};
-
-module.exports = {
-	Factory: factory,
-	Extractor: extractor
 };
