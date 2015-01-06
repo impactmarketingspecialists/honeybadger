@@ -1,7 +1,7 @@
 var ftp = require('./helpers/transports/ftp');
 var rets = require('./helpers/transports/rets');
 var csv = require('./helpers/csv');
-var log = require('debug')('honeybadger:worker');
+var log = require('debug')('HoneyBadger:Worker');
 
 var streamTransform = require('stream-transform');
 
@@ -52,6 +52,7 @@ var worker = function(options) {
 		});
 
 		$e.on('ready',function(err, body){
+			log('Extractor ready:', extractor_config.name);
 			$e.extract();
 		});
 

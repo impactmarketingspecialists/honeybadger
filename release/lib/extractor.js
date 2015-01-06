@@ -30,6 +30,8 @@ var events = require('events');
 
 util.inherits(Extractor, events.EventEmitter );
 function Extractor(){
+
+	log('Extractor constructor')
     events.EventEmitter.call(this);
 
     /** 
