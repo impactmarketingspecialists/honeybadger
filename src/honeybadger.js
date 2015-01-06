@@ -2,6 +2,7 @@
 
 var fs = require('fs')
     dnode = require('dnode'),
+    log = require('debug')('honeybadger'),
     utility = require('./lib/utility'),
     DataManager = require('./lib/data-manager'),
     scheduler = require('./lib/scheduler');
@@ -23,7 +24,7 @@ var dnode_port = 8120;
  */
 // if (process.argv.length > 2) {
 // 	// We have a command - process it and exit;
-// 	console.log('Console args:',process.argv);
+// 	log('Console args:',process.argv);
 // 	process.exit(0);
 // }
 
@@ -35,21 +36,21 @@ var honeybadger = function(){
 
 	this.loadConfig = function(path){
 		var configpath = (path) ? path : './config.json';
-		// console.log('Loading config: '+configpath);
+		// log('Loading config: '+configpath);
 
 		config = require(configpath);
 		return config;
 	};
 
 	this.loadTasks = function(tasks){
-		console.log('Initalizing task queue');
+		log('Initalizing task queue');
 		tasks.forEach(function(task){
 			self.registerTask(task.value);
 		});
 	}
 
 	this.registerTask = function(task){
-		console.log('Registering task with scheduler');
+		log('Registering task with scheduler');
 		scheduler.addTask(task);
 	}
 
@@ -59,7 +60,7 @@ var honeybadger = function(){
 };
 
 honeybadger.main = function() {
-	console.log('Starting Honey Badger Service');
+	log('Starting Honey Badger Service');
 
 	var hb = new honeybadger();
 	var config = hb.loadConfig();
@@ -75,7 +76,7 @@ honeybadger.main = function() {
 		var port = config.dnode_port || dnode_port;
 
 		dserver.listen(port);
-		console.log('dnode started on:', port);
+		log('dnode started on:', port);
 	}
 
 	DataManager.on('tasks', function(tasks){

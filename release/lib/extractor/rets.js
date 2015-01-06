@@ -3,35 +3,31 @@ var events = require('events');
 var url = require('url');
 var librets = require('rets-client');
 
-var clients = {};
-
-var rets = function( options, callback )
+var rets = function( options )
 {
     var self = this;
 
- 	// events.EventEmitter.call(this);
     var uri = url.parse(options.source.uri);
 
-    var client_key = uri.hostname+uri.port+':'+options.source.auth.username;
+    var client = librets.createConnection({
+        host: uri.hostname,
+        port: uri.port,
+        protocol: uri.protocol,
+        path: uri.path,
+        user: options.source.auth.username,
+        pass: options.source.auth.password,
+        version: options.source.version || '1.7.2',
+        agent: { user: options.source.auth.userAgentHeader, password: options.source.auth.userAgentPassword }
+    });
 
-    if (!clients[client_key]) {
-        var client = librets.createConnection({
-            host: uri.hostname,
-            port: uri.port,
-            protocol: uri.protocol,
-            path: uri.path,
-            user: options.source.auth.username,
-            pass: options.source.auth.password,
-            version: options.source.version || '1.7.2',
-            agent: { user: options.source.auth.userAgentHeader, password: options.source.auth.userAgentPassword }
-        });
-    }
-
-    // var client = clients[client_key];
-    // console.log(clients);
+    client.once('connection.error',function(error, client){
+        console.trace( 'Connection failed: %s.', error.message );
+        rets.debug( 'Connection failed: %s.', error.message );
+        self.emit('error', error);
+    });
 
     client.once('connection.success',function(client){
-        console.log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
+        rets.debug( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
 
         self.emit('connect', null, 'success');
 
@@ -45,28 +41,29 @@ var rets = function( options, callback )
 
         client.searchQuery(qry, function( error, data ) {
 
-            // console.log(error, data);
+            // rets.debug(error, data);
             
             if (error) {
-                console.log(data);
+                rets.debug(error, data);
+                self.emit('error', error, data);
+                return;
             } else if (data.type == 'status') {
-                // clog('<div class="text-warning">'+data.text+'</div>');
-                // if (!data.data || !data.data.length) clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-            } else {
+                rets.debug(data);
                 if (!data.data || !data.data.length) {
-                    // clog('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
+                    rets.debug(data.text+'\nJust because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.');
+                    self.emit('error', 'No records');
                     return;
                 }
-
-    			self.emit('data', data);
+            } else if (!data.data || !data.data.length) {
+                rets.debug(data.text+'\nJust because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.');
+                self.emit('error', 'No records');
+                return;
             }
+
+            self.emit('data', data);
         });
     });
 
-    client.once('connection.error',function(error, client){
-        console.error( 'Connection failed: %s.', error.message );
-        callback('onLoaderTest',error, null);
-    });
 
 };
 
@@ -78,7 +75,7 @@ util.inherits( rets, extractor );
  */
 Object.defineProperties( module.exports = rets, {
   debug: {
-    value: require( 'debug' )( 'rets:client' ),
+    value: require( 'debug' )( 'honeybadger:extractor:rets' ),
     enumerable: true,
     configurable: true,
     writable: true
@@ -86,7 +83,6 @@ Object.defineProperties( module.exports = rets, {
   initialize: {
     value: function init( settings, callback ) {
       rets.debug( 'Initializing RETS Extractor' );
-      console.log('Init')
       return new rets( settings, callback || utility.noop )
     },
     enumerable: true,

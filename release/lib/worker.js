@@ -1,6 +1,7 @@
 var ftp = require('./helpers/transports/ftp');
 var rets = require('./helpers/transports/rets');
 var csv = require('./helpers/csv');
+var log = require('debug')('honeybadger:worker');
 
 var streamTransform = require('stream-transform');
 
@@ -13,26 +14,26 @@ var worker = function(options) {
 		 * Let's get all the configs we need
 		 */
 
-		console.log('Running task', task.name);
+		log('Running task', task.name);
 
 		var extractor_config = DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value;
-		console.log('Loaded task extractor', extractor_config.name);
+		log('Loaded task extractor', extractor_config.name);
 
 		var source_config = DataManager.sources.filter(function(item){ if (item.id === extractor_config.source) return true; }).pop().value;
-		console.log('Loaded task extraction source', source_config.name);
+		log('Loaded task extraction source', source_config.name);
 
 		var transformer_configs = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return true; }).map(function(item){ return item.value; });
-		console.log('Discovered', transformer_configs.length, 'transformers');
+		log('Discovered', transformer_configs.length, 'transformers');
 
 		var loader_configs = [];
 		transformer_configs.forEach(function(transform){
-			console.log('Loaded task transformer', transform.name);
+			log('Loaded task transformer', transform.name);
 			DataManager.loaders.forEach(function(loader){
 				if (loader.value.transform === transform._id) loader_configs.push(loader.value);
 			})
 		});
 
-		console.log('Discovered', loader_configs.length, 'loaders');
+		log('Discovered', loader_configs.length, 'loaders');
 
 		/**
 		 * Let's get some instances of our etl objects
@@ -43,8 +44,13 @@ var worker = function(options) {
 			source: source_config.source,
 			target: extractor_config.target
 		});
+
+		$e.on('error',function(err, body){
+			console.trace(err);
+		});
+
 		$e.on('data',function(){
-			console.log('extractor got data');
+			log('extractor got data');
 		});
 
 		return;
@@ -71,7 +77,7 @@ var worker = function(options) {
 
         var mysql = require('mysql');
 		loaders.forEach(function(loader){
-			console.log('Loaded task loader', loader.name)
+			log('Loaded task loader', loader.name)
 	        var dsn = utility.dsn(loader.target.dsn);
 	        var connection = mysql.createConnection({
 	            host: dsn.host,
@@ -82,13 +88,13 @@ var worker = function(options) {
 
 	        var insert_query = 'INSERT INTO '+loader.target.schema.name+' SET ?';
 
-	        // console.log(transformer);
+	        // log(transformer);
 	        //We want to pipe transformer events back to the client
 	        db.get(loader.transform, function(err, transformer){
 
 	            // _log('Checking transformer for extractor: '+ transformer.extractor);
 
-	            // console.log(transformer);
+	            // log(transformer);
 	            //We want to pipe transformer events back to the client
 	            db.get(transformer.extractor,function(err, extractor){
 	                if (err) { /*_log('Error fetching extractor'); */return; }
@@ -107,7 +113,7 @@ var worker = function(options) {
 	                    var source = body;
 
 	                    var testlimit = 100;
-	                    // console.log(source.source);
+	                    // log(source.source);
 	                    /**
 	                     * We're going to leave in a bunch of extra steps here for the sake
 	                     * of verbosity to the client. I had intended to simply this all down
@@ -147,7 +153,7 @@ var worker = function(options) {
 	                                var processed = 0;
 
 	                                var xfm = streamTransform(function(record, cb){
-	                                    // console.log('processed', processed++);
+	                                    // log('processed', processed++);
 	                                    if (xformed.length >= testlimit) {
 	                                        process.nextTick(function(){
 	                                            // _log('<div class="text-success">Transform completed successfully.</div>');
@@ -168,7 +174,7 @@ var worker = function(options) {
 
 	                                    connection.query(insert_query,rec,function(err,res){
 	                                        if (!err) {
-	                                            // console.log('\tloaded',loaded++);
+	                                            // log('\tloaded',loaded++);
 	                                            records.push(true);
 	                                            process.nextTick(function(){
 	                                                // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
@@ -207,7 +213,7 @@ var worker = function(options) {
 	                                        });
 	                                        return;
 	                                    } else if (err) {
-	                                        console.log(err);
+	                                        log(err);
 	                                        // _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
 	                                        process.nextTick(function(){
 	                                            callback('onLoaderTest','Unable to parse data stream',null);
@@ -245,7 +251,7 @@ var worker = function(options) {
 	                            };
 	                            client.searchQuery(qry, function( error, data ) {
 
-	                            	console.log('RETS data recv');
+	                            	log('RETS data recv');
 
 	                                if (error) {
 	                                    // _log('<div class="text-danger">Query did not execute.</div>');
@@ -286,7 +292,7 @@ var worker = function(options) {
 	                                            transformer.transform.normalize.forEach(function(item, index){
 	                                                var i = rawheaders.indexOf(item.in);
 	                                                if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-	                                                // console.log(item,i,headers[i],record[i]);
+	                                                // log(item,i,headers[i],record[i]);
 	                                                rec[item.out] = record[i];
 	                                                rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
 	                                            });
@@ -295,7 +301,7 @@ var worker = function(options) {
 	                                            connection.query(insert_query,rec,function(err,res){
 	                                                if (!err) {
 	                                                    records.push(rec);
-	                                                    console.log('Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name);
+	                                                    log('Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name);
 	                                                    // process.nextTick(function(){
 	                                                        // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
 	                                                    // });
@@ -335,7 +341,7 @@ var worker = function(options) {
 	                                                });
 	                                                return;
 	                                            } else if (err) {
-	                                                console.log(err);
+	                                                log(err);
 	                                                // _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
 	                                                process.nextTick(function(){
 	                                                    callback('onLoaderTest','Unable to parse data stream',null);
