@@ -11,14 +11,6 @@ var sources = [],
     tasks = [],
     programs = [];
 
-/**
- * Follow database changes
- */
-feed.on('change', function (change) {
-    DataManager.refresh();
-});
-feed.follow();
-
 var DataManager = function(){
 
     var self = this;
@@ -308,7 +300,17 @@ var DataManager = function(){
 
 
     this.refresh();
+    
+    /**
+     * Follow database changes
+     */
+    feed.on('change', function (change) {
+        self.refresh();
+    });
+    feed.follow();
 };
 
 util.inherits( DataManager, events.EventEmitter );
+
+
 module.exports = new DataManager();
