@@ -33,6 +33,7 @@ var honeybadger = function(){
 	var self = this;
 	var config;
 	var tasks;
+	var cron;
 
 	this.loadConfig = function(path){
 		var configpath = (path) ? path : './config.json';
@@ -51,11 +52,11 @@ var honeybadger = function(){
 
 	this.registerTask = function(task){
 		log('Registering task with scheduler');
-		scheduler.addTask(task);
+		cron.addTask(task);
 	}
 
 	this.start = function(){
-
+		cron = new scheduler();
 	}
 };
 
@@ -87,5 +88,3 @@ honeybadger.main = function() {
 };
 
 honeybadger.main();
-
-exports.honeybadger = honeybadger;
