@@ -469,7 +469,7 @@ module.exports = {
                     _log('<div class="text-success">Extraction source is valid.</div>');
                     var source = body;
 
-                    var testlimit = 10000;
+                    var testlimit = 10;
                     // console.log(source.source);
                     /**
                      * We're going to leave in a bunch of extra steps here for the sake
@@ -686,7 +686,7 @@ module.exports = {
 
                                         }, {parallel: 1});
 
-                                        csv.parse('\t', '"', data, function(err,res){
+                                        csv.parse('\t', '', data, function(err,res){
                                             if (err === 'headers') {
                                                 _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                                 process.nextTick(function(){

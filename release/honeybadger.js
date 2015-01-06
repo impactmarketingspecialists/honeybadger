@@ -86,8 +86,11 @@ HoneyBadger.Service = {
 			log('Dnode services started on:', port);
 		}
 
-		DataManager.on('tasks', function(tasks){
-			hb.loadTasks(tasks);
+		/**
+		 * Wait for DataManager to load from couch
+		 */
+		DataManager.on('ready', function(){
+			hb.loadTasks(DataManager.tasks);
 		});
 
 		hb.start();

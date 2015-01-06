@@ -7,6 +7,8 @@ var streamTransform = require('stream-transform');
 
 var $Extractor = require('./extractor').Factory;
 
+var DataManager = require('./data-manager');
+
 var worker = function(options) {
 	this.runTask = function(task, callback) {
 
