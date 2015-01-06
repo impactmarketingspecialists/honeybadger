@@ -76,6 +76,10 @@ var refreshSources = function(callback){
                 DataManager.emit('ready');
             }
         } else console.trace(err);
+
+        log('Sources refreshed');
+        DataManager.emit('sources',loaders);
+
         if(callback) callback(err, body);
     });
 };
@@ -92,6 +96,10 @@ var refreshExtractors = function(callback){
                 DataManager.emit('ready');
             }
         } else console.trace(err);
+
+        log('Extractors refreshed');
+        DataManager.emit('extractors',loaders);
+
         if(callback) callback(err, body);
     });
 };
@@ -108,6 +116,10 @@ var refreshTransformers = function(callback){
                 DataManager.emit('ready');
             }
         } else console.trace(err);
+
+        log('Transformers refreshed');
+        DataManager.emit('transformers',loaders);
+
         if(callback) callback(err, body);
     });
 };
@@ -124,6 +136,10 @@ var refreshLoaders = function(callback){
                 DataManager.emit('ready');
             }
         } else console.trace(err);
+
+        log('Loaders refreshed');
+        DataManager.emit('loaders',loaders);
+
         if(callback) callback(err, body);
     });
 };
@@ -141,7 +157,7 @@ var refreshTasks = function(callback){
             }
         } else console.trace(err);
 
-        // console.log(self);
+        log('Tasks refreshed');
         DataManager.emit('tasks',tasks);
 
         if(callback) {
@@ -150,7 +166,12 @@ var refreshTasks = function(callback){
     });
 };
 
+DataManager.on('ready',function(){
+    log('Completed loading Data Objects')
+});
+
 DataManager.refresh = function(){
+    log('Refreshing Data Objects');
     readyState = 0;
     refreshSources();
     refreshExtractors();
@@ -164,6 +185,7 @@ DataManager.refresh();
  * Follow database changes
  */
 feed.on('change', function (change) {
+    log('Detected change in couch');
     DataManager.refresh();
 });
 feed.follow();
