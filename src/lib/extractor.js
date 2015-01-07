@@ -55,6 +55,7 @@ function Extractor(){
     };
 }
 
+var ftp = require('./extractor/ftp');
 var rets = require('./extractor/rets');
 
 /**
@@ -70,7 +71,8 @@ Extractor.Factory = function(options){
 	switch(options.source.type){
 		case 'file':
 		break;
-		case 'ftp':
+		case 'FTP':
+			return new ftp(options);
 		break;
 		case 'http':
 		break;

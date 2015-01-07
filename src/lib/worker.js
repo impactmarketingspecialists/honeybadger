@@ -18,6 +18,10 @@ var worker = function(options) {
 
 		log('Running task', task.name);
 
+		/** 
+		 * Danger!! No error checking - booo... don't forget to add
+		 * some sanity checks - don't be a poppin empty arrays;
+		 */
 		var extractor_config = DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value;
 		log('Loaded task extractor', extractor_config.name);
 
@@ -48,7 +52,8 @@ var worker = function(options) {
 		});
 
 		$e.on('error',function(err, body){
-			console.trace(err);
+			log('Extractor error:', err, body);
+			console.trace(err, body);
 		});
 
 		$e.on('ready',function(err, body){
