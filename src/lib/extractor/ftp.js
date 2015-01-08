@@ -70,7 +70,7 @@ function FTP( options ) {
         if (readyState < 2) throw('Extractor is not ready to start');
         log('Starting extraction');
 
-        client.get(options.target.res, function(error, real_stream){
+        client.get(options.target.res, function(error, ftp_stream){
             if (error) {
                 log('Error extracting target');
                 console.trace(error);
@@ -78,13 +78,37 @@ function FTP( options ) {
                 return;
             }
 
-            stream = real_stream;
-            log('Setup resource stream');
+            log('Setting up resource stream');
 
-            stream.once('close', function(){
-                log('Stream closed');
+            stream = ftp_stream;
+            ftp_stream.once('close', function(){
+                log('Resource stream closed');
                 client.end();
             });
+
+            if (options.target.format === 'delimited-text') {
+                log('Target is delimited-text; engaging CSV helper');
+
+                var _delim = { csv: ',', tsv: "\t", pipe: '|' };
+                var _quot = { default: '', dquote: '"', squote: "'" };
+
+                var beans = 0;
+                var csv = require('../helpers/csv');
+
+                // Overwrite stream
+                stream = csv.parse(
+                    _delim[ options.target.options.delimiter || 'csv' ],
+                    _quot[ options.target.options.escape || 'default' ],
+                    stream,
+                    function(error, res){
+                        log('CSV parser found headers');
+                    }
+                );
+
+                stream.on('finish',function(){
+                    log('CSV parser stream complete');
+                });
+            }
 
             $this.emit('data', stream);
         });

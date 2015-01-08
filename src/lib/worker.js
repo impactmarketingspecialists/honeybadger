@@ -95,26 +95,14 @@ function Worker(options) {
 
 		$e.on('data',function(data){
 
-            var _delim = { csv: ',', tsv: "\t", pipe: '|' };
-            var _quot = { default: '', dquote: '"', squote: "'" };
+			var beans = 0;
+			var xfm = streamTransform(function(record, callback){
+				log('Processed record', beans++);
+				callback(null, record.join('|'));
+			}, {parallel: 1});
 
-            var rawheaders = [];
-
-			if ((data instanceof Readable)) {
-				log('Extractor received data stream');
-				csv.parse(_delim[ extractor_config.target.options.delimiter || 'csv' ], _quot[ extractor_config.target.options.escape || 'default' ], data, function(err,res){
-					if (err === 'headers') {
-					return;
-					} else if (err) {
-					log(err);
-					return;
-					}
-
-					rawheaders = res.headers;
-					log(rawheaders);
-				});
-			}
-			else log('Extractor received data as an object');
+			log('Piping data stream to transformer');
+			if ((data instanceof Readable)) data.pipe(xfm);
 		});
 
 		return;
