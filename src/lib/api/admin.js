@@ -95,7 +95,7 @@ module.exports = {
                         var _delim = { csv: ',', tsv: "\t", pipe: '|' };
                         var _quot = { default: '', dquote: '"', squote: "'" };
 
-                        csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
+                        csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
                             // stream.end();
                             if (err === 'headers') {
                                 _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
@@ -117,9 +117,11 @@ module.exports = {
                             _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                             process.nextTick(function(){
                                 callback('onExtractorTest',null,{headers:res.headers});
-                                ftp.abort();
-                                ftp.end();
-                                ftp.destroy();
+                                try {
+                                    ftp.abort();
+                                    ftp.end();
+                                    ftp.destroy();
+                                } catch (e) { console.trace(e); }
                             });
                         });
                     });
@@ -288,7 +290,7 @@ module.exports = {
                                 cb(null, record.join('|'));
                             }, {parallel: 1});
 
-                            csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
+                            csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
                                 if (err === 'headers') {
                                     _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                     process.nextTick(function(){
@@ -544,9 +546,11 @@ module.exports = {
                                             process.nextTick(function(){
                                                 _log('<div class="text-success">Load completed successfully.</div>');
                                                 if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
-                                                ftp.abort();
-                                                ftp.end();
-                                                ftp.destroy();
+                                                try {
+                                                    ftp.abort();
+                                                    ftp.end();
+                                                    ftp.destroy();
+                                                } catch(e) { console.trace(e); }
                                             });
                                             return;
                                         }
@@ -562,7 +566,7 @@ module.exports = {
 
                                 }, {parallel: 1});
 
-                                csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.delimiter || 'default' ], stream, function(err,res){
+                                csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
                                     if (err === 'headers') {
                                         _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
                                         process.nextTick(function(){

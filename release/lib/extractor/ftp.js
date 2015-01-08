@@ -101,12 +101,12 @@ function FTP( options ) {
                     _quot[ options.target.options.escape || 'default' ],
                     stream,
                     function(error, res){
-                        log('CSV parser found headers');
+                        log('Received headers from CSV helper');
                     }
                 );
 
                 stream.on('finish',function(){
-                    log('CSV parser stream complete');
+                    log('CSV helper stream finished');
                 });
             }
 
