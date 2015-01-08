@@ -19,19 +19,19 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module.exports = Normalize;
+module.exports = BeanCounter;
 
 /** log facility */
-var log = require('debug')('HoneyBadger:Transformer:Normalize');
+var log = require('debug')('HoneyBadger:Transformer:BeanCounter');
 
 /** core deps */
 var util = require('util');
 var events.EventEmitter = require('events').EventEmitter;
 // var Transformer = module.parent.exports;
 
-// util.inherits( Normalize, Transformer );
-util.inherits( Normalize, EventEmitter );
-function Normalize( options ) {
+// util.inherits( BeanCounter, Transformer );
+util.inherits( BeanCounter, EventEmitter );
+function BeanCounter( options ) {
 
 	var $this = this;
 	var client = null;
