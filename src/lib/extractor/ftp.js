@@ -35,7 +35,6 @@ function FTP( options ) {
 
 	var $this = this;
 	var client = null;
-    var stream = null;
     var readyState = 0;
 
     Extractor.call(this);
@@ -80,10 +79,12 @@ function FTP( options ) {
 
             log('Setting up resource stream');
 
-            stream = ftp_stream;
+            // var stream = ftp_stream;
             ftp_stream.once('close', function(){
                 log('Resource stream closed');
-                client.end();
+                // client.end();
+                // $this.destroy();
+                // $this.emit('finish');
             });
 
             if (options.target.format === 'delimited-text') {
@@ -95,35 +96,47 @@ function FTP( options ) {
                 var beans = 0;
                 var csv = require('../helpers/csv');
 
-                // Overwrite stream
-                stream = csv.parse(
-                    _delim[ options.target.options.delimiter || 'csv' ],
-                    _quot[ options.target.options.escape || 'default' ],
-                    stream,
-                    function(error, res){
-                        log('Received headers from CSV helper');
-                    }
-                );
+                var Normalizer = require('../transformer/normalize');
+                var transform = new Normalizer();
 
-                stream.on('finish',function(){
-                    log('CSV helper stream finished');
+                var Parser = require('csv-stream');
+                var parser = Parser.createStream({
+                    delimiter: "|",
+                    escapeChar: ""
                 });
+
+                ftp_stream.pipe(parser).pipe(transform);
+
+                // // Overwrite stream
+                // stream = csv.parse(
+                //     _delim[ options.target.options.delimiter || 'csv' ],
+                //     _quot[ options.target.options.escape || 'default' ],
+                //     stream,
+                //     function(error, res){
+                //         log('Received headers from CSV helper');
+                //     }
+                // );
+
+                // stream.on('finish',function(){
+                //     log('CSV helper stream finished');
+                //     stream.end();
+                // });
             }
 
-            $this.emit('data', stream);
+            // $this.emit('data', stream);
         });
     };
 
     this.destroy = function(){
-    	log('Destroying FTP extractor');
-    	if (client !== null) {
+        if (client !== null) {
+    	   log('Destroying FTP extractor');
     		try {
     			client.end();
     			client = null;
     		} catch(e) {
     			console.trace(e);
     		}
-    	}
+    	} else log('Client already destroyed');
     };
 
     this.pipe = function(xstream){

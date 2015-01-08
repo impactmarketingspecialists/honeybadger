@@ -26,18 +26,29 @@ var log = require('debug')('HoneyBadger:Transformer:Normalize');
 
 /** core deps */
 var util = require('util');
-var events.EventEmitter = require('events').EventEmitter;
+var stream = require('stream');
+var EventEmitter = require('events').EventEmitter;
 // var Transformer = module.parent.exports;
 
-// util.inherits( Normalize, Transformer );
 util.inherits( Normalize, EventEmitter );
+util.inherits( Normalize, stream.Transform );
 function Normalize( options ) {
 
 	var $this = this;
-	var client = null;
-    var stream = null;
-    var readyState = 0;
+	EventEmitter.call(this);
+	stream.Transform.call(this, {objectMode: true});
 
-    // Transformer.call(this);
-    EventEmitter.call(this);
+	var beans = 0;
+
+	this._transform = function(chunk, encoding, callback) {
+		log('Processed record', beans++);
+		if (this._readableState.pipesCount > 0) this.push(chunk);
+		return callback();
+	};
+
+	this._flush = function(){
+		log('Completed '+beans+' records');
+		// this.push(null);
+		// this.end();
+	};
 }

@@ -7,6 +7,8 @@
     "MD5": "^1.2.0",
     "async": "*",
     "csv-parse": "*",
+    "csv-stream": "^0.1.3",
+    "csv-streamify": "^1.0.0",
     "debug": "^2.1.1",
     "dnode": "*",
     "express": "*",

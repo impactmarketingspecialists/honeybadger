@@ -25,40 +25,56 @@ var CSV = exports;
 var log = require('debug')('HoneyBadger:Helper:CSV');
 
 /** core deps */
-var libcsv = require('csv-parse');
+var Parser = require('csv-stream');
 
 CSV.parse = function(delimiter, quotes, data, callback){
-	var errors = fired = false;
-	var headers = null;
-	var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-		if (head.length <= 1) {
-			errors = true;
-			fired = true;
-			log('Parser errored on CSV headers');
-			callback('headers',null);
-		} else {
-			headers = head;
-			log('Parser discovered CSV headers');
-			// Let's fire our headers callback immediately
-			fired = true;
-			callback(null,{headers:headers})
-		}
-	}});
+	// var errors = fired = false;
+	// var headers = null;
+	// var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
+	// 	if (head.length <= 1) {
+	// 		errors = true;
+	// 		fired = true;
+	// 		log('Parser errored on CSV headers');
+	// 		callback('headers',null);
+	// 	} else {
+	// 		headers = head;
+	// 		log('Parser discovered CSV headers');
+	// 		// Let's fire our headers callback immediately
+	// 		fired = true;
+	// 		callback(null,{headers:headers})
+	// 	}
+	// }});
+	
+	var parser = new Parser({
+		delimiter: delimiter,
+		escapeChar: quotes,
+		objectMode: false
+		// columns: true
+	})
+
+	parser.on('readable',function(){
+		// log('Parser readable');
+	});
+
+	parser.on('data',function(){
+		// log('Parser record');
+	});
 
 	parser.on('finish',function(){
-		process.nextTick(function(){
-			// Don't fire if we've already done so
-			log('Parser finished')
-			if (!errors && !fired) callback(null,{headers:headers});
-		});
+		log('Parser finish');
+	});
+
+	parser.on('end',function(){
+		log('Parser end');
+		parser = null;
+	});
+
+	parser.on('close',function(){
+		log('Parser stream closed');
 	});
 
 	parser.on('error',function(err){
-		process.nextTick(function(){
-			// Don't fire if we've already done so
-			log('Parser error', err);
-			if (!fired) callback(err,null);
-		});
+		log('Parser error', err);
 	});
 
 	/**

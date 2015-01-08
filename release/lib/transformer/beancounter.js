@@ -34,11 +34,11 @@ var EventEmitter = require('events').EventEmitter;
 util.inherits( BeanCounter, stream.Transform );
 function BeanCounter( options ) {
 
-    stream.Transform.call(this, {objectMode: true});
-    var beans = 0;
+	stream.Transform.call(this, {objectMode: true});
+	var beans = 0;
 
 	this._transform = function(chunk, encoding, callback) {
-    	log('Processed record', beans++);
+		log('Processed record', beans++);
 		this.push(chunk);
 		return callback();
 	};

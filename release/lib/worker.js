@@ -44,11 +44,15 @@ function Worker(options) {
 
 	this.runTask = function(task, callback) {
 
+		if (task.status !== 'active') {
+			log('Task is inactive; not running');
+			return;
+		}
+		log('Running task', task.name);
+
 		/**
 		 * Let's get all the configs we need
 		 */
-
-		log('Running task', task.name);
 
 		/** 
 		 * Danger!! No error checking - booo... don't forget to add
@@ -93,13 +97,27 @@ function Worker(options) {
 			$e.extract();
 		});
 
+		$e.on('finish',function(err, body){
+			log('Extractor finished:', extractor_config.name);
+			// $e.extract();
+			delete $e;
+		});
+
 		$e.on('data',function(data){
 
-			var BeanCounter = require('./transformer/beancounter');
-			var xfm = new BeanCounter(transformer_configs[0]);
+			var Normalizer = require('./transformer/normalize');
+			var transform = new Normalizer(transformer_configs[0]);
+
+			transform.on('finish',function(){
+				log('transform complete');
+				transform.end();
+				delete tranform, data, $e;
+				global.gc();
+			});
 
 			log('Piping data stream to transformer');
-			if ((data instanceof Readable)) data.pipe(xfm);
+			// if ((data instanceof Readable)) data.pipe(transform);
+
 		});
 
 		return;
