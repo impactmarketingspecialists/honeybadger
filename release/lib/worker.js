@@ -95,11 +95,8 @@ function Worker(options) {
 
 		$e.on('data',function(data){
 
-			var beans = 0;
-			var xfm = streamTransform(function(record, callback){
-				log('Processed record', beans++);
-				callback(null, record.join('|'));
-			}, {parallel: 1});
+			var BeanCounter = require('./transformer/beancounter');
+			var xfm = new BeanCounter(transformer_configs[0]);
 
 			log('Piping data stream to transformer');
 			if ((data instanceof Readable)) data.pipe(xfm);

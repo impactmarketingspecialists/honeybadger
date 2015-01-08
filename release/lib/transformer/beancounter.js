@@ -26,18 +26,24 @@ var log = require('debug')('HoneyBadger:Transformer:BeanCounter');
 
 /** core deps */
 var util = require('util');
-var events.EventEmitter = require('events').EventEmitter;
+var stream = require('stream');
+var EventEmitter = require('events').EventEmitter;
 // var Transformer = module.parent.exports;
 
 // util.inherits( BeanCounter, Transformer );
-util.inherits( BeanCounter, EventEmitter );
+util.inherits( BeanCounter, stream.Transform );
 function BeanCounter( options ) {
 
-	var $this = this;
-	var client = null;
-    var stream = null;
-    var readyState = 0;
+    stream.Transform.call(this, {objectMode: true});
+    var beans = 0;
 
-    // Transformer.call(this);
-    EventEmitter.call(this);
+	this._transform = function(chunk, encoding, callback) {
+    	log('Processed record', beans++);
+		this.push(chunk);
+		return callback();
+	};
+
+	this._flush = function(){
+		log('Completed '+beans+' records');
+	};
 }
