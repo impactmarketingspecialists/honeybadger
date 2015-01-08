@@ -30,11 +30,18 @@ var rets = require('./helpers/transports/rets');
 var csv = require('./helpers/csv');
 
 var streamTransform = require('stream-transform');
+var Readable = require('stream').Readable;
 
 var DataManager = require('./data-manager');
 var Extractor = require('./extractor').Factory;
 
 function Worker(options) {
+
+	if (!(this instanceof Worker))
+		return new Worker(options);
+
+	var $this = this;
+
 	this.runTask = function(task, callback) {
 
 		/**
@@ -86,8 +93,28 @@ function Worker(options) {
 			$e.extract();
 		});
 
-		$e.on('data',function(){
-			log('extractor got data');
+		$e.on('data',function(data){
+
+            var _delim = { csv: ',', tsv: "\t", pipe: '|' };
+            var _quot = { default: '', dquote: '"', squote: "'" };
+
+            var rawheaders = [];
+
+			if ((data instanceof Readable)) {
+				log('Extractor received data stream');
+				csv.parse(_delim[ extractor_config.target.options.delimiter || 'csv' ], _quot[ extractor_config.target.options.escape || 'default' ], data, function(err,res){
+					if (err === 'headers') {
+					return;
+					} else if (err) {
+					log(err);
+					return;
+					}
+
+					rawheaders = res.headers;
+					log(rawheaders);
+				});
+			}
+			else log('Extractor received data as an object');
 		});
 
 		return;

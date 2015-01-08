@@ -102,7 +102,9 @@ function FTP( options ) {
     	}
     };
 
-    this.pipe = stream;
+    this.pipe = function(xstream){
+        return stream.pipe(xstream);
+    };
 
     this.init();
 }
