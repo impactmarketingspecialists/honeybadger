@@ -22,7 +22,7 @@
 module.exports = Scheduler;
 
 /** log facility */
-var log = require('debug')('honeybadger:scheduler');
+var log = require('debug')('HoneyBadger:Scheduler');
 
 /** core deps */
 var util = require('util');

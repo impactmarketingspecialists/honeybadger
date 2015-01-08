@@ -35,6 +35,7 @@ function FTP( options ) {
 
 	var $this = this;
 	var client = null;
+    var stream = null;
     var readyState = 0;
 
     Extractor.call(this);
@@ -45,8 +46,8 @@ function FTP( options ) {
 
 		client.on('error', function(error) {
 			readyState = -1 // Error
-			console.trace('Connection failed:', error);
 			log('Connection failed: %s', error);
+            console.trace('Connection failed:', error);
 			$this.emit('error',error);
 		});
 
@@ -68,6 +69,25 @@ function FTP( options ) {
     this.start = function(){
         if (readyState < 2) throw('Extractor is not ready to start');
         log('Starting extraction');
+
+        client.get(options.target.res, function(error, real_stream){
+            if (error) {
+                log('Error extracting target');
+                console.trace(error);
+                $this.emit('error',error);
+                return;
+            }
+
+            stream = real_stream;
+            log('Setup resource stream');
+
+            stream.once('close', function(){
+                log('Stream closed');
+                client.end();
+            });
+
+            $this.emit('data', stream);
+        });
     };
 
     this.destroy = function(){
@@ -80,7 +100,9 @@ function FTP( options ) {
     			console.trace(e);
     		}
     	}
-    }
+    };
+
+    this.pipe = stream;
 
     this.init();
 }
