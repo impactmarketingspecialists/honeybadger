@@ -52,6 +52,7 @@ function MySQL( options ) {
 	});
 
 	var insert_query = 'INSERT INTO '+options.target.schema.name+' SET ?';
+	log('Initializing loader');
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
@@ -66,25 +67,28 @@ function MySQL( options ) {
 				var i = headers.indexOf(item.in);
 				record[item.out] = chunk[i];
 			});
-			console.log(record);
 			connection.query(insert_query,record,function(err,res){
 				if (err) {
 					log('Error inserting record %s for loader', inserts++, options.name);
 					console.trace(err);
 					return;
 				}
-				log('Inserted record',inserts++);
+				inserts++;
+				// log('Inserted record',inserts);
+				// The first record will be our headers - so there's actually beans-1 inserts
+				if (inserts >= beans-1) $this.emit('finish');
 			});
 		}
 
 		beans++;
-		log('Processed record', beans);
+		// log('Processed record', beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
 	};
 
 	this._flush = function(){
-		log('Completed '+beans+' records');
+		log('Completed processing %s records, 1 header',beans);
+		log('Inserted %s rows.', inserts);
 	};
 }

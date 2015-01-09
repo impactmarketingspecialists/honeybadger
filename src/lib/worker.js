@@ -113,6 +113,10 @@ function Worker(options) {
 
 				var loader = new MySQL(loader_config);
 
+				loader.on('finish', function(){
+					log('Loader finished:', loader_config.name);
+				});
+
 				log('Applying transformer:', transformer_config.name);
 
 				/** Normalizer */

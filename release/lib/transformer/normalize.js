@@ -67,7 +67,7 @@ function Normalize( options ) {
 		// });
 
 		beans++;
-		log('Processed record', beans);
+		// log('Processed record', beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();

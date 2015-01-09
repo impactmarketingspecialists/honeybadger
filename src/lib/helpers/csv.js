@@ -38,7 +38,7 @@ CSV.parse = function(delimiter, quotes, data, headersCallback){
 	var parser = new Parser({
 		delimiter: delimiter,
 		quote: quotes,
-		newline: '\r\n',
+		newline: '\n',
 		objectMode: true,
 		columns: false // csv-streamify REMOVES the header row from the stream
 	});
