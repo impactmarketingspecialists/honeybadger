@@ -25,48 +25,43 @@ var CSV = exports;
 var log = require('debug')('HoneyBadger:Helper:CSV');
 
 /** core deps */
-var Parser = require('csv-stream');
+var util = require('util');
+var events = require('events');
+var Readable = require('stream').Readable;
+var Parser = require('csv-streamify');
 
-CSV.parse = function(delimiter, quotes, data, callback){
-	// var errors = fired = false;
-	// var headers = null;
-	// var parser = libcsv({delimiter:delimiter, quote: quotes, columns: function(head){
-	// 	if (head.length <= 1) {
-	// 		errors = true;
-	// 		fired = true;
-	// 		log('Parser errored on CSV headers');
-	// 		callback('headers',null);
-	// 	} else {
-	// 		headers = head;
-	// 		log('Parser discovered CSV headers');
-	// 		// Let's fire our headers callback immediately
-	// 		fired = true;
-	// 		callback(null,{headers:headers})
-	// 	}
-	// }});
-	
+CSV.parse = function(delimiter, quotes, data, headersCallback){
+
+	var $this = this;
+	var headers = false;
+
 	var parser = new Parser({
 		delimiter: delimiter,
-		escapeChar: quotes,
-		objectMode: false
-		// columns: true
-	})
+		quote: quotes,
+		objectMode: true,
+		columns: true
+	});
 
+	/** We'll use readable vs data to watch for headers */
 	parser.on('readable',function(){
-		// log('Parser readable');
+		if (parser._columns && headers === false) {
+			log('Parser discovered headers');
+			headers = true;
+			parser.emit('headers', parser._columns);
+			if (headersCallback) headersCallback(null,{headers:parser._columns})
+		}
 	});
 
-	parser.on('data',function(){
-		// log('Parser record');
-	});
+	/** We don't need to do anything here */
+	// parser.on('data',function(){
+	// });
 
 	parser.on('finish',function(){
-		log('Parser finish');
+		log('Parser finished with %s records', parser.lineNo);
 	});
 
 	parser.on('end',function(){
 		log('Parser end');
-		parser = null;
 	});
 
 	parser.on('close',function(){
@@ -84,7 +79,7 @@ CSV.parse = function(delimiter, quotes, data, callback){
 	* is a stream. We like streams :) we'll return it so
 	* it's chainable.
 	*/
-	if (typeof data.pipe === 'function') {
+	if ((data instanceof Readable)) {
 		return data.pipe(parser);
 	} else if (typeof data.data !== 'undefined') {
 		parser.write(data.data);

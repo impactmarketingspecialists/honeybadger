@@ -110,13 +110,10 @@ function Worker(options) {
 
 			transform.on('finish',function(){
 				log('transform complete');
-				transform.end();
-				delete tranform, data, $e;
-				global.gc();
 			});
 
 			log('Piping data stream to transformer');
-			// if ((data instanceof Readable)) data.pipe(transform);
+			if ((data instanceof Readable)) data.pipe(transform);
 
 		});
 

@@ -90,40 +90,27 @@ function FTP( options ) {
             if (options.target.format === 'delimited-text') {
                 log('Target is delimited-text; engaging CSV helper');
 
-                var _delim = { csv: ',', tsv: "\t", pipe: '|' };
-                var _quot = { default: '', dquote: '"', squote: "'" };
+                var _delim = { csv: ',', tsv: "\t", pipe: '|' }[ options.target.options.delimiter || 'csv' ];
+                var _quot = { default: '', dquote: '"', squote: "'" }[ options.target.options.escape || 'default' ];
 
-                var beans = 0;
                 var csv = require('../helpers/csv');
 
-                var Normalizer = require('../transformer/normalize');
-                var transform = new Normalizer();
-
-                var Parser = require('csv-stream');
-                var parser = Parser.createStream({
-                    delimiter: "|",
-                    escapeChar: ""
+                log('Using delimiter %s', _delim);
+                log('Using escapeChar `%s`', _quot);
+                
+                // Overwrite stream
+                stream = csv.parse(_delim, _quot, ftp_stream);
+                stream.on('headers',function(error, res){
+                    log('Received headers from CSV helper');
                 });
 
-                ftp_stream.pipe(parser).pipe(transform);
-
-                // // Overwrite stream
-                // stream = csv.parse(
-                //     _delim[ options.target.options.delimiter || 'csv' ],
-                //     _quot[ options.target.options.escape || 'default' ],
-                //     stream,
-                //     function(error, res){
-                //         log('Received headers from CSV helper');
-                //     }
-                // );
-
-                // stream.on('finish',function(){
-                //     log('CSV helper stream finished');
-                //     stream.end();
-                // });
+                stream.on('finish',function(){
+                    log('CSV helper stream finished');
+                    stream.end();
+                });
             }
 
-            // $this.emit('data', stream);
+            $this.emit('data', stream);
         });
     };
 

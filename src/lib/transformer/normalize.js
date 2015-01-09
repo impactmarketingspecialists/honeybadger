@@ -40,15 +40,18 @@ function Normalize( options ) {
 
 	var beans = 0;
 
+	/** We are TOTALLY ASSUMING that chunks are records 
+	 *  coming from a CSV stream processor. That's probably not
+	 *  the safest assumption longterm ;)
+	 */
 	this._transform = function(chunk, encoding, callback) {
 		log('Processed record', beans++);
+
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
 	};
 
 	this._flush = function(){
 		log('Completed '+beans+' records');
-		// this.push(null);
-		// this.end();
 	};
 }

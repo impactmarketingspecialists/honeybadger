@@ -39,7 +39,7 @@ function BeanCounter( options ) {
 
 	this._transform = function(chunk, encoding, callback) {
 		log('Processed record', beans++);
-		this.push(chunk);
+		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
 	};
 
