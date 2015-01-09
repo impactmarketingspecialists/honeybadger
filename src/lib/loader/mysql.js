@@ -64,8 +64,9 @@ function MySQL( options ) {
 			var record = {};
 			options.transform.normalize.forEach(function(item, index){
 				var i = headers.indexOf(item.in);
-				record[item.out] = record[i];
+				record[item.out] = chunk[i];
 			});
+			console.log(record);
 			connection.query(insert_query,record,function(err,res){
 				if (err) {
 					log('Error inserting record %s for loader', inserts++, options.name);
