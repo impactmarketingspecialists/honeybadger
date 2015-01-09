@@ -38,23 +38,24 @@ CSV.parse = function(delimiter, quotes, data, headersCallback){
 	var parser = new Parser({
 		delimiter: delimiter,
 		quote: quotes,
+		newline: '\r\n',
 		objectMode: true,
-		columns: true
-	});
-
-	/** We'll use readable vs data to watch for headers */
-	parser.on('readable',function(){
-		if (parser._columns && headers === false) {
-			log('Parser discovered headers');
-			headers = true;
-			parser.emit('headers', parser._columns);
-			if (headersCallback) headersCallback(null,{headers:parser._columns})
-		}
+		columns: false // csv-streamify REMOVES the header row from the stream
 	});
 
 	/** We don't need to do anything here */
-	// parser.on('data',function(){
-	// });
+	parser.on('readable',function(record){
+	});
+
+	/** Watch for headers */
+	parser.on('data',function(record){
+		if (parser.lineNo === 0 && headers === false) {
+			log('Parser discovered headers');
+			headers = true;
+			parser.emit('headers', record);
+			if (headersCallback) headersCallback(null,{headers:record})
+		}
+	});
 
 	parser.on('finish',function(){
 		log('Parser finished with %s records', parser.lineNo);
@@ -87,3 +88,4 @@ CSV.parse = function(delimiter, quotes, data, headersCallback){
 		return parser;
 	}
 };
+

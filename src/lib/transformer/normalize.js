@@ -39,13 +39,28 @@ function Normalize( options ) {
 	stream.Transform.call(this, {objectMode: true});
 
 	var beans = 0;
+	var toss = [];
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
 	 *  the safest assumption longterm ;)
 	 */
 	this._transform = function(chunk, encoding, callback) {
-		log('Processed record', beans++);
+		if (beans === 0) { // CSV header row
+			// log('Transforming CSV headers');
+			chunk = chunk.filter(function(column,index){
+				if (options.transform.input.indexOf(column) > -1) return true;
+				else toss.push(index);
+			});
+			// log('Transformed headers', chunk.length,chunk.equals(options.transform.input),toss.length);
+		} else {
+			chunk = chunk.filter(function(val,index){
+				if (toss.indexOf(index) === -1) return true;
+			});
+		}
+
+		beans++;
+		log('Processed record', beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
@@ -55,3 +70,28 @@ function Normalize( options ) {
 		log('Completed '+beans+' records');
 	};
 }
+
+// attach the .equals method to Array's prototype to call it on any array
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time 
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;       
+        }           
+        else if (this[i] != array[i]) { 
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }           
+    }       
+    return true;
+}   
