@@ -34,7 +34,9 @@ var Readable = require('stream').Readable;
 
 var DataManager = require('./data-manager');
 var Extractor = require('./extractor').Factory;
+var BeanCounter = require('./transformer/beancounter');
 var Normalizer = require('./transformer/normalize');
+var MySQL = require('./loader/mysql');
 
 function Worker(options) {
 
@@ -107,19 +109,24 @@ function Worker(options) {
 			loader_configs.forEach(function(loader_config){
 				var transformer_config = transformer_configs.filter(function(item){ if (item._id === loader_config.transform) return true; }).pop();
 
+				log('Loaded task loader', loader_config.name)
+
+				var loader = new MySQL(loader_config);
+
 				log('Applying transformer:', transformer_config.name);
 
 				/** Normalizer */
 				if (transformer_config.transform.normalize.length) {
 					
 					var transform = new Normalizer(transformer_config);
+					loader_config.transform = transformer_config.transform;
 
 					transform.on('finish',function(){
 						log('Transformer finished:', transformer_config.name);
 					});
 
 					log('Piping data stream to transformer');
-					if ((data instanceof Readable)) data.pipe(transform);
+					if ((data instanceof Readable)) data.pipe(transform).pipe(loader);
 				}
 			});
 

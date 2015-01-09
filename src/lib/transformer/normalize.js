@@ -59,6 +59,13 @@ function Normalize( options ) {
 			});
 		}
 
+		/** Original normalizer - probably more efficient */
+		// transformer.transform.normalize.forEach(function(item, index){
+		// var i = rawheaders.indexOf(item.in);
+		// if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+		// rec[item.out] = record[i];
+		// });
+
 		beans++;
 		log('Processed record', beans);
 
