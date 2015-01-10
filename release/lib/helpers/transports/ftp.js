@@ -101,16 +101,25 @@ Object.defineProperties(module.exports,{
 		enumerable: true
 	},
 	put: {
-		value: function(source, target, callback){
-			var c = new libftp();
+		value: function(stream, source, target, callback){
+			var Client = require('ftp');
+			var c = new Client();
+
+			stream.on('finish', function(){
+				// console.log('outstream_finished')
+				// c.end();
+			});
 
 			c.on('ready', function() {
-				c.put(target, function(err, stream){
-					stream.once('close', function(){ 
-						c.end(); 
-					});
-					callback(err, stream);
+				c.put(stream, target, function(err){
+					c.end();
 				});
+			});
+
+			c.on('close', function(){
+				console.log('complete');
+				c.destroy();
+				callback(null, true);
 			});
 
 			c.on('error', function(err) {

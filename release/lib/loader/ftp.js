@@ -26,6 +26,7 @@ var log = require('debug')('HoneyBadger:Loader:FTP');
 
 /** core deps */
 var util = require('util');
+var ftp = require('../helpers/transports/ftp');
 var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
@@ -39,31 +40,55 @@ function FTP( options ) {
 	stream.Transform.call(this, {objectMode: true});
 
 	var beans = 0;
-	var headers = []
+
+	var Client = require('ftp');
+	var c = new Client();
+
+	c.on('ready', function() {
+		log('Connection ready, piping to remote target');
+		c.put($this, 'good_office_extract.csv', function(err){
+			log('Stream data transfer complete');
+			c.end();
+			if (err) {
+				console.trace(err);
+			}
+		});
+		$this.emit('ready');
+	});
+
+	c.on('close', function(){
+		log('Connection closed');
+		c.destroy();
+	});
+
+	c.on('error', function(err) {
+		log('Error', err);
+		console.trace(err);
+	});
+
+	c.connect({
+		host: options.target.uri,
+		port: options.target.port || '21',
+		user: options.target.auth.username,
+		password: options.target.auth.password
+	});
+
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
 	 *  the safest assumption longterm ;)
 	 */
 	this._transform = function(chunk, encoding, callback) {
-		if (beans === 0) { // CSV header row
-			headers = chunk;
-		} else {
-			var record = {};
-			options.transform.normalize.forEach(function(item, index){
-				var i = headers.indexOf(item.in);
-				record[item.out] = record[i];
-			});
-		}
 
 		beans++;
-		log('Processed record', beans);
+		// log('Processed record', beans);
 
-		if (this._readableState.pipesCount > 0) this.push(chunk);
+		this.push(chunk.join(',')+'\r\n');
 		return callback();
 	};
 
-	this._flush = function(){
+	this._flush = function(callback){
 		log('Completed '+beans+' records');
+		callback();
 	};
 }

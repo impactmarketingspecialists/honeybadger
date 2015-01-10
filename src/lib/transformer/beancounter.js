@@ -43,7 +43,8 @@ function BeanCounter( options ) {
 		return callback();
 	};
 
-	this._flush = function(){
+	this._flush = function(callback){
 		log('Completed '+beans+' records');
+		callback();
 	};
 }

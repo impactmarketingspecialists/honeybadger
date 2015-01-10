@@ -29,6 +29,7 @@ var util = require('util');
 var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
+var mysql = require('mysql');
 
 util.inherits( MySQL, EventEmitter );
 util.inherits( MySQL, stream.Transform );
@@ -42,7 +43,6 @@ function MySQL( options ) {
 	var inserts = 0;
 	var headers = []
 
-	var mysql = require('mysql');
 	var dsn = utility.dsn(options.target.dsn);
 	var connection = mysql.createConnection({
 		host: dsn.host,
@@ -87,8 +87,11 @@ function MySQL( options ) {
 		return callback();
 	};
 
-	this._flush = function(){
+	this._flush = function(callback){
 		log('Completed processing %s records, 1 header',beans);
 		log('Inserted %s rows.', inserts);
+		callback();
 	};
+
+	$this.emit('ready');
 }

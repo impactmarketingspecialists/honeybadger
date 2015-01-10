@@ -37,6 +37,8 @@ var Extractor = require('./extractor').Factory;
 var BeanCounter = require('./transformer/beancounter');
 var Normalizer = require('./transformer/normalize');
 var MySQL = require('./loader/mysql');
+var Filesystem = require('./loader/filesystem');
+var FTPLoader = require('./loader/ftp');
 
 function Worker(options) {
 
@@ -80,6 +82,8 @@ function Worker(options) {
 
 		log('Discovered', loader_configs.length, 'loaders');
 
+		var loaders_ready = [];
+
 		/**
 		 * Let's get some instances of our etl objects
 		 */
@@ -97,29 +101,34 @@ function Worker(options) {
 
 		$e.on('ready',function(err, body){
 			log('Extractor ready:', extractor_config.name);
-			$e.extract();
-		});
-
-		$e.on('finish',function(err, body){
-			log('Extractor finished:', extractor_config.name);
-		});
-
-		$e.on('data',function(data){
-
 			loader_configs.forEach(function(loader_config){
 				var transformer_config = transformer_configs.filter(function(item){ if (item._id === loader_config.transform) return true; }).pop();
 
 				log('Loaded task loader', loader_config.name)
 
-				var loader = new MySQL(loader_config);
+				var loader = null;
+				if (loader_config.target.type == 'mysql')	var loader = new MySQL(loader_config);
+				else if (loader_config.target.type == 'file')	var loader = new Filesystem(loader_config);
+				else if (loader_config.target.type == 'ftp')	var loader = new FTPLoader(loader_config);
 
 				loader.on('finish', function(){
 					log('Loader finished:', loader_config.name);
 				});
 
-				log('Applying transformer:', transformer_config.name);
+				loader.on('ready',function(){
+					log('Loader ready', loader_config.name);
+					loaders_ready.push(loader_config.name);
 
-				/** Normalizer */
+					log('Applying transformer:', transformer_config.name);
+
+					/** Normalizer */
+
+					if (loaders_ready.length < loader_configs.length) {
+						log('Start extraction');
+						$e.start();
+					}
+				});
+
 				if (transformer_config.transform.normalize.length) {
 					
 					var transform = new Normalizer(transformer_config);
@@ -129,11 +138,20 @@ function Worker(options) {
 						log('Transformer finished:', transformer_config.name);
 					});
 
-					log('Piping data stream to transformer');
-					if ((data instanceof Readable)) data.pipe(transform).pipe(loader);
+					// log('Piping data stream to transformer');
+					$e.pipe(transform).pipe(loader);
 				}
 			});
+		});
 
+		$e.on('finish',function(err, body){
+			log('Finished extraction for:', extractor_config.name);
+		});
+
+		$e.on('readable',function(){
+		});
+
+		$e.on('data',function(data){
 		});
 	};
 }

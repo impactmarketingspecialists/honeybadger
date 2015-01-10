@@ -10,7 +10,7 @@
     "debug": "^2.1.1",
     "dnode": "*",
     "express": "*",
-    "ftp": "*",
+    "ftp": "^0.3.8",
     "mysql": "^2.3.0",
     "nano": "*",
     "node-schedule": "^0.1.15",

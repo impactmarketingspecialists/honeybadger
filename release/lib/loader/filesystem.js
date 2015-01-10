@@ -25,6 +25,8 @@ module.exports = Filesystem;
 var log = require('debug')('HoneyBadger:Loader:Filesystem');
 
 /** core deps */
+var fs = require('fs');
+var path = require('path');
 var util = require('util');
 var utilily = require('../utility');
 var stream = require('stream');
@@ -38,31 +40,31 @@ function Filesystem( options ) {
 	EventEmitter.call(this);
 	stream.Transform.call(this, {objectMode: true});
 
+	log('Streaming to %s',options.target.path);
+
 	var beans = 0;
-	var headers = []
+	var headers = [];
+	var target = path.resolve(options.target.path);
+	var fStream = fs.createWriteStream(target, { flags: 'w', encoding: 'utf8', mode: 0666 });
+	this.pipe(fStream);
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
 	 *  the safest assumption longterm ;)
 	 */
 	this._transform = function(chunk, encoding, callback) {
-		if (beans === 0) { // CSV header row
-			headers = chunk;
-		} else {
-			options.transform.normalize.forEach(function(item, index){
-				var i = headers.indexOf(item.in);
-				record[item.out] = record[i];
-			});
-		}
-
+		
 		beans++;
-		log('Processed record', beans);
+		// log('Processed record', beans);
 
-		if (this._readableState.pipesCount > 0) this.push(chunk);
-		return callback();
+		if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
+		callback();
 	};
 
-	this._flush = function(){
-		log('Completed '+beans+' records');
+	this._flush = function(callback){
+		log('Flushed '+beans+' lines to %s',target);
+		callback();
 	};
+
+	$this.emit('ready');
 }
