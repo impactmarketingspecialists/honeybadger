@@ -1,14 +1,43 @@
-var ftp = require('../helpers/transports/ftp');
-var rets = require('../helpers/transports/rets');
-var csv = require('../helpers/csv');
+// Copyright Impact Marketing Specialists, Inc. and other contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+module.exports = Admin();
+
+/** log facility */
+var log = require('debug')('HoneyBadger:Admin');
+
+/** log via websocket directly to client */
 var clog = function(target, client){
     return function(data){
         client.send('{ "event":"log-stream", "target": "'+target+'", "body":'+JSON.stringify(data)+'}');
     };
 };
 
-module.exports = {
+/** core deps */
+var ftp = require('../helpers/transports/ftp');
+var rets = require('../helpers/transports/rets');
+var csv = require('../helpers/csv');
+
+function Admin(){
+    return {
     "source.list": function(callback){
         process.nextTick(function(){
             callback('onSourceList', null, DataManager.sources);
@@ -16,7 +45,7 @@ module.exports = {
     },
     "source.test": function(source, callback) {
 
-        console.log(source.type+' Client Test');
+        log(source.type+' Client Test');
 
         /**
          * Testing a source really just means validating access.
@@ -62,7 +91,7 @@ module.exports = {
 
             _log('<div class="text-success">Extraction source is valid.</div>');
             var source = body;
-            // console.log(source.source);
+            // log(source.source);
             /**
              * We're going to leave in a bunch of extra steps here for the sake
              * of verbosity to the client. I had intended to simply this all down
@@ -104,7 +133,7 @@ module.exports = {
                                 });
                                 return;
                             } else if (err) {
-                                console.log(err);
+                                log(err);
                                 _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                 process.nextTick(function(){
                                     callback('onExtractorTest','Unable to parse data stream',null);
@@ -150,7 +179,7 @@ module.exports = {
                         if (error) {
                             _log('<div class="text-danger">Query did not execute.</div>');
                             _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                            console.log(error);
+                            log(error);
                             callback('onExtractorTest',error, null);
                             return;
                         } else if (data.type == 'status') {
@@ -172,7 +201,7 @@ module.exports = {
                                         });
                                         return;
                                     } else if (err) {
-                                        console.log(err);
+                                        log(err);
                                         _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                         process.nextTick(function(){
                                             callback('onExtractorTest','Unable to parse data stream',null);
@@ -211,7 +240,7 @@ module.exports = {
         var _log = clog('transformer-log-body',client);
         _log('Testing transformer from extractor: '+ transformer.extractor);
 
-        // console.log(transformer);
+        // log(transformer);
         //We want to pipe transformer events back to the client
         db.get(transformer.extractor,function(err, extractor){
             if (err) { _log('Error fetching extractor'); return; }
@@ -228,7 +257,7 @@ module.exports = {
 
                 _log('<div class="text-success">Extraction source is valid.</div>');
                 var source = body;
-                // console.log(source.source);
+                // log(source.source);
                 /**
                  * We're going to leave in a bunch of extra steps here for the sake
                  * of verbosity to the client. I had intended to simply this all down
@@ -298,7 +327,7 @@ module.exports = {
                                     });
                                     return;
                                 } else if (err) {
-                                    console.log(err);
+                                    log(err);
                                     _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                     process.nextTick(function(){
                                         callback('onTransformerTest','Unable to parse data stream',null);
@@ -340,7 +369,7 @@ module.exports = {
                             if (error) {
                                 _log('<div class="text-danger">Query did not execute.</div>');
                                 _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                                console.log(error);
+                                log(error);
                                 callback('onTransformerTest',error, null);
                                 return;
                             } else if (data.type == 'status') {
@@ -393,7 +422,7 @@ module.exports = {
                                             });
                                             return;
                                         } else if (err) {
-                                            console.log(err);
+                                            log(err);
                                             _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                             process.nextTick(function(){
                                                 callback('onTransformerTest','Unable to parse data stream',null);
@@ -447,13 +476,13 @@ module.exports = {
 
         var insert_query = 'INSERT INTO '+loader.target.schema.name+' SET ?';
 
-        // console.log(transformer);
+        // log(transformer);
         //We want to pipe transformer events back to the client
         db.get(loader.transform, function(err, transformer){
 
             _log('Checking transformer for extractor: '+ transformer.extractor);
 
-            // console.log(transformer);
+            // log(transformer);
             //We want to pipe transformer events back to the client
             db.get(transformer.extractor,function(err, extractor){
                 if (err) { _log('Error fetching extractor'); return; }
@@ -472,7 +501,7 @@ module.exports = {
                     var source = body;
 
                     var testlimit = 10;
-                    // console.log(source.source);
+                    // log(source.source);
                     /**
                      * We're going to leave in a bunch of extra steps here for the sake
                      * of verbosity to the client. I had intended to simply this all down
@@ -512,7 +541,7 @@ module.exports = {
                                 var processed = 0;
 
                                 var xfm = streamTransform(function(record, cb){
-                                    // console.log('processed', processed++);
+                                    // log('processed', processed++);
                                     if (xformed.length >= testlimit) {
                                         process.nextTick(function(){
                                             _log('<div class="text-success">Transform completed successfully.</div>');
@@ -533,7 +562,7 @@ module.exports = {
 
                                     connection.query(insert_query,rec,function(err,res){
                                         if (!err) {
-                                            // console.log('\tloaded',loaded++);
+                                            // log('\tloaded',loaded++);
                                             records.push(true);
                                             process.nextTick(function(){
                                                 // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
@@ -574,7 +603,7 @@ module.exports = {
                                         });
                                         return;
                                     } else if (err) {
-                                        console.log(err);
+                                        log(err);
                                         _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                         process.nextTick(function(){
                                             callback('onLoaderTest','Unable to parse data stream',null);
@@ -615,7 +644,7 @@ module.exports = {
                                 if (error) {
                                     _log('<div class="text-danger">Query did not execute.</div>');
                                     _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                                    console.log(error);
+                                    log(error);
                                     callback('onLoaderTest',error, null);
                                     return;
                                 } else if (data.type == 'status') {
@@ -651,7 +680,7 @@ module.exports = {
                                             transformer.transform.normalize.forEach(function(item, index){
                                                 var i = rawheaders.indexOf(item.in);
                                                 if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-                                                // console.log(item,i,headers[i],record[i]);
+                                                // log(item,i,headers[i],record[i]);
                                                 rec[item.out] = record[i];
                                                 rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
                                             });
@@ -698,7 +727,7 @@ module.exports = {
                                                 });
                                                 return;
                                             } else if (err) {
-                                                console.log(err);
+                                                log(err);
                                                 _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
                                                 process.nextTick(function(){
                                                     callback('onLoaderTest','Unable to parse data stream',null);
@@ -908,8 +937,9 @@ module.exports = {
             Query: _query || '(status=Listed)',
             Limit: _limit || 10
         }, function( error, data ) {
-            console.log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
+            log( require( 'util' ).inspect( data, { showHidden: false, colors: true, depth: 5 } ) )
         });
     }
 
+    };
 };
