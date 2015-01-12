@@ -76,7 +76,10 @@ function MySQL( options ) {
 				inserts++;
 				// log('Inserted record',inserts);
 				// The first record will be our headers - so there's actually beans-1 inserts
-				if (inserts >= beans-1) $this.emit('finish');
+				if (inserts >= beans-1) {
+					log('Inserted %s rows.', inserts);
+					$this.emit('finish');
+				}
 			});
 		}
 
@@ -89,7 +92,6 @@ function MySQL( options ) {
 
 	this._flush = function(callback){
 		log('Completed processing %s records, 1 header',beans);
-		log('Inserted %s rows.', inserts);
 		callback();
 	};
 

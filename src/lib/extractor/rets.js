@@ -31,8 +31,8 @@ var librets = require('rets-client');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
 
-util.inherits( FTP, EventEmitter );
-util.inherits( FTP, stream.Transform );
+util.inherits( RETS, EventEmitter );
+util.inherits( RETS, stream.Transform );
 function RETS( options )
 {
     var $this = this;
