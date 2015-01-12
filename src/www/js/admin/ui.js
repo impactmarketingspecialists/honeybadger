@@ -436,6 +436,7 @@
 		$('#loaderMySQL').hide();
 		$('#loaderCouchDB').hide();
 		$('#loaderFTP').hide();
+		$('#loaderFilesystem').hide();
 		$('#ldr-target-type').change(function(){
 			switch($(this).val())
 			{
@@ -443,16 +444,25 @@
 					$('#loaderMySQL').show();
 					$('#loaderCouchDB').hide();
 					$('#loaderFTP').hide();
+					$('#loaderFilesystem').hide();
 				break;
 				case "couchdb":
 					$('#loaderMySQL').hide();
 					$('#loaderCouchDB').show();
 					$('#loaderFTP').hide();
+					$('#loaderFilesystem').hide();
 				break;
 				case "ftp":
 					$('#loaderMySQL').hide();
 					$('#loaderCouchDB').hide();
 					$('#loaderFTP').show();
+					$('#loaderFilesystem').hide();
+				break;
+				case "filesystem":
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').hide();
+					$('#loaderFilesystem').show();
 				break;
 			}
 		});
@@ -463,15 +473,25 @@
 		$('#loaderDSN button').click(function(){
 			$DM.loader.validateConnection(ldr(),function(e){
 				var t = $('#ldr-target-type').val();
-				var btn = (t === 'mysql') ? '#ldr-mysql-validate' : '#ldr-couchdb-validate';
+				var btn = $('#ldr-'+t+'-validate');
+				switch(t) {
+					case "mysql":
+					break;
+					case "couchdb":
+					break;
+					case "ftp":
+					break;
+					case "filesystem":
+					break;
+				}
 				$(btn).removeClass('btn-danger btn-success').addClass('btn-primary');
 				if (!e.err) {
-					$(btn).removeClass('btn-primary').addClass('btn-success')
-					$(btn+' .validation-status').removeClass('asterisk').addClass('ok-sign');
+					$(btn).removeClass('btn-primary').addClass('btn-success');
+					$('.validation-status',btn).removeClass('asterisk').addClass('ok-sign');
 					$('#loaderWizard [am-Button~=next]').prop('disabled',false);
 				} else {
-					$(btn).prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
-					$(btn+' .validation-status').removeClass('asterisk').addClass('exclamation-sign');
+					$(btn).prop('disabled',false).removeClass('btn-primary').addClass('btn-danger');
+					$('.validation-status',btn).removeClass('asterisk').addClass('exclamation-sign');
 				}
 
 			});
@@ -921,48 +941,57 @@
 				$('#loaderName').val(data.name);
 				$('#ldr-source-select').val(data.transform);
 				$('#ldr-target-type').val(data.target.type);
-				$('#ldr-mysql-dsn').val(data.target.dsn);
-				$('#ldr-target-schema').val(data.target.schema.name);
-
-				$DM.transformer.sample($DM.getTransformer(data.transform).value,function(e){
-					if (!e.err) {
-						Admin.View.loaderDefinition()(e.body);
-						// update('loaderDefinition',e.body);
-						trnSample = e.body;
-					} 
-				});
-
-				$DM.loader.validate(data, function(res){
-					if (res.err) {
-						$('#loaderSchemas .create').show();
-						$('#loaderSchemas .fields').hide();
-					}
-
-					$('#loaderSchemas .create').hide();
-					$('#loaderSchemas .fields').show().find('p:first-child').hide();
-					$('#ldr-create-schema').hide();
-
-					$('#loaderSchemas input').prop('disabled',true);
-					$('#loaderSchemas select').prop('disabled',true);
-
-				});
 
 				switch(data.target.type)
 				{
 					case "mysql":
+						$DM.transformer.sample($DM.getTransformer(data.transform).value,function(e){
+							if (!e.err) {
+								Admin.View.loaderDefinition()(e.body);
+								// update('loaderDefinition',e.body);
+								trnSample = e.body;
+							} 
+						});
+						$DM.loader.validate(data, function(res){
+							if (res.err) {
+								$('#loaderSchemas .create').show();
+								$('#loaderSchemas .fields').hide();
+							}
+
+							$('#loaderSchemas .create').hide();
+							$('#loaderSchemas .fields').show().find('p:first-child').hide();
+							$('#ldr-create-schema').hide();
+
+							$('#loaderSchemas input').prop('disabled',true);
+							$('#loaderSchemas select').prop('disabled',true);
+
+						});
+						$('#ldr-mysql-dsn').val(data.target.dsn);
+						$('#ldr-target-schema').val(data.target.schema.name);
 						$('#loaderMySQL').show();
 						$('#loaderCouchDB').hide();
 						$('#loaderFTP').hide();
+						$('#loaderFilesystem').hide();
 					break;
 					case "couchdb":
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').show();
 						$('#loaderFTP').hide();
+						$('#loaderFilesystem').hide();
 					break;
 					case "ftp":
+						$('#ldr-ftp-dsn').val(data.target.dsn);
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').hide();
 						$('#loaderFTP').show();
+						$('#loaderFilesystem').hide();
+					break;
+					case "filesystem":
+						$('#ldr-filesystem-dsn').val(data.target.dsn);
+						$('#loaderMySQL').hide();
+						$('#loaderCouchDB').hide();
+						$('#loaderFTP').hide();
+						$('#loaderFilesystem').show();
 					break;
 				}
 			break;
@@ -1069,20 +1098,35 @@
 			name: $('#loaderName').val(),
 			transform: $('#ldr-source-select').val(),
 			target: {
-				type: $('#ldr-target-type').val(),
-				dsn: $('#ldr-mysql-dsn').val(),
-				schema: {
-					name: $('#ldr-target-schema').val(),
-					fields: []
-				}
+				type: $('#ldr-target-type').val()
 			}
 		};
-		$('#loaderSchemas .fields .maps label').each(function(index,item){
-			res.target.schema.fields.push({
-				key: $(item).text(),
-				type: $(item).parent().parent().find('select').val()
-			});
-		});
+
+		switch(res.target.type) {
+			case "mysql":
+				res.target.dsn = $('#ldr-mysql-dsn').val();
+				res.target.schema = {
+					name: $('#ldr-target-schema').val(),
+					fields: []
+				};
+				$('#loaderSchemas .fields .maps label').each(function(index,item){
+					res.target.schema.fields.push({
+						key: $(item).text(),
+						type: $(item).parent().parent().find('select').val()
+					});
+				});
+			break;
+			case "ftp":
+				res.target.dsn = $('#ldr-ftp-dsn').val();
+			break;
+			case "filesystem":
+				res.target.dsn = $('#ldr-filesystem-dsn').val();
+			break;
+			case "couchdb":
+			break;
+		}
+
+
 		return res;
 	};
 

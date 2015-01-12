@@ -184,10 +184,18 @@
 		return function render(data) {
 			$('#loaderList > tbody').html('');
 			$(data).each(function(index, item){
-				$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'/'+item.value.target.schema.name+'</td><td>'+item.value.status+'</td></tr>').click(function(){
-					showWizard('loaderWizard');
-					setupWizard('loaderWizard', item.value);
-				}));
+				if (item.value.target.type === 'mysql') {
+					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'/'+item.value.target.schema.name+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+						showWizard('loaderWizard');
+						setupWizard('loaderWizard', item.value);
+					}));
+				}
+				if (item.value.target.type === 'ftp') {
+					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+						showWizard('loaderWizard');
+						setupWizard('loaderWizard', item.value);
+					}));
+				}
 				// if (item.value.status === 'active') $('#activeSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>');
 				// else $('#inactiveSources > tbody').append('<tr><td>'+item.key+'</td><td>'+item.value.type+'</td><td>'+(new Date(item.value.date)).toDateString()+'</td></tr>') ;
 			});
@@ -212,6 +220,7 @@
 	this.transformDataStructures = function() {
 
 		return function render(data) {
+			if (!data.headers || !data.data) return; 
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');
 			if (data.headers) {

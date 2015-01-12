@@ -765,6 +765,7 @@ module.exports = {
             case "couchdb":
             break;
             case "ftp":
+                callback('onLoaderValidate',null,{});
             break;
         }
     },
@@ -793,6 +794,10 @@ module.exports = {
             case "couchdb":
             break;
             case "ftp":
+                callback(null,null);
+            break;
+            case "filesystem":
+                callback(null,null);
             break;
         }
     },
