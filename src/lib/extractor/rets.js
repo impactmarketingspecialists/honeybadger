@@ -27,12 +27,18 @@ var log = require('debug')('HoneyBadger:Extractor:RETS');
 /** core deps */
 var util = require('util');
 var url = require('url');
-var Extractor = module.parent.exports;
+var librets = require('rets-client');
+var stream = require('stream');
+var EventEmitter = require('events').EventEmitter;
 
-util.inherits( RETS, Extractor );
+util.inherits( FTP, EventEmitter );
+util.inherits( FTP, stream.Transform );
 function RETS( options )
 {
     var $this = this;
+    EventEmitter.call(this);
+    stream.Transform.call(this, {objectMode: true});
+
     var uri = url.parse(options.source.uri);
 
     /**
@@ -50,11 +56,8 @@ function RETS( options )
      * through node-rets-client to hunt down naughty
      * globals.
      */
-    var librets = require('rets-client');
     var client = null;
     var readyState = 0;
-
-    Extractor.call(this);
 
     this.connect = function() {
         readyState = 1; // Connecting
@@ -119,7 +122,17 @@ function RETS( options )
         });
     };
 
-    this.init();
+    this._transform = function(chunk, encoding, callback){
+        if (this._readableState.pipesCount > 0) this.push(chunk);
+        callback();
+    };
+
+    this._flush = function(callback){
+        log('Completed reading RETS resource');
+        callback();
+    };
+
+    this.connect();
 };
 
 
