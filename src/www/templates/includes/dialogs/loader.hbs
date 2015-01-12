@@ -75,12 +75,12 @@
 				</div>
 				<div id="loaderFilesystem">
 					<div class="form-group">
-						<label class="control-label" for="ldr-ftp-dsn">Filesystem Path</label>
-						<input type="text" class="form-control" name="ldr-filesystem-dsn" id="ldr-filesystem-dsn" placeholder="/mnt/data/archive/%source.filename%-%date%.csv" />
+						<label class="control-label" for="ldr-ftp-basepath">Filesystem Base Path</label>
+						<input type="text" class="form-control" name="ldr-filesystem-basepath" id="ldr-filesystem-basepath" placeholder="/mnt/data/archive/" />
 					</div>
 					<div class="form-group">
 						<button id="ldr-filesystem-validate" tabindex="-1" type="button" class="btn btn-primary">
-							Validate Connection <span class="validation-status glyphicon"></span>
+							Validate Path <span class="validation-status glyphicon"></span>
 						</button>
 					</div>
 				</div>
@@ -88,7 +88,7 @@
       	</section>
       	<section id="ldr-step-2" class="step">
 			<h4>Loader Details</h4>
-			<div id="loaderSchemas">
+			<div class="loader-options" id="loaderSchemas">
 				<div class="create well">
 					<p>This database does not appear to have any schemas that support your transformer's output.</p>
 					<p><center><button id="ldr-new-schema" class="btn btn-primary">Create Schema</button></center></p>
@@ -107,6 +107,33 @@
 						</button>
 					</div>
 				</div>
+			</div>
+			<div class="loader-options" id="ldr-ftp-options">
+				<div class="form-group">
+					<label for="ldr-ftp-basepath">FTP Base Path</label>
+					<input type="text" class="form-control" placeholder="/data/" name="ldr-ftp-basepath" id="ldr-ftp-basepath"/>
+				</div>
+					<label for="ldf-ftp-filename">FTP Target File</label><br>
+				<div class="row">
+					<div class="col-xs-8">
+						<input type="text" class="form-control" placeholder="listings-%source.filename%-%date%.csv" name="ldf-ftp-filename" id="ldf-ftp-filename"/> 
+					</div>
+					<div class="col-xs-4">
+        				<button type="button" class="btn btn-primary" id="ldr-ftp-browse">Browse</button>
+        			</div>
+				</div>
+				<div><small>You can use variables to help name your file. </small><span am-Icon="glyph" class="question-sign"></span></div>
+				<div id="ldr-ftp-browser">
+					<ul class="files">
+					</ul>
+				</div>
+			</div>
+			<div class="loader-options" id="ldr-filesystem-options">
+				<div class="form-group">
+					<label for="ldr-filesystem-filename">Filesystem Output Filename</label>
+					<input type="text" class="form-control" placeholder="listings-%source.filename%-%date%.csv" name="ldr-filesystem-filename" id="ldr-filesystem-filename"/>
+				</div>
+				<small>You can use variables to help name your file. </small><span am-Icon="glyph" class="question-sign"></span>
 			</div>
       	</section>
       	<section id="ldr-step-3" class="step">

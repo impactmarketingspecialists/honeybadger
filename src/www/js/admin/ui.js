@@ -437,36 +437,6 @@
 		$('#loaderCouchDB').hide();
 		$('#loaderFTP').hide();
 		$('#loaderFilesystem').hide();
-		$('#ldr-target-type').change(function(){
-			switch($(this).val())
-			{
-				case "mysql":
-					$('#loaderMySQL').show();
-					$('#loaderCouchDB').hide();
-					$('#loaderFTP').hide();
-					$('#loaderFilesystem').hide();
-				break;
-				case "couchdb":
-					$('#loaderMySQL').hide();
-					$('#loaderCouchDB').show();
-					$('#loaderFTP').hide();
-					$('#loaderFilesystem').hide();
-				break;
-				case "ftp":
-					$('#loaderMySQL').hide();
-					$('#loaderCouchDB').hide();
-					$('#loaderFTP').show();
-					$('#loaderFilesystem').hide();
-				break;
-				case "filesystem":
-					$('#loaderMySQL').hide();
-					$('#loaderCouchDB').hide();
-					$('#loaderFTP').hide();
-					$('#loaderFilesystem').show();
-				break;
-			}
-		});
-
 		/**
 		 * Bindings to validate the loader DSN, URI, whatever
 		 */
@@ -497,27 +467,68 @@
 			});
 		});
 
-		/**
-		 * Bindings to the create schema button for MySQL loaders
-		 */
-		$('#ldr-create-schema').click(function(){
-			$DM.loader.createSchema(ldr(),function(e){
-				$('#ldr-create-schema').removeClass('btn-danger btn-success').addClass('btn-primary');
-				if (!e.err) {
-					$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
-					$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('ok-sign');
-				} else {
-					$('#ldr-create-schema').prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
-					$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('exclamation-sign');
-				}
+		$('#ldr-target-type').change(function(){
+			switch($(this).val())
+			{
+				case "mysql":
+					$('.loader-options').hide();
+					$('#loaderSchemas').show();
 
-			});
-		});
+					/**
+					 * Bindings to the create schema button for MySQL loaders
+					 */
+					$('#ldr-create-schema').click(function(){
+						$DM.loader.createSchema(ldr(),function(e){
+							$('#ldr-create-schema').removeClass('btn-danger btn-success').addClass('btn-primary');
+							if (!e.err) {
+								$('#ldr-create-schema').removeClass('btn-primary').addClass('btn-success')
+								$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('ok-sign');
+							} else {
+								$('#ldr-create-schema').prop('disabled',false).removeClass('btn-primary').addClass('btn-danger')
+								$('#ldr-create-schema .schema-status').removeClass('asterisk').addClass('exclamation-sign');
+							}
 
-		$('#loaderSchemas .fields').hide();
-		$('#ldr-new-schema').click(function(){
-			$('#loaderSchemas .create').hide();
-			$('#loaderSchemas .fields').show();
+						});
+					});
+
+					$('#loaderSchemas .fields').hide();
+					$('#ldr-new-schema').click(function(){
+						$('#loaderSchemas .create').hide();
+						$('#loaderSchemas .fields').show();
+					});
+					$('#loaderMySQL').show();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').hide();
+					$('#loaderFilesystem').hide();
+				break;
+				case "couchdb":
+					$('.loader-options').hide();
+					$('#ldr-couchdb-options').show();
+					
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').show();
+					$('#loaderFTP').hide();
+					$('#loaderFilesystem').hide();
+				break;
+				case "ftp":
+					$('.loader-options').hide();
+					$('#ldr-ftp-options').show();
+
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').show();
+					$('#loaderFilesystem').hide();
+				break;
+				case "filesystem":
+					$('.loader-options').hide();
+					$('#ldr-filesystem-options').show();
+
+					$('#loaderMySQL').hide();
+					$('#loaderCouchDB').hide();
+					$('#loaderFTP').hide();
+					$('#loaderFilesystem').show();
+				break;
+			}
 		});
 
 		/**
@@ -942,9 +953,11 @@
 				$('#ldr-source-select').val(data.transform);
 				$('#ldr-target-type').val(data.target.type);
 
+				$('.loader-options').hide();
 				switch(data.target.type)
 				{
 					case "mysql":
+						$('#loaderSchemas').show();
 						$DM.transformer.sample($DM.getTransformer(data.transform).value,function(e){
 							if (!e.err) {
 								Admin.View.loaderDefinition()(e.body);
@@ -974,12 +987,14 @@
 						$('#loaderFilesystem').hide();
 					break;
 					case "couchdb":
+						$('#ldr-couchdb-options').show();
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').show();
 						$('#loaderFTP').hide();
 						$('#loaderFilesystem').hide();
 					break;
 					case "ftp":
+						$('#ldr-ftp-options').show();
 						$('#ldr-ftp-dsn').val(data.target.dsn);
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').hide();
@@ -987,6 +1002,7 @@
 						$('#loaderFilesystem').hide();
 					break;
 					case "filesystem":
+						$('#ldr-filesystem-options').show();
 						$('#ldr-filesystem-dsn').val(data.target.dsn);
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').hide();
