@@ -46,7 +46,7 @@ function FTP( options ) {
 
 	c.on('ready', function() {
 		log('Connection ready, piping to remote target');
-		c.put($this, 'good_office_extract.csv', function(err){
+		c.put($this, options.target.basepath + options.target.filename, function(err){
 			log('Stream data transfer complete');
 			c.end();
 			if (err) {
@@ -72,7 +72,6 @@ function FTP( options ) {
 		user: dsn.user,
 		password: dsn.password
 	});
-
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
