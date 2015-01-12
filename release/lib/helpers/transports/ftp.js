@@ -98,9 +98,9 @@ FTP.get = function(source, target, callback){
 	log('Fetching source target');
 	c.on('ready', function() {
 		c.get(target, function(err, stream){
+			c.end(); 
 			if (!err) stream.once('close', function(){
 				log('Data stream closed');
-				c.end(); 
 			});
 			// process.nextTick(function(){
 			if (callback) callback(err, stream);

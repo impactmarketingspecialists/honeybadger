@@ -146,11 +146,6 @@ function Admin(){
                             _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
                             process.nextTick(function(){
                                 callback('onExtractorTest',null,{headers:res.headers});
-                                try {
-                                    ftp.abort();
-                                    ftp.end();
-                                    ftp.destroy();
-                                } catch (e) { console.trace(e); }
                             });
                         });
                     });
@@ -296,9 +291,6 @@ function Admin(){
                                     process.nextTick(function(){
                                         _log('<div class="text-success">Transform completed successfully.</div>');
                                         if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
-                                        // ftp.abort();
-                                        // ftp.end();
-                                        // ftp.destroy();
                                     });
                                     return;
                                 }
@@ -575,11 +567,6 @@ function Admin(){
                                             process.nextTick(function(){
                                                 _log('<div class="text-success">Load completed successfully.</div>');
                                                 if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
-                                                try {
-                                                    ftp.abort();
-                                                    ftp.end();
-                                                    ftp.destroy();
-                                                } catch(e) { console.trace(e); }
                                             });
                                             return;
                                         }
