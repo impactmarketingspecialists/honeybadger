@@ -312,6 +312,8 @@ DataManager.transformerSave = function(transformer, callback) {
 
 DataManager.loaderSave = function(loader, callback) {
 
+    log('Saving loader');
+
     var _updateLoader = function(){
         if (!loader._rev) {
             console.log('Document has no _rev; cannot update');

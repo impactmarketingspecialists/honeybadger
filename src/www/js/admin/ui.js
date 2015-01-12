@@ -996,6 +996,10 @@
 					case "ftp":
 						$('#ldr-ftp-options').show();
 						$('#ldr-ftp-dsn').val(data.target.dsn);
+
+						$('#ldr-ftp-basepath').val(data.target.basepath);
+						$('#ldr-ftp-filename').val(data.target.filename);
+
 						$('#loaderMySQL').hide();
 						$('#loaderCouchDB').hide();
 						$('#loaderFTP').show();
@@ -1118,6 +1122,14 @@
 			}
 		};
 
+		var id = $('#loaderWizard').attr('data-id');
+		var _rev = $('#loaderWizard').attr('data-rev');
+		if (id && _rev) {
+			res._id = id;
+			res._rev = _rev;
+		}
+
+
 		switch(res.target.type) {
 			case "mysql":
 				res.target.dsn = $('#ldr-mysql-dsn').val();
@@ -1134,6 +1146,8 @@
 			break;
 			case "ftp":
 				res.target.dsn = $('#ldr-ftp-dsn').val();
+				res.target.basepath = $('#ldr-ftp-basepath').val();
+				res.target.filename = $('#ldr-ftp-filename').val();
 			break;
 			case "filesystem":
 				res.target.dsn = $('#ldr-filesystem-dsn').val();
@@ -1141,6 +1155,8 @@
 			case "couchdb":
 			break;
 		}
+
+		console.log(res);
 
 
 		return res;

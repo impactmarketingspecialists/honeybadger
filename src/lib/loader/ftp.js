@@ -27,6 +27,7 @@ var log = require('debug')('HoneyBadger:Loader:FTP');
 /** core deps */
 var util = require('util');
 var ftp = require('../helpers/transports/ftp');
+var Client = require('ftp');
 var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
@@ -39,10 +40,9 @@ function FTP( options ) {
 	EventEmitter.call(this);
 	stream.Transform.call(this, {objectMode: true});
 
-	var beans = 0;
-
-	var Client = require('ftp');
 	var c = new Client();
+	var dsn = utility.dsn(options.target.dsn);
+	var beans = 0;
 
 	c.on('ready', function() {
 		log('Connection ready, piping to remote target');
@@ -67,10 +67,10 @@ function FTP( options ) {
 	});
 
 	c.connect({
-		host: options.target.uri,
-		port: options.target.port || '21',
-		user: options.target.auth.username,
-		password: options.target.auth.password
+		host: dsn.host,
+		port: dsn.port,
+		user: dsn.user,
+		password: dsn.password
 	});
 
 

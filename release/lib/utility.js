@@ -4,11 +4,7 @@ Object.defineProperties(module.exports, {
 			var args;
 			var components = require('url').parse(dsn);
 
-			if (components.hostname) {
-				if (components.protocol !== 'mysql:') {
-					throw new Error("only doing mysql for now");
-				}
-
+			var mysql = function(){
 				var hostname = components.hostname,
 					port = components.port,
 					auth = components.auth.split(':'),
@@ -18,8 +14,33 @@ Object.defineProperties(module.exports, {
 					socket = null,
 					flags = null;
 
-				args = { host: hostname, user: user, password: password, database: database, port: port, socket: socket, flags: flags };
-			} 
+				return { host: hostname, user: user, password: password, database: database, port: port, socket: socket, flags: flags };
+			};
+
+			var ftp = function(){
+				var hostname = components.hostname,
+					port = components.port || 21,
+					auth = components.auth.split(':'),
+					user = auth.shift(),
+					password = auth.shift()
+					path = components.path;
+
+				return { host: hostname, user: user, password: password, port: port, path: path };
+			};
+
+			if (components.hostname) {
+				switch(components.protocol)
+				{
+					case 'mysql:':
+						args = mysql();
+					break;
+					case 'ftp:':
+						args = ftp();
+					break;
+					default:
+						throw new Error('Not implemented');
+				}
+			}
 			else args = [arguments[0]];
 			return args;
 		},

@@ -190,7 +190,7 @@
 						setupWizard('loaderWizard', item.value);
 					}));
 				}
-				if (item.value.target.type === 'ftp') {
+				else if (item.value.target.type === 'ftp') {
 					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 						showWizard('loaderWizard');
 						setupWizard('loaderWizard', item.value);

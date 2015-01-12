@@ -31,7 +31,7 @@ var events = require('events');
 var libftp = require('ftp');
 var stream = require('stream');
 
-FTP.validate = function(source, callback){
+FTP.validate = function(options, callback){
 	var c = new libftp();
 
 	log('Validating connection to source');
@@ -52,10 +52,10 @@ FTP.validate = function(source, callback){
 	});
 
 	c.connect({
-		host: source.uri,
-		port: source.port,
-		user: source.auth.username,
-		password: source.auth.password
+		host: options.uri,
+		port: options.port,
+		user: options.auth.username,
+		password: options.auth.password
 	});
 };
 
