@@ -118,7 +118,7 @@ function RETS( options )
                 return;
             }
 
-            $this.emit('data', data);
+            // $this.emit('data', data);
         });
     };
 

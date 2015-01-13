@@ -78,7 +78,8 @@ function MySQL( options ) {
 				// The first record will be our headers - so there's actually beans-1 inserts
 				if (inserts >= beans-1) {
 					log('Inserted %s rows.', inserts);
-					$this.emit('finish');
+					connection.end();
+					// $this.emit('finish');
 				}
 			});
 		}
@@ -95,5 +96,13 @@ function MySQL( options ) {
 		callback();
 	};
 
-	$this.emit('ready');
+	connection.connect(function(err){
+		if (err) {
+			log('Connection error');
+			console.trace(err);
+			return;
+		}
+		log('Connection ready');
+		$this.emit('ready');
+	});
 }

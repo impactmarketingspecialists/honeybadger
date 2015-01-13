@@ -122,8 +122,7 @@ function Worker(options) {
 					log('Applying transformer:', transformer_config.name);
 
 					/** Normalizer */
-
-					if (loaders_ready.length < loader_configs.length) {
+					if (loaders_ready.length == loader_configs.length) {
 						log('Start extraction');
 						$e.start();
 					}
