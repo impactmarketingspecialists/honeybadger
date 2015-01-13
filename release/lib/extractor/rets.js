@@ -97,7 +97,7 @@ function RETS( options )
             Limit: 10
         };
 
-        client.searchQuery(qry, function( error, data ) {
+        var ondata = function( error, data ) {
 
             // log(error, data);
             
@@ -119,7 +119,17 @@ function RETS( options )
             }
 
             // $this.emit('data', data);
-        });
+        };
+
+        var onstream = function(stream){
+            log('Stream received');
+            stream.on('data',function(chunk){
+                // console.log(chunk.toString())
+                $this.emit('data',chunk.toString().split('\t'));
+            });
+        };
+
+        client.searchQuery(qry, ondata, onstream);
     };
 
     this._transform = function(chunk, encoding, callback){
