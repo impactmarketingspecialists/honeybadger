@@ -94,7 +94,7 @@ function RETS( options )
             Class: options.target.class,
             Query: options.target.res,
             Format: 'COMPACT-DECODED',
-            Limit: 888
+            Limit: 10
         };
 
         var ondata = function( error, data ) {
