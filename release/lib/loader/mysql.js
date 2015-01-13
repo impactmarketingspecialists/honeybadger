@@ -74,13 +74,32 @@ function MySQL( options ) {
 					return;
 				}
 				inserts++;
-				// log('Inserted record',inserts);
+
+				/** 
+				 * Just a little note that on slower data transfer;
+				 * Our MySQL writes will actually not lag behind our bean counter
+				 * if data xfer is slow.
+				 *
+				 * This isn't really the most reliable way to be checking since
+				 * it could actually be evaluating to true every time. If mysql writes
+				 * are actually keeping up with data flow that will happen.
+				 *
+				 * ** nextTick didn't seem to defer enough either; it's probably best
+				 * if we do some checking in _flush() to activate this. Basically, if
+				 * we hit _flush() and there are still pending insert responses - THEN
+				 * we activate this section
+				 *
+				 * (we only want to fire 'finish' once)
+				 */
+				// if ((inserts % 100) == 1) log('Inserted record',inserts);
 				// The first record will be our headers - so there's actually beans-1 inserts
-				if (inserts >= beans-1) {
-					log('Inserted %s rows.', inserts);
-					// connection.end();
-					// $this.emit('finish');
-				}
+				process.nextTick(function(){				
+					if (inserts >= beans-1) {
+						// log('Inserted %s rows.', inserts);
+						// connection.end();
+						// $this.emit('finish');
+					}
+				})
 			});
 		}
 
