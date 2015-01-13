@@ -123,6 +123,7 @@ function RETS( options )
 
         var onstream = function(stream){
             log('Stream received');
+            // stream.pipe($this);
             stream.on('data',function(chunk){
                 // console.log(chunk.toString())
                 $this.emit('data',chunk.toString().split('\t'));
@@ -132,15 +133,15 @@ function RETS( options )
         client.searchQuery(qry, ondata, onstream);
     };
 
-    this._transform = function(chunk, encoding, callback){
-        if (this._readableState.pipesCount > 0) this.push(chunk);
-        callback();
-    };
+    // this._transform = function(chunk, encoding, callback){
+    //     if (this._readableState.pipesCount > 0) this.push(chunk);
+    //     callback();
+    // };
 
-    this._flush = function(callback){
-        log('Completed reading RETS resource');
-        callback();
-    };
+    // this._flush = function(callback){
+    //     log('Completed reading RETS resource');
+    //     callback();
+    // };
 
     this.connect();
 };
