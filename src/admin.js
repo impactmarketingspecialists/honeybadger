@@ -10,7 +10,6 @@ var fs = require('fs')
     nano = require('nano')('http://localhost:5984'),
     db = nano.use('honeybadger'),
     feed = db.follow({since: "now"}),
-    streamTransform = require('stream-transform'),
     utility = require('../lib/utility'),
     DataManager = require('../lib/data-manager'),
     WSAPI = require('../lib/api/admin'),

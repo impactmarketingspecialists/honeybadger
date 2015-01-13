@@ -29,7 +29,6 @@ var ftp = require('./helpers/transports/ftp');
 var rets = require('./helpers/transports/rets');
 var csv = require('./helpers/csv');
 
-var streamTransform = require('stream-transform');
 var Readable = require('stream').Readable;
 
 var DataManager = require('./data-manager');
@@ -120,7 +119,7 @@ function Worker(options) {
 					loaders_ready.push(loader_config.name);
 
 					log('Applying transformer:', transformer_config.name);
-
+					log(loaders_ready, loader_configs);
 					/** Normalizer */
 					if (loaders_ready.length == loader_configs.length) {
 						log('Start extraction');
