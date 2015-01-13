@@ -38,6 +38,8 @@ function Normalize( options ) {
 	EventEmitter.call(this);
 	stream.Transform.call(this, {objectMode: true});
 
+	log('Initialize normalizer %s', options.name)
+
 	var beans = 0;
 	var toss = [];
 
@@ -67,7 +69,7 @@ function Normalize( options ) {
 		// });
 
 		beans++;
-		// log('Processed record', beans);
+		// log('%s - Processed record', options.name, beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();

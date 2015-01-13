@@ -78,7 +78,7 @@ function MySQL( options ) {
 				// The first record will be our headers - so there's actually beans-1 inserts
 				if (inserts >= beans-1) {
 					log('Inserted %s rows.', inserts);
-					connection.end();
+					// connection.end();
 					// $this.emit('finish');
 				}
 			});

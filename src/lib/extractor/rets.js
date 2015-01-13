@@ -94,7 +94,7 @@ function RETS( options )
             Class: options.target.class,
             Query: options.target.res,
             Format: 'COMPACT-DECODED',
-            Limit: 10
+            Limit: 888
         };
 
         var ondata = function( error, data ) {
@@ -123,10 +123,13 @@ function RETS( options )
 
         var onstream = function(stream){
             log('Stream received');
-            // stream.pipe($this);
             stream.on('data',function(chunk){
-                // console.log(chunk.toString())
                 $this.emit('data',chunk.toString().split('\t'));
+            });
+
+            stream.on('end',function(){
+                log('RETS Data stream ended');
+                $this.end();
             });
         };
 
