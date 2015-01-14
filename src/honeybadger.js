@@ -40,6 +40,8 @@ function HoneyBadger(){
 	var tasks;
 	var cron;
 
+	this.initialized = false;
+
 	this.loadConfig = function(path){
 		var configpath = (path) ? path : './config.json';
 		log('Loading config: '+configpath);
@@ -53,6 +55,7 @@ function HoneyBadger(){
 		tasks.forEach(function(task){
 			self.registerTask(task.value);
 		});
+		this.initialized = true;
 	}
 
 	this.registerTask = function(task){
@@ -90,7 +93,7 @@ HoneyBadger.Service = {
 		 * Wait for DataManager to load from couch
 		 */
 		DataManager.on('ready', function(){
-			hb.loadTasks(DataManager.tasks);
+			if (!hb.initialized) hb.loadTasks(DataManager.tasks);
 		});
 
 		hb.start();
