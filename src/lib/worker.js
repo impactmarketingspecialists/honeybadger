@@ -61,22 +61,28 @@ function Worker(options) {
 		/** 
 		 * Danger!! No error checking - booo... don't forget to add
 		 * some sanity checks - don't be a poppin empty arrays;
+		 *
+		 * We use Object.create here to do something specific; don't be fooled.
+		 * We _want_ changes made on original configuration docs to bubble,
+		 * however we _don't_ want changes to these configs to affect data-manager.
 		 */
-		var extractor_config = DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value;
+		var extractor_config = Object.create(DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value);
 		log('Loaded task extractor', extractor_config.name);
 
-		var source_config = DataManager.sources.filter(function(item){ if (item.id === extractor_config.source) return true; }).pop().value;
+		var source_config = Object.create(DataManager.sources.filter(function(item){ if (item.id === extractor_config.source) return true; }).pop().value);
 		log('Loaded task extraction source', source_config.name);
 
-		var transformer_configs = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return true; }).map(function(item){ return item.value; });
+		var transformer_configs = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return true; }).map(function(item){ return Object.create(item.value); });
 		log('Discovered', transformer_configs.length, 'transformers');
 
 		var loader_configs = [];
 		transformer_configs.forEach(function(transform){
 			log('Loaded task transformer', transform.name);
-			DataManager.loaders.forEach(function(loader){
-				if (loader.value.transform === transform._id) loader_configs.push(loader.value);
-			})
+
+			var loaders = DataManager.loaders.filter(function(item){ if (item.value.transform === transform._id) return true; });
+			loaders.forEach(function(loader){
+				loader_configs.push(Object.create(loader.value));
+			});
 		});
 
 		log('Discovered', loader_configs.length, 'loaders');
@@ -102,6 +108,7 @@ function Worker(options) {
 			log('Extractor ready:', extractor_config.name);
 			loader_configs.forEach(function(loader_config){
 				var transformer_config = transformer_configs.filter(function(item){ if (item._id === loader_config.transform) return true; }).pop();
+				var transforms = [];
 
 				log('Loaded task loader', loader_config.name)
 
@@ -128,8 +135,12 @@ function Worker(options) {
 				});
 
 				if (transformer_config.transform.normalize.length) {
-					
-					var transform = new Normalizer(transformer_config);
+
+					var transform = transforms[transformer_config.name] || new Normalizer(transformer_config);
+					if (!transforms[transformer_config.name]) transforms[transformer_config.name] = transform;
+
+					// We should probably change this to loader_config.schema; it causes confusion and overrides
+					// and existing variable
 					loader_config.transform = transformer_config.transform;
 
 					transform.on('finish',function(){
