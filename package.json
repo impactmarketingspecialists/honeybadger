@@ -17,6 +17,7 @@
     "node-uuid": "^1.4.2",
     "rets": "git://github.com/dermidgen/node-rets-client.git#develop",
     "rimraf": "^2.2.8",
+    "stream-transform": "0.0.6",
     "ws": "^0.6.5"
   },
   "contributors": [
