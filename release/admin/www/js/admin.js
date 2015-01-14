@@ -13458,6 +13458,8 @@ var Admin = (function($this,$){
 						return;
 					}
 
+					// console.log(e.body);
+
 					Admin.View.transformDataStructures()(e.body);
 					$('#trn-transform-type').val((data.transform.normalize.length)?'normalize':'normalize').trigger('change');
 
@@ -13469,7 +13471,7 @@ var Admin = (function($this,$){
 						$out.val(item.out);
 						$row.find('input[type=checkbox]').prop('checked',true).trigger('change');
 						// $row.find('input[type=checkbox]').prop('checked',true).trigger('change');
-						// console.log();
+						// console.log(item);
 					});
 
 					// $('#transformNormalize .item input:text:enabled').each(function(index,item){
@@ -14073,7 +14075,7 @@ var Admin = (function($this,$){
 	this.transformDataStructures = function() {
 
 		return function render(data) {
-			if (!data.headers || !data.data) return; 
+			if (!data.headers && !data.data) return; 
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');
 			if (data.headers) {

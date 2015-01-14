@@ -220,7 +220,7 @@
 	this.transformDataStructures = function() {
 
 		return function render(data) {
-			if (!data.headers || !data.data) return; 
+			if (!data.headers && !data.data) return; 
 			$('#transformNormalize').html('');
 			$('#transformMapper .fields').html('');
 			if (data.headers) {

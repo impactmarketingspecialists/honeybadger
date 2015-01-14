@@ -356,7 +356,13 @@ function Admin(){
                             Format: 'COMPACT-DECODED',
                             Limit: 10
                         };
-                        client.searchQuery(qry, function( error, data ) {
+                        client.searchQuery(qry, function( error, res ) {
+
+                            // var data = {
+                            //     data: res.toString('utf8').split('\n').map(function(i){ return i.split('\t')})
+                            // }
+                            var data = res;
+                            // console.log(data.type);
 
                             if (error) {
                                 _log('<div class="text-danger">Query did not execute.</div>');

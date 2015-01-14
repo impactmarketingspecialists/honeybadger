@@ -1,6 +1,16 @@
 html, body { height: 100%; }
 body { padding-top: 50px; }
 
+/** something is up with blox and modal backdrop */
+.modal-backdrop {
+	display:none !important;
+}
+
+.modal {
+	background-color: rgba(0,0,0,0.5);
+}
+
+
 #connection {
 	border-left: 2px solid #eaeaea;
 	text-align: right;

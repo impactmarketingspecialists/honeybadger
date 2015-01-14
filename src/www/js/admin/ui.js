@@ -920,6 +920,8 @@
 						return;
 					}
 
+					// console.log(e.body);
+
 					Admin.View.transformDataStructures()(e.body);
 					$('#trn-transform-type').val((data.transform.normalize.length)?'normalize':'normalize').trigger('change');
 
@@ -931,7 +933,7 @@
 						$out.val(item.out);
 						$row.find('input[type=checkbox]').prop('checked',true).trigger('change');
 						// $row.find('input[type=checkbox]').prop('checked',true).trigger('change');
-						// console.log();
+						// console.log(item);
 					});
 
 					// $('#transformNormalize .item input:text:enabled').each(function(index,item){
