@@ -952,7 +952,6 @@
 				$('#loaderWizard').attr('data-rev',data._rev);
 
 				$('#loaderName').val(data.name);
-				console.log(data);
 				$('#ldr-source-select').val(data.transform);
 				$('#ldr-target-type').val(data.target.type);
 
@@ -1158,9 +1157,6 @@
 			case "couchdb":
 			break;
 		}
-
-		console.log(res);
-
 
 		return res;
 	};

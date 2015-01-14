@@ -13490,7 +13490,6 @@ var Admin = (function($this,$){
 				$('#loaderWizard').attr('data-rev',data._rev);
 
 				$('#loaderName').val(data.name);
-				console.log(data);
 				$('#ldr-source-select').val(data.transform);
 				$('#ldr-target-type').val(data.target.type);
 
@@ -13696,9 +13695,6 @@ var Admin = (function($this,$){
 			case "couchdb":
 			break;
 		}
-
-		console.log(res);
-
 
 		return res;
 	};
