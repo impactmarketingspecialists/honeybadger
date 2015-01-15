@@ -94,57 +94,45 @@ function RETS( options )
             Class: options.target.class,
             Query: options.target.res,
             Format: 'COMPACT-DECODED',
-            Limit: 10
+            Limit: 1000
         };
 
-        var ondata = function( error, data ) {
+        // client.searchQuery(qry, ondata, true);
+        // var csv = require('../helpers/csv');
 
-            // log(error, data);
-            
-            if (error) {
-                log(error, data);
-                $this.emit('error', error, data);
-                return;
-            } else if (data.type == 'status') {
-                log(data);
-                if (!data.data || !data.data.length) {
-                    log(data.text+'\nJust because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.');
-                    $this.emit('error', 'No records');
-                    return;
-                }
-            } else if (!data.data || !data.data.length) {
-                log(data.text+'\nJust because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.');
-                $this.emit('error', 'No records');
-                return;
-            }
+        // // Overwrite stream
+        // var csvStream = csv.parse('\u0009', '"', client);
+        // csvStream.on('headers',function(error, res){
+        //     log('Received headers from CSV helper');
+        //     $this.emit('readable');
+        // });
 
-            // $this.emit('data', data);
-        };
+        // csvStream.on('end',function(){
+        // });
 
-        var onstream = function(stream){
-            log('Stream received');
-            stream.on('data',function(chunk){
-                $this.emit('data',chunk.toString().split('\t'));
-            });
+        // csvStream.on('finish',function(){
+        // });
 
-            stream.on('end',function(){
-                log('RETS Data stream ended');
-                $this.end();
-            });
-        };
+        client.pipe($this);
 
-        client.searchQuery(qry, ondata, onstream);
+        var request = client.searchQuery(qry, null, true);
+
     };
 
-    // this._transform = function(chunk, encoding, callback){
-    //     if (this._readableState.pipesCount > 0) this.push(chunk);
-    //     callback();
-    // };
+    var beans = 0;
+    var keeppushing = true;
+    this._transform = function(chunk, encoding, callback){
+        // if (this._readableState.pipesCount > 0) log('READABLE>>>>>>>>>>>>>>>')
+        // 
+        // $this.emit('data', chunk);
+        if (keeppushing) keeppushing = this.push(chunk.toString('utf8').split('\t'));
+        callback();
+    };
 
-    // this._flush = function(callback){
-    //     log('Completed reading RETS resource');
-    //     callback();
-    // };
+    this._flush = function(callback){
+        log('Completed reading RETS resource');
+        callback();
+    };
 
     this.connect();
 };

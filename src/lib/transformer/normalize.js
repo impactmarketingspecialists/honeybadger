@@ -41,7 +41,7 @@ function Normalize( options ) {
 	log('Initialize normalizer %s', options.name)
 
 	var beans = 0;
-	var toss = [];
+	var rawheaders = [];
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
@@ -50,23 +50,16 @@ function Normalize( options ) {
 	this._transform = function(chunk, encoding, callback) {
 		if (beans === 0) { // CSV header row
 			// log('Transforming CSV headers');
-			chunk = chunk.filter(function(column,index){
-				if (options.transform.input.indexOf(column) > -1) return true;
-				else toss.push(index);
-			});
+			rawheaders = chunk;
 			// log('Transformed headers', chunk.length,chunk.equals(options.transform.input),toss.length);
 		} else {
-			chunk = chunk.filter(function(val,index){
-				if (toss.indexOf(index) === -1) return true;
+			var rec = [];
+			options.transform.normalize.forEach(function(item, index){
+				var i = rawheaders.indexOf(item.in);
+				if (i > -1 ) rec.push(chunk[i]);
 			});
+			chunk = rec;
 		}
-
-		/** Original normalizer - probably more efficient */
-		// transformer.transform.normalize.forEach(function(item, index){
-		// var i = rawheaders.indexOf(item.in);
-		// if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-		// rec[item.out] = record[i];
-		// });
 
 		beans++;
 		// log('%s - Processed record', options.name, beans);

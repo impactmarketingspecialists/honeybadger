@@ -82,7 +82,7 @@ function FTP( options ) {
 		beans++;
 		// log('Processed record', beans);
 
-		this.push(chunk.join(',')+'\r\n');
+		this.push(chunk.join('|')+'\r\n');
 		return callback();
 	};
 
