@@ -41,34 +41,42 @@ function Normalize( options ) {
 	log('Initialize normalizer %s', options.name)
 
 	var beans = 0;
-	var headers = [];
-	var rawheaders = [];
+	var headers_to_map = [];
+	var headers_raw = [];
+	var indexes = [];
+
+	options.transform.normalize.forEach(function(item, index){
+		headers_to_map[item.in] = item.out;
+	});
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
 	 *  the safest assumption longterm ;)
 	 */
 	this._transform = function(chunk, encoding, callback) {
+		var pick = [];
+		var toss = [];
+
 		if (beans === 0) { // CSV header row
 			// log('Transforming CSV headers');
-			rawheaders = chunk;
-			// log('Transformed headers', chunk.length,chunk.equals(options.transform.input),toss.length);
-		}// else {
-		// 	chunk = chunk.filter(function(val,index){
-		// 		if (toss.indexOf(index) === -1) return true;
-		// 	});
-		// }
-		var rec = [];
-		/** Original normalizer - probably more efficient */
-		options.transform.normalize.forEach(function(item, index){
-			var i = rawheaders.indexOf(item.in);
-			if (i < 0) return;
-			if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-			rec.push(chunk[i]);
-		});
+			chunk.forEach(function(item,index){
+				if (typeof headers_to_map[item] !== undefined) {
+					indexes.push(index);
+					pick.push(item);
+				} else toss.push(item);
+			});
 
-		if (rec.length) chunk = rec;
-		
+			// chunk = pick;
+			// log('Transformed headers', chunk.length,chunk.equals(options.transform.input),toss.length);
+		} else {
+			chunk.forEach(function(item,index){
+				if (indexes.indexOf(index) > -1) pick.push(item);
+				else toss.push(item);
+			});
+
+			// chunk = pick;
+		}
+
 		beans++;
 		// log('%s - Processed record', options.name, beans);
 

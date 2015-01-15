@@ -94,7 +94,7 @@ function RETS( options )
             Class: options.target.class,
             Query: options.target.res,
             Format: 'COMPACT-DECODED',
-            Limit: 1000
+            Limit: 100
         };
 
         // client.searchQuery(qry, ondata, true);
