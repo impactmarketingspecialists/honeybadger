@@ -122,7 +122,7 @@ function FTP( options ) {
 
     var keeppushing = true;
     this._transform = function(chunk, encoding, callback){
-        if (keeppushing) keeppushing = this.push(chunk);
+        this.emit('data',chunk);
         callback();
     };
 

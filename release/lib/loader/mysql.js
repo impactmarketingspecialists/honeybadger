@@ -29,7 +29,8 @@ var util = require('util');
 var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
-var mysql = require('mysql');
+var SqlString = require('mysql/lib/protocol/SqlString');
+var mysql = require('mariasql');
 
 util.inherits( MySQL, EventEmitter );
 util.inherits( MySQL, stream.Transform );
@@ -44,14 +45,40 @@ function MySQL( options ) {
 	var headers = []
 
 	var dsn = utility.dsn(options.target.dsn);
-	var connection = mysql.createConnection({
+	var connection = new mysql();
+	connection.connect({
 		host: dsn.host,
 		user: dsn.user,
 		password: dsn.password,
-		database: dsn.database
+		db: dsn.database
 	});
 
-	var insert_query = 'INSERT INTO '+options.target.schema.name+' SET ?';
+	connection.on('connect', function(err){
+		if (err) {
+			log('Connection error');
+			console.trace(err);
+			return;
+		}
+		log('Connection ready');
+		$this.emit('ready');
+	});
+
+	connection.on('error', function(err){
+		console.trace(err);
+	});
+
+	var insert_query = 'INSERT INTO '+options.target.schema.name+' SET ? ';
+	var prepare = function(data) {
+		var cs = '(';
+		var vs = 'VALUES(';
+		var keys = [],
+			vals = [];
+		for (var i in data) {
+			keys.push(i);
+			vals.push(data[i]);
+		}
+		return '(' + keys.join(',') + ') VALUES('+vals.join(',')+')';
+	}
 	log('Initializing loader');
 
 	/** We are TOTALLY ASSUMING that chunks are records 
@@ -67,44 +94,46 @@ function MySQL( options ) {
 				var i = headers.indexOf(item.in);
 				record[item.out] = chunk[i];
 			});
-			connection.query(insert_query,record,function(err,res){
-				if (err) {
-					log('Error inserting record %s for loader', inserts++, options.name);
-					console.trace(err);
-					return;
-				}
-				inserts++;
+			// process.nextTick(function(){
+				// console.log(SqlString.format(insert_query, record));
+				var query = SqlString.format(insert_query, record)
+				connection.query(query)//.on('result',function(res){
+					// if (err) {
+					// 	log('Error inserting record %s for loader', inserts++, options.name);
+					// 	console.trace(err);
+					// 	return;
+					// }
+					//inserts++;
 
-				/** 
-				 * Just a little note that on slower data transfer;
-				 * Our MySQL writes will actually not lag behind our bean counter
-				 * if data xfer is slow.
-				 *
-				 * This isn't really the most reliable way to be checking since
-				 * it could actually be evaluating to true every time. If mysql writes
-				 * are actually keeping up with data flow that will happen.
-				 *
-				 * ** nextTick didn't seem to defer enough either; it's probably best
-				 * if we do some checking in _flush() to activate this. Basically, if
-				 * we hit _flush() and there are still pending insert responses - THEN
-				 * we activate this section
-				 *
-				 * (we only want to fire 'finish' once)
-				 */
-				// if ((inserts % 100) == 1) log('Inserted record',inserts);
-				// The first record will be our headers - so there's actually beans-1 inserts
-				process.nextTick(function(){				
-					if (inserts >= beans-1) {
+					/** 
+					 * Just a little note that on slower data transfer;
+					 * Our MySQL writes will actually not lag behind our bean counter
+					 * if data xfer is slow.
+					 *
+					 * This isn't really the most reliable way to be checking since
+					 * it could actually be evaluating to true every time. If mysql writes
+					 * are actually keeping up with data flow that will happen.
+					 *
+					 * ** nextTick didn't seem to defer enough either; it's probably best
+					 * if we do some checking in _flush() to activate this. Basically, if
+					 * we hit _flush() and there are still pending insert responses - THEN
+					 * we activate this section
+					 *
+					 * (we only want to fire 'finish' once)
+					 */
+					// if ((inserts % 100) == 1) log('Inserted record',inserts);
+					// The first record will be our headers - so there's actually beans-1 inserts
+					//if (inserts >= beans-1) {
 						// log('Inserted %s rows.', inserts);
 						// connection.end();
 						// $this.emit('finish');
-					}
-				})
-			});
+					//}
+				// });
+			// })
 		}
 
 		beans++;
-		// log('Processed record', beans);
+		if ((beans % 100) == 1) log('Processed record', beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
@@ -115,13 +144,4 @@ function MySQL( options ) {
 		callback();
 	};
 
-	connection.connect(function(err){
-		if (err) {
-			log('Connection error');
-			console.trace(err);
-			return;
-		}
-		log('Connection ready');
-		$this.emit('ready');
-	});
 }
