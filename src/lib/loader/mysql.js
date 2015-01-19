@@ -77,14 +77,14 @@ function MySQL( options ) {
 	this._transform = function(chunk, encoding, callback) {
 		if (beans === 0) { // CSV header row
 			headers = chunk;
-		} else {
+		} else if (chunk.length > 0){
 			var record = [];
 			options.transform.normalize.forEach(function(item, index){
 				var i = headers.indexOf(item.in);
 				record.push(chunk[i]);
 			});
 			connection.write('\t'+record.join('\t')+"\n");
-		}
+		} else { log('empty chunk?',chunk.toString())}
 
 		beans++;
 		if ((beans % 10000) == 1) log('Processed record', beans);
@@ -95,7 +95,7 @@ function MySQL( options ) {
 
 	this._flush = function(callback){
 		log('Completed processing %s records, 1 header',beans);
-		connection.end("\n");
+		connection.end();
 		callback();
 	};
 
