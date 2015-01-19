@@ -30,7 +30,7 @@ var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
 var SqlString = require('mysql/lib/protocol/SqlString');
-var mysql = require('mariasql');
+var myfifo = require('node-myfifo');
 
 util.inherits( MySQL, EventEmitter );
 util.inherits( MySQL, stream.Transform );
@@ -45,15 +45,16 @@ function MySQL( options ) {
 	var headers = []
 
 	var dsn = utility.dsn(options.target.dsn);
-	var connection = new mysql();
-	connection.connect({
-		host: dsn.host,
-		user: dsn.user,
+	var connection = new myfifo({
+		username: dsn.user,
 		password: dsn.password,
-		db: dsn.database
+		host: dsn.host,
+		basepath: '/tmp/',
+		database: dsn.database,
+		table: options.target.schema.name
 	});
 
-	connection.on('connect', function(err){
+	connection.on('ready', function(err){
 		if (err) {
 			log('Connection error');
 			console.trace(err);
@@ -67,18 +68,6 @@ function MySQL( options ) {
 		console.trace(err);
 	});
 
-	var insert_query = 'INSERT INTO '+options.target.schema.name+' SET ? ';
-	var prepare = function(data) {
-		var cs = '(';
-		var vs = 'VALUES(';
-		var keys = [],
-			vals = [];
-		for (var i in data) {
-			keys.push(i);
-			vals.push(data[i]);
-		}
-		return '(' + keys.join(',') + ') VALUES('+vals.join(',')+')';
-	}
 	log('Initializing loader');
 
 	/** We are TOTALLY ASSUMING that chunks are records 
@@ -89,51 +78,16 @@ function MySQL( options ) {
 		if (beans === 0) { // CSV header row
 			headers = chunk;
 		} else {
-			var record = {};
+			var record = [];
 			options.transform.normalize.forEach(function(item, index){
 				var i = headers.indexOf(item.in);
-				record[item.out] = chunk[i];
+				record.push(chunk[i]);
 			});
-			// process.nextTick(function(){
-				// console.log(SqlString.format(insert_query, record));
-				var query = SqlString.format(insert_query, record)
-				connection.query(query)//.on('result',function(res){
-					// if (err) {
-					// 	log('Error inserting record %s for loader', inserts++, options.name);
-					// 	console.trace(err);
-					// 	return;
-					// }
-					//inserts++;
-
-					/** 
-					 * Just a little note that on slower data transfer;
-					 * Our MySQL writes will actually not lag behind our bean counter
-					 * if data xfer is slow.
-					 *
-					 * This isn't really the most reliable way to be checking since
-					 * it could actually be evaluating to true every time. If mysql writes
-					 * are actually keeping up with data flow that will happen.
-					 *
-					 * ** nextTick didn't seem to defer enough either; it's probably best
-					 * if we do some checking in _flush() to activate this. Basically, if
-					 * we hit _flush() and there are still pending insert responses - THEN
-					 * we activate this section
-					 *
-					 * (we only want to fire 'finish' once)
-					 */
-					// if ((inserts % 100) == 1) log('Inserted record',inserts);
-					// The first record will be our headers - so there's actually beans-1 inserts
-					//if (inserts >= beans-1) {
-						// log('Inserted %s rows.', inserts);
-						// connection.end();
-						// $this.emit('finish');
-					//}
-				// });
-			// })
+			connection.write('\t'+record.join('\t')+"\n");
 		}
 
 		beans++;
-		if ((beans % 100) == 1) log('Processed record', beans);
+		if ((beans % 10000) == 1) log('Processed record', beans);
 
 		if (this._readableState.pipesCount > 0) this.push(chunk);
 		return callback();
@@ -141,6 +95,7 @@ function MySQL( options ) {
 
 	this._flush = function(callback){
 		log('Completed processing %s records, 1 header',beans);
+		connection.end("\n");
 		callback();
 	};
 
