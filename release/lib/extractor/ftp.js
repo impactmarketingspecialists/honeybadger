@@ -55,10 +55,15 @@ function FTP( options ) {
 			$this.emit('error',error);
 		});
 
-		client.on('ready', function() {
+        client.on('ready', function() {
+            readyState = 2; // Success
+            log('Connected to FTP as %s.', options.source.auth.username);
+            $this.emit('ready', null, 'success');
+        });
+
+		client.on('close', function() {
 			readyState = 2; // Success
-			log('Connected to FTP as %s.', options.source.auth.username);
-			$this.emit('ready', null, 'success');
+			log('Client closed connection to source');
 		});
 
 		client.connect({
@@ -87,7 +92,17 @@ function FTP( options ) {
             fStream = ftp_stream;
             fStream.once('close', function(){
                 log('Resource stream closed');
+                // client.end();
+            });
+
+            fStream.once('finish', function(){
+                log('Resource stream finished');
                 client.end();
+            });
+
+            fStream.once('end', function(){
+                log('Resource stream ended');
+                // client.end();
             });
 
             if (options.target.format === 'delimited-text') {
@@ -108,9 +123,11 @@ function FTP( options ) {
                 });
 
                 csvStream.on('end',function(){
+                    log('CSV stream ended');
                 });
 
                 csvStream.on('finish',function(){
+                    log('CSV stream finished');
                 });
 
                 csvStream.pipe($this);
