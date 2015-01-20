@@ -29,7 +29,6 @@ var util = require('util');
 var utilily = require('../utility');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
-var SqlString = require('mysql/lib/protocol/SqlString');
 var myfifo = require('node-myfifo');
 
 util.inherits( MySQL, EventEmitter );
@@ -98,5 +97,13 @@ function MySQL( options ) {
 		connection.end();
 		callback();
 	};
+
+	this.on('finish',function(){
+		log('finish fired');
+	});
+
+	this.on('end',function(){
+		log('end fired');
+	});
 
 }

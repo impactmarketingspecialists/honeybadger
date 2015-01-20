@@ -98,6 +98,7 @@ function FTP( options ) {
             fStream.once('finish', function(){
                 log('Resource stream finished');
                 client.end();
+                $this.end();
             });
 
             fStream.once('end', function(){
