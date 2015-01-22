@@ -94,18 +94,37 @@ FTP.browse = function(source, callback){
 
 FTP.get = function(source, target, callback){
 	var c = new libftp();
+	var get_stream = null;
 
 	log('Fetching source target');
 	c.on('ready', function() {
 		c.get(target, function(err, stream){
-			c.end(); 
-			if (!err) stream.once('close', function(){
-				log('Data stream closed');
-			});
+			if (!err) {
+				get_stream = stream;
+				get_stream.once('close', function(){
+					log('Data stream closed');
+				});
+				get_stream.once('finish', function(){
+					log('Data stream finished');
+				});
+				get_stream.once('end', function(){
+					log('Data stream ended');
+				});
 			// process.nextTick(function(){
-			if (callback) callback(err, stream);
+				if (callback) callback(err, stream);
+				// c.end();
 			// });
+			}
 		});
+	});
+
+	c.on('close', function(){
+		log('Closing connection');
+	});
+
+	c.on('end', function(){
+		log('Get data stream end');
+		get_stream.end();
 	});
 
 	c.on('error', function(err) {

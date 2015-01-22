@@ -378,7 +378,7 @@ function Admin(){
 
                             _log('<pre>'+rstr+'</pre>');
 
-                            cb(null, record.join('|'));
+                            cb(null, null);
                         }, {parallel: 1});
 
                         var csvStream = csv.parse("\t", "", client);
@@ -504,77 +504,57 @@ function Admin(){
                                         var processed = 0;
 
                                         var xfm = streamTransform(function(record, cb){
-                                            // log('processed', processed++);
-                                            if (xformed.length >= testlimit) {
-                                                process.nextTick(function(){
-                                                    _log('<div class="text-success">Transform completed successfully.</div>');
-                                                    // if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
+                                            // log(record);
+                                            log('processed %s', processed++);
+                                            if (processed < 10) {
+                                                var rec = {};
+                                                var rstr = '{\n';
+                                                transformer.transform.normalize.forEach(function(item, index){
+                                                    var i = rawheaders.indexOf(item.in);
+                                                    if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                                    rec[item.out] = record[i];
+                                                    rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
                                                 });
-                                                return;
+                                                rstr += '}'
+                                                _log('<pre>'+rstr+'</pre>');
+
+                                                connection.query(insert_query,rec,function(err,res){
+                                                    if (!err) {
+                                                        records.push(true);
+                                                        _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+
+                                                    } else {
+                                                        errors = true;
+                                                    }
+                                                });
+                                                cb(null, null);
+                                            } else if (processed == 10) {
+                                                _log('<div class="text-success">Load completed successfully.</div>');
+                                                callback('onLoaderTest',null,{headers:headers, records:records});
+                                                stream.end();
                                             }
-
-                                            var rec = {};
-                                            var rstr = '{\n';
-                                            transformer.transform.normalize.forEach(function(item, index){
-                                                var i = rawheaders.indexOf(item.in);
-                                                if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-                                                rec[item.out] = record[i];
-                                                rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
-                                            });
-                                            rstr += '}'
-
-                                            connection.query(insert_query,rec,function(err,res){
-                                                if (!err) {
-                                                    // log('\tloaded',loaded++);
-                                                    records.push(true);
-                                                    process.nextTick(function(){
-                                                        // _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
-                                                    });
-                                                } else {
-                                                    errors = true;
-                                                }
-                                                if (records.length >= testlimit) {
-
-                                                    process.nextTick(function(){
-                                                        _log('<div class="text-success">Load completed successfully.</div>');
-                                                        if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
-                                                    });
-                                                    return;
-                                                }
-                                            });
-
-                                            xformed.push(true);
-                                            cb(null, record.join('|'));
-
-
-                                            // process.nextTick(function(){
-                                            //     _log('<pre>'+rstr+'</pre>');
-                                            // });
 
                                         }, {parallel: 1});
 
-                                        csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
-                                            if (err === 'headers') {
-                                                _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                                process.nextTick(function(){
-                                                    callback('onLoaderTest','Unable to parse column headers from data stream',null);
-                                                });
-                                                return;
-                                            } else if (err) {
-                                                log(err);
-                                                _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                                process.nextTick(function(){
-                                                    callback('onLoaderTest','Unable to parse data stream',null);
-                                                });
-                                                return;
-                                            }
 
-                                            rawheaders = res.headers;
-
+                                        var csvStream = csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream);
+                                        csvStream.on('headers',function(res){
+                                            rawheaders = res;
+                                            log('Received headers from CSV helper');
                                             _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                                            _log('<pre>'+res.headers.join("\n")+'</pre>');
+                                            _log('<pre>'+res.join("\n")+'</pre>');
+                                        });
 
-                                        }).pipe(xfm);
+                                        csvStream.on('end',function(){
+                                            log('CSV stream ended');
+                                            _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                            _log('<div class="text-success">Transform completed successfully.</div>');
+                                        });
+
+                                        csvStream.on('finish',function(){
+                                            log('CSV stream finished');
+                                        });
+                                        csvStream.pipe(xfm);
 
                                     });
                                 });
@@ -597,112 +577,73 @@ function Admin(){
                                         Format: 'COMPACT-DECODED',
                                         Limit: testlimit
                                     };
-                                    client.searchQuery(qry, function( error, data ) {
 
-                                        if (error) {
-                                            _log('<div class="text-danger">Query did not execute.</div>');
-                                            _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                                            log(error);
-                                            callback('onLoaderTest',error, null);
-                                            return;
-                                        } else if (data.type == 'status') {
-                                            _log('<div class="text-warning">'+data.text+'</div>');
-                                            if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                            callback('onLoaderTest',null,{data:data});
-                                            return;
-                                        } else {
-                                            if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                            else if (data.data && data.data.length) {
+                                    var rawheaders = [];
+                                    var headers = [];
+                                    var trnheaders = [];
+                                    var errors = false;
+    
+                                    var xformed = [];
+                                    var records = [];
 
-                                                _log('<div class="text-success">RETS query found '+data.count+' records. We will sample a max of '+testlimit+'.</div>');
+                                    var xfm = streamTransform(function(record, cb){
+                                        
+                                        var rec = {};
+                                        var rstr = '{\n';
+                                        transformer.transform.normalize.forEach(function(item, index){
+                                            var i = rawheaders.indexOf(item.in);
+                                            if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                            // log(item,i,headers[i],record[i]);
+                                            rec[item.out] = record[i];
+                                            rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
+                                        });
+                                        rstr += '}'
+                                        _log('<pre>'+rstr+'</pre>');
 
-                                                var rawheaders = [];
-                                                var headers = [];
-                                                var trnheaders = [];
-                                                var errors = false;
-                
-                                                var xformed = [];
-                                                var records = [];
-
-                                                var xfm = streamTransform(function(record, cb){
-                                                    if (xformed.length >= testlimit) {
-                                                        process.nextTick(function(){ 
-                                                            _log('<div class="text-success">Transform completed successfully.</div>');
-                                                            // if (!errors) callback('onLoaderTest',null,{headers:headers, records:records});
-                                                        });
-                                                        return;
-                                                    }
-
-                                                    var rec = {};
-                                                    var rstr = '{\n';
-                                                    transformer.transform.normalize.forEach(function(item, index){
-                                                        var i = rawheaders.indexOf(item.in);
-                                                        if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-                                                        // log(item,i,headers[i],record[i]);
-                                                        rec[item.out] = record[i];
-                                                        rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
-                                                    });
-                                                    rstr += '}'
-
-                                                    connection.query(insert_query,rec,function(err,res){
-                                                        if (!err) {
-                                                            records.push(rec);
-                                                            process.nextTick(function(){
-                                                                _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
-                                                            });
-                                                        } else {
-                                                            errors = true;
-                                                        }
-                                                        if (records.length >= testlimit) {
-                                                            process.nextTick(function(){
-                                                                if (!errors) {
-                                                                    _log('<div class="text-success">Load completed successfully.</div>');
-                                                                    callback('onLoaderTest',null,{headers:headers, records:records});
-                                                                } else {
-                                                                    _log('<div class="text-danger">Load failed.</div>');
-                                                                    callback('onLoaderTest',{err:"Did not load all records"},{headers:headers, records:records});
-                                                                }
-                                                            });
-                                                            return;
-                                                        }
-                                                    });
-
-                                                    xformed.push(true);
-                                                    cb(null, record.join('|'));
-                                                    
-                                                    process.nextTick(function(){
-
-                                                        _log('<pre>'+rstr+'</pre>');
-                                                    });
-
-                                                }, {parallel: 1});
-
-                                                csv.parse('\t', '', data, function(err,res){
-                                                    if (err === 'headers') {
-                                                        _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                                        process.nextTick(function(){
-                                                            callback('onLoaderTest','Unable to parse column headers from data stream',null);
-                                                        });
-                                                        return;
-                                                    } else if (err) {
-                                                        log(err);
-                                                        _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                                        process.nextTick(function(){
-                                                            callback('onLoaderTest','Unable to parse data stream',null);
-                                                        });
-                                                        return;
-                                                    }
-
-                                                    rawheaders = res.headers; 
-
-                                                    _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                                                    _log('<pre>'+res.headers.join("\n")+'</pre>');
-                                                    _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                                                    
-                                                }).pipe(xfm);
+                                        connection.query(insert_query,rec,function(err,res){
+                                            if (err) {
+                                                errors = true;
                                             }
-                                        }
+
+                                            if (records.length >= testlimit) {
+                                                if (!errors) {
+                                                    _log('<div class="text-success">Load completed successfully.</div>');
+                                                    callback('onLoaderTest',null,{headers:headers, records:records});
+                                                } else {
+                                                    _log('<div class="text-danger">Load failed.</div>');
+                                                    callback('onLoaderTest',{err:"Did not load all records"},{headers:headers, records:records});
+                                                }
+                                                return;
+                                            } else {
+                                                records.push(rec);
+                                                _log('<div class="text-success">Successfully created new record in target: '+dsn.database+'.'+loader.target.schema.name+'</div>');
+                                            }
+                                        });
+
+                                        cb(null, null);
+
+                                    }, {parallel: 1});
+
+                                    var csvStream = csv.parse("\t", "", client);
+                                    csvStream.on('headers',function(res){
+                                        rawheaders = res;
+                                        log('Received headers from CSV helper');
+                                        _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
+                                        _log('<pre>'+res.join("\n")+'</pre>');
                                     });
+
+                                    csvStream.on('end',function(){
+                                        log('CSV stream ended');
+                                        _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                        _log('<div class="text-success">Transform completed successfully.</div>');
+                                        callback('onLoaderTest',null,{headers:headers, records:records});
+                                    });
+
+                                    csvStream.on('finish',function(){
+                                        log('CSV stream finished');
+                                    });
+                                    csvStream.pipe(xfm);
+                                    client.searchQuery(qry, null, true );
                                 });
                             }
                         });
