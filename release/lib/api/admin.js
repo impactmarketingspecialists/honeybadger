@@ -124,29 +124,23 @@ function Admin(){
                         var _delim = { csv: ',', tsv: "\t", pipe: '|' };
                         var _quot = { default: '', dquote: '"', squote: "'" };
 
-                        csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
-                            // stream.end();
-                            if (err === 'headers') {
-                                _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                process.nextTick(function(){
-                                    callback('onExtractorTest','Unable to parse column headers from data stream',null);
-                                });
-                                return;
-                            } else if (err) {
-                                log(err);
-                                _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                process.nextTick(function(){
-                                    callback('onExtractorTest','Unable to parse data stream',null);
-                                });
-                                return;
-                            }
-
+                        var csvStream = csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream);
+                        csvStream.on('headers',function(res){
+                            log('Received headers from CSV helper');
                             _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                            _log('<pre>'+res.headers.join("\n")+'</pre>');
+                            _log('<pre>'+res.join("\n")+'</pre>');
+                            callback('onExtractorTest',null,{headers:res});
+                            stream.end();
+                        });
+
+                        csvStream.on('end',function(){
+                            log('CSV stream ended');
                             _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                            process.nextTick(function(){
-                                callback('onExtractorTest',null,{headers:res.headers});
-                            });
+                            _log('<div class="text-success">Transform completed successfully.</div>');
+                        });
+
+                        csvStream.on('finish',function(){
+                            log('CSV stream finished');
                         });
                     });
                 });
@@ -292,6 +286,7 @@ function Admin(){
                                         _log('<div class="text-success">Transform completed successfully.</div>');
                                         if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
                                     });
+                                    stream.end();
                                     return;
                                 }
 
@@ -308,32 +303,28 @@ function Admin(){
                                 records.push(rec);
                                 _log('<pre>'+rstr+'</pre>');
 
-                                cb(null, record.join('|'));
+                                cb(null, null);
                             }, {parallel: 1});
 
-                            csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream, function(err,res){
-                                if (err === 'headers') {
-                                    _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                    process.nextTick(function(){
-                                        callback('onTransformerTest','Unable to parse column headers from data stream',null);
-                                    });
-                                    return;
-                                } else if (err) {
-                                    log(err);
-                                    _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                    process.nextTick(function(){
-                                        callback('onTransformerTest','Unable to parse data stream',null);
-                                    });
-                                    return;
-                                }
-
-                                rawheaders = res.headers;
-
+                            var csvStream = csv.parse(_delim[ extractor.target.options.delimiter || 'csv' ], _quot[ extractor.target.options.escape || 'default' ], stream);
+                            csvStream.on('headers',function(res){
+                                rawheaders = res;
+                                log('Received headers from CSV helper');
                                 _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                                _log('<pre>'+res.headers.join("\n")+'</pre>');
-                                _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                _log('<pre>'+res.join("\n")+'</pre>');
+                            });
 
-                            }).pipe(xfm);
+                            csvStream.on('end',function(){
+                                log('CSV stream ended');
+                                _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                                _log('<div class="text-success">Transform completed successfully.</div>');
+                                callback('onTransformerTest',null,{headers:headers, records:records});
+                            });
+
+                            csvStream.on('finish',function(){
+                                log('CSV stream finished');
+                            });
+                            csvStream.pipe(xfm);
 
                         });
                     });
