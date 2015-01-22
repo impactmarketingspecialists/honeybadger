@@ -52,7 +52,7 @@ function Worker(options) {
 			log('Task is inactive; not running');
 			return;
 		}
-		log('Running task', task.name);
+		log('Running task %s', task.name);
 
 		/**
 		 * Let's get all the configs we need
@@ -85,7 +85,7 @@ function Worker(options) {
 			});
 		});
 
-		log('Discovered', loader_configs.length, 'loaders');
+		log('Discovered %s loaders', loader_configs.length);
 
 		var loaders_ready = [];
 
@@ -110,7 +110,7 @@ function Worker(options) {
 				var transformer_config = transformer_configs.filter(function(item){ if (item._id === loader_config.transform) return true; }).pop();
 				var transforms = [];
 
-				log('Loaded task loader', loader_config.name)
+				log('Loaded task loader %s', loader_config.name)
 
 				var loader = null;
 				if (loader_config.target.type == 'mysql')	var loader = new MySQL(loader_config);
@@ -122,10 +122,10 @@ function Worker(options) {
 				});
 
 				loader.on('ready',function(){
-					log('Loader ready', loader_config.name);
+					log('Loader ready %s', loader_config.name);
 					loaders_ready.push(loader_config.name);
 
-					log('Applying transformer:', transformer_config.name);
+					log('Applying transformer: %s', transformer_config.name);
 
 					/** Normalizer */
 					if (loaders_ready.length == loader_configs.length) {
@@ -144,7 +144,7 @@ function Worker(options) {
 					loader_config.transform = transformer_config.transform;
 
 					transform.on('finish',function(){
-						log('Transformer finished:', transformer_config.name);
+						log('Transformer finished: %s', transformer_config.name);
 					});
 
 					// log('Piping data stream to transformer');
@@ -154,7 +154,7 @@ function Worker(options) {
 		});
 
 		$e.on('finish',function(err, body){
-			log('Finished extraction for:', extractor_config.name);
+			log('Finished extraction for: %s', extractor_config.name);
 		});
 
 		$e.on('readable',function(){
