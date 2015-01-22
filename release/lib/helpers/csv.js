@@ -52,6 +52,9 @@ CSV.parse = function(delimiter, quotes, data, headersCallback){
 		if (parser.lineNo === 0 && headers === false) {
 			log('Parser discovered headers');
 			headers = true;
+			record.map(function(i){
+				return i.toString().trim();
+			});
 			parser.emit('headers', record);
 			if (headersCallback) headersCallback(null,{headers:record})
 		}
