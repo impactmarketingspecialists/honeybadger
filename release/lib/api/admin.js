@@ -349,6 +349,7 @@ function Admin(){
                         _log('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
                         _log('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
                         _log('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
+
                         var qry = {
                             SearchType: extractor.target.type,
                             Class: extractor.target.class,
@@ -356,89 +357,50 @@ function Admin(){
                             Format: 'COMPACT-DECODED',
                             Limit: 10
                         };
-                        client.searchQuery(qry, function( error, res ) {
 
-                            // var data = {
-                            //     data: res.toString('utf8').split('\n').map(function(i){ return i.split('\t')})
-                            // }
-                            var data = res;
-                            // console.log(data.type);
+                        var rawheaders = [];
+                        var headers = [];
+                        var records = [];
+                        var trnheaders = [];
+                        var errors = false;
 
-                            if (error) {
-                                _log('<div class="text-danger">Query did not execute.</div>');
-                                _log('<pre class="text-danger">'+JSON.stringify(error,2)+'</pre>');
-                                log(error);
-                                callback('onTransformerTest',error, null);
-                                return;
-                            } else if (data.type == 'status') {
-                                _log('<div class="text-warning">'+data.text+'</div>');
-                                if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                callback('onTransformerTest',null,{data:data});
-                                return;
-                            } else {
-                                if (!data.data || !data.data.length) _log('<div class="text-info">'+data.text+'<br>Just because there were no records doesn\'t mean your query was bad, just no records that matched. Try playing with your query.</div>');
-                                else if (data.data && data.data.length) {
+                        var xfm = streamTransform(function(record, cb){
 
-                                    _log('<div class="text-success">RETS query received '+data.data.length+' records back.</div>');
+                            var rec = {};
+                            var rstr = '{\n';
+                            transformer.transform.normalize.forEach(function(item, index){
+                                var i = rawheaders.indexOf(item.in);
+                                if (headers.indexOf(item.out) === -1) headers[i] = item.out;
+                                rec[item.out] = record[i];
+                                rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
+                            });
+                            rstr += '}'
 
-                                    var rawheaders = [];
-                                    var headers = [];
-                                    var records = [];
-                                    var trnheaders = [];
-                                    var errors = false;
+                            _log('<pre>'+rstr+'</pre>');
 
-                                    var xfm = streamTransform(function(record, cb){
-                                        if (records.length >= data.data.length) {
-                                            process.nextTick(function(){
-                                                _log('<div class="text-success">Transform completed successfully.</div>');
-                                                if (!errors) callback('onTransformerTest',null,{headers:headers, records:records});
-                                            });
-                                            return;
-                                        }
+                            cb(null, record.join('|'));
+                        }, {parallel: 1});
 
-                                        var rec = {};
-                                        var rstr = '{\n';
-                                        transformer.transform.normalize.forEach(function(item, index){
-                                            var i = rawheaders.indexOf(item.in);
-                                            if (headers.indexOf(item.out) === -1) headers[i] = item.out;
-                                            rec[item.out] = record[i];
-                                            rstr += '    "'+item.out+'" : "'+record[i]+'",\n';
-                                        });
-                                        rstr += '}'
-
-                                        records.push(rec);
-                                        _log('<pre>'+rstr+'</pre>');
-
-                                        cb(null, record.join('|'));
-                                    }, {parallel: 1});
-
-                                    csv.parse('\t', '"', data, function(err,res){
-                                        if (err === 'headers') {
-                                            _log('<div class="text-danger">CSV extraction engine was unable to find column headers; perhaps you are using the wrong delimiter.</div>');
-                                            process.nextTick(function(){
-                                                callback('onTransformerTest','Unable to parse column headers from data stream',null);
-                                            });
-                                            return;
-                                        } else if (err) {
-                                            log(err);
-                                            _log('<div class="text-danger">CSV extraction engine was unable to parse the data stream.</div>');
-                                            process.nextTick(function(){
-                                                callback('onTransformerTest','Unable to parse data stream',null);
-                                            });
-                                            return;
-                                        }
-
-                                        rawheaders = res.headers; 
-
-                                        _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
-                                        _log('<pre>'+res.headers.join("\n")+'</pre>');
-                                        _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
-                                        
-                                    }).pipe(xfm);
-
-                                }
-                            }
+                        var csvStream = csv.parse("\t", "", client);
+                        csvStream.on('headers',function(res){
+                            rawheaders = res;
+                            log('Received headers from CSV helper');
+                            _log('<div class="text-success">CSV extraction engine found the following column headers.</div>');
+                            _log('<pre>'+res.join("\n")+'</pre>');
                         });
+
+                        csvStream.on('end',function(){
+                            log('CSV stream ended');
+                            _log('<div class="text-success">CSV extraction engine completed reading and parsing data source.</div>');
+                            _log('<div class="text-success">Transform completed successfully.</div>');
+                            callback('onTransformerTest',null,{headers:headers, records:records});
+                        });
+
+                        csvStream.on('finish',function(){
+                            log('CSV stream finished');
+                        });
+                        csvStream.pipe(xfm);
+                        client.searchQuery(qry, null, true );
 
                     });
                 }

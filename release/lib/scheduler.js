@@ -40,7 +40,7 @@ function Scheduler() {
 	this.addTask = function(task){
 		var date = new Date(task.runDate);
 
-		log('Scheduling a job to run for task: %s', task.name, date);
+		log('Scheduling a job to run for task: %s', task.name);
 		$this.emit('add',task,date);
 
 		schedule.scheduleJob(date, function(){
