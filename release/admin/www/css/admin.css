@@ -7207,6 +7207,10 @@ body { padding-top: 50px; }
 	background-color: rgba(0,0,0,0.5);
 }
 
+.modal-header .buttons {
+	float:right;
+	margin-right: 1em;
+}
 
 #connection {
 	border-left: 2px solid #eaeaea;
