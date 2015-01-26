@@ -38,14 +38,21 @@ function Scheduler() {
 	EventEmitter.call(this);
 
 	this.addTask = function(task){
+		var today = new Date();
 		var date = new Date(task.runDate + ' ' + task.runTime);
+		var rule = date;
 
-		log('Scheduling a job to run for task: %s', task.name);
-		log('Job scheduled for %s', date.toString());
+		log('Scheduling a job task %s at', task.name, date.toString());
+
+		rule = new schedule.RecurrenceRule();
+		rule.hour = date.getHours();
+		rule.minute = date.getMinutes();
+		rule.dayOfWeek = [0,1,2,3,4,5,6];
+
 		$this.emit('add',task,date);
 
-		schedule.scheduleJob(date, function(){
-			log('Scheduled task: %s ...starting up', task.name);
+		schedule.scheduleJob(rule, function(){
+			log('Starting task %s', task.name);
 			$this.emit('start',task);
 
 			var w = new worker();

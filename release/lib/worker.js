@@ -69,8 +69,18 @@ function Worker(options) {
 		var extractor_config = Object.create(DataManager.extractors.filter(function(item){ if (item.id === task.extractor) return true; }).pop().value);
 		log('Loaded task extractor', extractor_config.name);
 
+		if (extractor_config.status !== 'active') {
+			log('Extractor %s is not active; quitting', extractor_config.name);
+			return;
+		}
+
 		var source_config = Object.create(DataManager.sources.filter(function(item){ if (item.id === extractor_config.source) return true; }).pop().value);
 		log('Loaded task extraction source', source_config.name);
+
+		if (source_config.status !== 'active') {
+			log('Extraction source %s is not active; quitting', source_config.name);
+			return;
+		}
 
 		var transformer_configs = DataManager.transformers.filter(function(item){ if (item.value.extractor === task.extractor) return true; }).map(function(item){ return Object.create(item.value); });
 		log('Discovered', transformer_configs.length, 'transformers');
@@ -79,8 +89,18 @@ function Worker(options) {
 		transformer_configs.forEach(function(transform){
 			log('Loaded task transformer', transform.name);
 
+			if (transform.status !== 'active') {
+				log('Transformer %s is not active; quitting',transform.name);
+				return;
+			}
+
 			var loaders = DataManager.loaders.filter(function(item){ if (item.value.transform === transform._id) return true; });
 			loaders.forEach(function(loader){
+				if (loader.value.status !== 'active') {
+					log('Loader %s is not active; quitting', loader.value.name);
+					return;
+				}
+
 				loader_configs.push(Object.create(loader.value));
 			});
 		});

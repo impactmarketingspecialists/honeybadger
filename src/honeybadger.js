@@ -59,7 +59,7 @@ function HoneyBadger(){
 	}
 
 	this.registerTask = function(task){
-		log('Registering task with scheduler');
+		log('Registering task %s with scheduler',task.name);
 		cron.addTask(task);
 	}
 

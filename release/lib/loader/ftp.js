@@ -45,35 +45,9 @@ function FTP( options ) {
 	var beans = 0;
 
 	c.on('ready', function() {
-		log('Connection ready, piping to remote target');
-		var tkexp = /{(.*?)}/gi;
-		var fnexp = /\((.*?)\)/;
-		var filename = options.target.filename;
-		var tokens = filename.match(tkexp);
-		if (tokens.length) {
-			tokens.forEach(function(item,index){
-				var token = item.replace('{','').replace('}','');
-				var fn = token.match(fnexp);
-				var arg = null;
+		var filename = utility.tokenz(options.target.filename);
 
-				if (fn.length) {
-					arg = fn[1];
-					fn = token.substr(0,token.indexOf('('));
-
-					switch(fn)
-					{
-						case "Date":
-							var d = (arg === '' || arg === 'today') ? new Date() : new Date(arg);
-							console.log(d);
-							var val = d.getFullYear() + '-' + ( (d.getMonth()+1 < 10) ? '0'+(d.getMonth()+1) : (d.getMonth()+1) ) + '-' + d.getDate();
-							filename = filename.replace(item, val);
-						break;
-					}
-				}
-				console.log(token, fn, arg, filename);
-
-			});
-		}
+		log('Connection ready, piping to remote target %s', filename);
 		
 		c.put($this, options.target.basepath + filename, function(err){
 			log('Stream data transfer complete');

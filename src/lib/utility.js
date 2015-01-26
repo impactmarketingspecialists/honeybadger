@@ -48,6 +48,59 @@ Object.defineProperties(module.exports, {
 		configurable: true,
 		writeable: true
 	},
+	tokenz: {
+		value: function tokenz(query) {
+
+		    var tkexp = /{(.*?)}/gi;
+		    var fnexp = /\((.*?)\)/;
+		    var tokens = query.match(tkexp);
+
+		    var getDate = function(date){
+		        switch(date)
+		        {
+		            case "today":
+		                var d = new Date();
+		            break;
+		            case "yesterday":
+		                var d = new Date();
+		                d.setDate(-1);
+		            break;
+		            default:
+		                var d = new Date(date);
+		        }
+
+                var m = d.getMonth()+1;
+                var dd = d.getDate();
+                return d.getFullYear() + '-' + ( (m < 10) ? '0'+m : m ) + '-' + ( (dd < 10) ? '0'+dd : dd );
+		    }
+
+		    if (tokens && tokens.length) {
+		        tokens.forEach(function(item,index){
+		            var token = item.replace('{','').replace('}','');
+		            var fn = token.match(fnexp);
+		            var arg = null;
+
+		            if (fn.length) {
+		                arg = fn[1];
+		                fn = token.substr(0,token.indexOf('('));
+
+		                switch(fn)
+		                {
+		                    case "Date":
+		                        var val = getDate(arg);
+		                        query = query.replace(item, val);
+		                    break;
+		                }
+		            }
+		        });
+		    }
+
+		    return query;
+		},
+		enumerable: true,
+		configurable: true,
+		writable: true
+	},
 	noop: {
 		value: function noop() {},
 		enumerable: true,

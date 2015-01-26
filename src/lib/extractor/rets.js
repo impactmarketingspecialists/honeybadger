@@ -80,6 +80,7 @@ function RETS( options )
         });
 
         client.once('connection.success',function(client){
+            if (readyState === 2) return; //We've already connected
             readyState = 2; // Connected
             log( 'Connected to RETS as %s.', client.get( 'provider.name' ) );
             $this.emit('ready', null, 'success');
@@ -89,12 +90,15 @@ function RETS( options )
     this.start = function() {
         if (readyState < 2) throw('Extractor is not ready to start');
 
+        var Query = utility.tokenz(options.target.res);
+        log('RETS Request => SearchType: %s Class: %s Query: %s', options.target.type, options.target.class, Query);
+
         var qry = {
             SearchType: options.target.type,
             Class: options.target.class,
-            Query: options.target.res,
+            Query: Query,
             Format: 'COMPACT-DECODED',
-            Limit: 100
+            Limit: 5000
         };
 
         // client.searchQuery(qry, ondata, true);
@@ -124,7 +128,7 @@ function RETS( options )
     this._transform = function(chunk, encoding, callback){
         // if (this._readableState.pipesCount > 0) log('READABLE>>>>>>>>>>>>>>>')
         // 
-        // $this.emit('data', chunk);
+        // $this.emit('data', chunk); ?? .trim() ??
         if (keeppushing) keeppushing = this.push(chunk.toString('utf8').split('\t'));
         callback();
     };
