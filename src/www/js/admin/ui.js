@@ -128,7 +128,6 @@
 
 		
 		$('[am-Button~=switch]').click(function(){
-			console.log(this);
 			var state = $(this).attr('data-state');
 			state = (state !== 'on') ? 'on' : 'off';
 			var label = $(this).attr('data-'+state+'-text');
