@@ -79,6 +79,8 @@
 			src_rev = $('#sourceEditor').attr('data-rev');
 		if( src_id ){ src._id = src_id; }
 		if( src_rev ){ src._rev = src_rev; }
+		
+		src.status = $('#sourceEditor .modal-header [am-Button~=switch].status').attr('data-state-value');
 
 		switch(type)
 		{

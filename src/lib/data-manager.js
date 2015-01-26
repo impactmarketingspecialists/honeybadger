@@ -216,7 +216,7 @@ DataManager.sourceSave = function(source, callback) {
             return false;
         }
         source.type = 'dsn'; // Set the document type to Data Source Name // added by dan to ensure these are set since they do not have a field to change them
-        source.status = 'active'; // Activate the source // added by dan to ensure these are set since they do not have a field to change them
+        source.status = source.status || 'active'; // Activate the source // added by dan to ensure these are set since they do not have a field to change them
         source.activatedOn = Date.now();
         db.insert(source, null, function(err, body){
             refreshSources(function(){
@@ -250,7 +250,7 @@ DataManager.extractorSave = function(extractor, callback) {
             return false;
         }
         extractor.type = 'extractor'; // Set the document type to Data Source Name
-        extractor.status = 'active'; // Activate the source
+        extractor.status = extractor.status || 'active'; // Activate the source
         extractor.activatedOn = Date.now();
 
         db.insert(extractor, extractor._id, function(err,body){
@@ -286,7 +286,7 @@ DataManager.transformerSave = function(transformer, callback) {
         }
 
         transformer.type = 'transformer'; // Set the document type to Data Source Name
-        transformer.status = 'active'; // Activate the source
+        transformer.status = transformer.status || 'active'; // Activate the source
         transformer.activatedOn = Date.now();
         db.insert(transformer, transformer._id, function(err,body){
             refreshTransformers(function(){
@@ -334,7 +334,7 @@ DataManager.loaderSave = function(loader, callback) {
 
     var _newLoader = function(){
         loader.type = 'loader'; // Set the document type to Data Source Name
-        loader.status = 'active'; // Activate the source
+        loader.status = loader.status || 'active'; // Activate the source
         loader.activatedOn = Date.now();
         db.insert(loader, null, function(err, body){
             refreshLoaders(function(){
@@ -358,7 +358,7 @@ DataManager.taskSave = function(task, callback) {
         }
 
         task.type = 'task';
-        task.status = 'active';
+        task.status = task.status || 'active';
         task.activatedOn = Date.now();
         db.insert(task, task._id, function(err, body){
             refreshTasks(function(){

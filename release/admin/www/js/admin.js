@@ -12664,6 +12664,16 @@ var Admin = (function($this,$){
 			});
 		});
 
+		
+		$('[am-Button~=switch]').click(function(){
+			console.log(this);
+			var state = $(this).attr('data-state');
+			state = (state !== 'on') ? 'on' : 'off';
+			var label = $(this).attr('data-'+state+'-text');
+			var value = (state === 'on') ? 'active' : 'disabled';
+			$(this).attr('data-state',state).attr('data-state-value',value).text(label);
+		});
+
 
 		/**************** UI Bindings ***************/
 		/**************** Sources ***************/
@@ -13311,6 +13321,10 @@ var Admin = (function($this,$){
 				$('#sourceEditor').attr('data-id',data._id);
 				$('#sourceEditor').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#sourceEditor .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#sourceEditor [am-Button~=finish]').prop('disabled',true).show();
 				$('#sourceEditor [am-Button~=next]').prop('disabled',true).hide();
 
@@ -13337,6 +13351,11 @@ var Admin = (function($this,$){
 
 				$('#extractorWizard').attr('data-id',data._id);
 				$('#extractorWizard').attr('data-rev',data._rev);
+
+				if (data.status == 'disabled') {
+					$('#extractorWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				/**
 				 * Load Saved Extractor for Editing
 				 */
@@ -13437,6 +13456,10 @@ var Admin = (function($this,$){
 				$('#transformWizard').attr('data-id',data._id);
 				$('#transformWizard').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#transformerName').val(data.name);
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
@@ -13488,6 +13511,10 @@ var Admin = (function($this,$){
 			case "loaderWizard":
 				$('#loaderWizard').attr('data-id',data._id);
 				$('#loaderWizard').attr('data-rev',data._rev);
+
+				if (data.status == 'disabled') {
+					$('#loaderWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
 
 				$('#loaderName').val(data.name);
 				$('#ldr-source-select').val(data.transform);
@@ -13559,6 +13586,10 @@ var Admin = (function($this,$){
 				$('#taskWizard').attr('data-id',data._id);
 				$('#taskWizard').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#taskWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#taskName').val(data.name);
 				$('#taskDescription').val(data.description);
 				$('#taskRepeat').val(data.repeat);
@@ -13587,7 +13618,8 @@ var Admin = (function($this,$){
 				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
 				res: (stype == 'RETS') ? $('#ext-rets-query').val() : $('#ftpFileName').val(),
 				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-data-format]').val()
-			}
+			},
+			status: $('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		var id = $('#extractorWizard').attr('data-id');
@@ -13628,7 +13660,8 @@ var Admin = (function($this,$){
 				input: [],
 				normalize: [],
 				map: $('#trn-map').val()
-			}
+			},
+			status: $('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		var id = $('#transformWizard').attr('data-id');
@@ -13659,8 +13692,10 @@ var Admin = (function($this,$){
 			transform: $('#ldr-source-select').val(),
 			target: {
 				type: $('#ldr-target-type').val()
-			}
+			},
+			status: $('#loaderWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
+
 
 		var id = $('#loaderWizard').attr('data-id');
 		var _rev = $('#loaderWizard').attr('data-rev');
@@ -13712,7 +13747,8 @@ var Admin = (function($this,$){
 			runDate: $('#taskRundate').val(),
 			runTime: $('#taskRuntime').val(),
 			repeat: $('#taskRepeat').val(),
-			extractor: $('#task-extractor-select').val()
+			extractor: $('#task-extractor-select').val(),
+			status: $('#taskWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		if (id && _rev) {
@@ -13806,6 +13842,8 @@ var Admin = (function($this,$){
 			src_rev = $('#sourceEditor').attr('data-rev');
 		if( src_id ){ src._id = src_id; }
 		if( src_rev ){ src._rev = src_rev; }
+		
+		src.status = $('#sourceEditor .modal-header [am-Button~=switch].status').attr('data-state-value');
 
 		switch(type)
 		{

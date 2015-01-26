@@ -126,6 +126,16 @@
 			});
 		});
 
+		
+		$('[am-Button~=switch]').click(function(){
+			console.log(this);
+			var state = $(this).attr('data-state');
+			state = (state !== 'on') ? 'on' : 'off';
+			var label = $(this).attr('data-'+state+'-text');
+			var value = (state === 'on') ? 'active' : 'disabled';
+			$(this).attr('data-state',state).attr('data-state-value',value).text(label);
+		});
+
 
 		/**************** UI Bindings ***************/
 		/**************** Sources ***************/
@@ -773,6 +783,10 @@
 				$('#sourceEditor').attr('data-id',data._id);
 				$('#sourceEditor').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#sourceEditor .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#sourceEditor [am-Button~=finish]').prop('disabled',true).show();
 				$('#sourceEditor [am-Button~=next]').prop('disabled',true).hide();
 
@@ -799,6 +813,11 @@
 
 				$('#extractorWizard').attr('data-id',data._id);
 				$('#extractorWizard').attr('data-rev',data._rev);
+
+				if (data.status == 'disabled') {
+					$('#extractorWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				/**
 				 * Load Saved Extractor for Editing
 				 */
@@ -899,6 +918,10 @@
 				$('#transformWizard').attr('data-id',data._id);
 				$('#transformWizard').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#transformerName').val(data.name);
 				$('#transformerDescription').val(data.description);
 				$('#trn-source-toggle').val(data.style);
@@ -950,6 +973,10 @@
 			case "loaderWizard":
 				$('#loaderWizard').attr('data-id',data._id);
 				$('#loaderWizard').attr('data-rev',data._rev);
+
+				if (data.status == 'disabled') {
+					$('#loaderWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
 
 				$('#loaderName').val(data.name);
 				$('#ldr-source-select').val(data.transform);
@@ -1021,6 +1048,10 @@
 				$('#taskWizard').attr('data-id',data._id);
 				$('#taskWizard').attr('data-rev',data._rev);
 
+				if (data.status == 'disabled') {
+					$('#taskWizard .modal-header [am-Button~=switch].status').attr('data-state-value','disabled').attr('data-state','off').text('Disabled');
+				}
+
 				$('#taskName').val(data.name);
 				$('#taskDescription').val(data.description);
 				$('#taskRepeat').val(data.repeat);
@@ -1049,7 +1080,8 @@
 				class: (stype == 'RETS') ? $('#ext-rets-class').val() : "",
 				res: (stype == 'RETS') ? $('#ext-rets-query').val() : $('#ftpFileName').val(),
 				format: (stype == 'RETS') ? 'DMQL2' : $('[name=ext-data-format]').val()
-			}
+			},
+			status: $('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		var id = $('#extractorWizard').attr('data-id');
@@ -1090,7 +1122,8 @@
 				input: [],
 				normalize: [],
 				map: $('#trn-map').val()
-			}
+			},
+			status: $('#transformWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		var id = $('#transformWizard').attr('data-id');
@@ -1121,8 +1154,10 @@
 			transform: $('#ldr-source-select').val(),
 			target: {
 				type: $('#ldr-target-type').val()
-			}
+			},
+			status: $('#loaderWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
+
 
 		var id = $('#loaderWizard').attr('data-id');
 		var _rev = $('#loaderWizard').attr('data-rev');
@@ -1174,7 +1209,8 @@
 			runDate: $('#taskRundate').val(),
 			runTime: $('#taskRuntime').val(),
 			repeat: $('#taskRepeat').val(),
-			extractor: $('#task-extractor-select').val()
+			extractor: $('#task-extractor-select').val(),
+			status: $('#taskWizard .modal-header [am-Button~=switch].status').attr('data-state-value')
 		};
 
 		if (id && _rev) {
