@@ -123,6 +123,13 @@ function RETS( options )
 
         client.pipe($this);
 
+        if (options.target.options) {
+            var extract = (options.target.options.extractURL === true) ? options.target.options.urlExtractKey : null;
+            if (extract) {
+                log('Also extracting from discovered URL %s',extract);
+            }
+        }
+
         var request = client.searchQuery(qry, null, true);
 
     };

@@ -398,14 +398,14 @@ function Admin(){
                         csvStream.pipe(xfm);
                         client.searchQuery(qry, null, true );
 
-                        client.getMetadataObjects('Property',function(meta){
-                            console.log('Got object metadata');
-                            console.log(meta);
-                        });
-                        client.getObject('Property','PHOTO','','*',0,function(res){
-                         console.log('getObject Callback');
-                         console.log(res);
-                        });
+                        // client.getMetadataObjects('Property',function(meta){
+                        //     console.log('Got object metadata');
+                        //     console.log(meta);
+                        // });
+                        // client.getObject('Property','PHOTO','','*',0,function(res){
+                        //  console.log('getObject Callback');
+                        //  console.log(res);
+                        // });
 
                     });
                 }

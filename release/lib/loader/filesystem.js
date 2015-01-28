@@ -67,6 +67,6 @@ function Filesystem( options ) {
 	};
 
 	process.nextTick(function(){
-		$this.emit('ready');
+		setTimeout(function(){ $this.emit('ready'); }, 250);
 	});
 }

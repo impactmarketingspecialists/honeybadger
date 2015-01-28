@@ -63,7 +63,7 @@ Object.defineProperties(module.exports, {
 		            break;
 		            case "yesterday":
 		                var d = new Date();
-		                d.setDate(-1);
+		                d.setDate(d.getDate()-1);
 		            break;
 		            default:
 		                var d = new Date(date);
