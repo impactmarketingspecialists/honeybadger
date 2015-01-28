@@ -1056,6 +1056,8 @@
 				$('#taskRepeat').val(data.repeat);
 				$('#taskRundate').val(data.runDate);
 				$('#taskRuntime').val(data.runTime);
+				$('#task-extractor-select').val(data.extractor).change();
+
 			break;
 		}
 	}
