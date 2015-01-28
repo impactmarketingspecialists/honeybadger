@@ -416,6 +416,10 @@ var HoneyBadger = (function($this){
 		$this.exec('task.test', [tsk], callback);
 	};
 
+	this.task.run = function(tsk, callback){
+		$this.exec('task.run', [tsk], callback);
+	};
+
 
 	this.ftpBrowse = function(source, basepath, callback)
 	{

@@ -139,6 +139,7 @@ function Worker(options) {
 
 				loader.on('finish', function(){
 					log('Loader finished:', loader_config.name);
+					callback(null);
 				});
 
 				loader.on('ready',function(){

@@ -817,6 +817,17 @@ function Admin(){
     "task.test": function(task, callback) {
         callback('onvalidate',null,{success:true});
     },
+    "task.run": function(task, callback) {
+        log('Manually running task %s', task.name);
+
+        var worker = require('../worker');
+        var w = new worker();
+        w.runTask(task,function(){
+            log('Manual Run Task: %s ...complete', task.name);
+            callback('onTaskRun',null,{success:true,task:task});
+        });
+
+    },
     "task.save": function(task, callback) {
         DataManager.taskSave(task, function(err, body){
             callback('onsave',err,body);

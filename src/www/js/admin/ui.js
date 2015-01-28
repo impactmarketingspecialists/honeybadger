@@ -670,6 +670,28 @@
 		});
 
 		/**
+		 * Binding to manually run the task
+		 */
+		$('#task-run').click(function(){
+			$('#task-log-body').html('');
+			$('#task-result').html('');
+
+			$('#task-log-body').html('<p class="text-warning">Manually Running Task! <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
+
+			$DM.task.run(tsk(),function(e){
+				if (!e.err) {
+					$('#task-result').html('<p class="bg-success">Task Manual Run Completed Successfully <span am-Icon="glyph" class="glyphicon ok-circle"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',false);
+				} else {
+					$('#task-result').html('<p class="bg-danger">Task Manual Run Failed! Check your settings and try again. <span am-Icon="glyph" class="glyphicon warning-sign"></span></p>');
+					$('#taskWizard [am-Button~=finish]').prop('disabled',true);
+				}
+			});
+
+
+		});
+
+		/**
 		 * Hook to the Dialog finish button
 		 */
 		$('#taskWizard [am-Button~=finish]').click(function(){
