@@ -90,5 +90,18 @@ Object.defineProperties(module.exports,{
 	        });
 	    },
 	    enumerable: true
-    },	
+    },
+    getObject: {
+    	value: function(){
+    		client.getMetadataObjects('Property',function(meta){
+    			console.log('Got object metadata');
+    			console.log(meta);
+	    		// client.getObject('Property','PHOTO','','*',0,function(res){
+	    		// 	console.log('getObject Callback');
+	    		// 	console.log(res);
+	    		// });
+    		})
+    	},
+    	enumerable: true
+    }
 });

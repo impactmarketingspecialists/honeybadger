@@ -155,11 +155,14 @@ function Admin(){
                     _log('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
                     _log('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
                     _log('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-                    _log('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
+
+                    var Query = utility.tokenz(extractor.target.res);
+                    _log('<div class="text-info">-- Query: '+Query+'</div>');
+                    
                     var qry = {
                         SearchType: extractor.target.type,
                         Class: extractor.target.class,
-                        Query: extractor.target.res,
+                        Query: Query,
                         Format: 'COMPACT-DECODED',
                         Limit: 10
                     };
@@ -339,12 +342,14 @@ function Admin(){
                         _log('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
                         _log('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
                         _log('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-                        _log('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
+
+                        var Query = utility.tokenz(extractor.target.res);
+                        _log('<div class="text-info">-- Query: '+Query+'</div>');
 
                         var qry = {
                             SearchType: extractor.target.type,
                             Class: extractor.target.class,
-                            Query: extractor.target.res,
+                            Query: Query,
                             Format: 'COMPACT-DECODED',
                             Limit: 10
                         };
@@ -392,6 +397,15 @@ function Admin(){
                         });
                         csvStream.pipe(xfm);
                         client.searchQuery(qry, null, true );
+
+                        client.getMetadataObjects('Property',function(meta){
+                            console.log('Got object metadata');
+                            console.log(meta);
+                        });
+                        client.getObject('Property','PHOTO','','*',0,function(res){
+                         console.log('getObject Callback');
+                         console.log(res);
+                        });
 
                     });
                 }
@@ -560,11 +574,14 @@ function Admin(){
                                     _log('<div class="text-info">Extracting 10 records via DMQL2 RETS Query.</div>');
                                     _log('<div class="text-info">-- Resource/SearchType: '+extractor.target.type+'</div>');
                                     _log('<div class="text-info">-- Classification: '+extractor.target.class+'</div>');
-                                    _log('<div class="text-info">-- Query: '+extractor.target.res+'</div>');
+
+                                    var Query = utility.tokenz(extractor.target.res);
+                                    _log('<div class="text-info">-- Query: '+Query+'</div>');
+
                                     var qry = {
                                         SearchType: extractor.target.type,
                                         Class: extractor.target.class,
-                                        Query: extractor.target.res,
+                                        Query: Query,
                                         Format: 'COMPACT-DECODED',
                                         Limit: testlimit
                                     };

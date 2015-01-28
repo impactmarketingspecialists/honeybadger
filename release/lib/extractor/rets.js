@@ -101,6 +101,10 @@ function RETS( options )
             Limit: 5000
         };
 
+        // $this->GetRETSOption('PropertyPhotoKey')
+        // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
+        // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
+
         // client.searchQuery(qry, ondata, true);
         // var csv = require('../helpers/csv');
 
