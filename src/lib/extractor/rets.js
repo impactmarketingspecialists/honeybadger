@@ -135,7 +135,7 @@ function RETS( options )
 
     };
     var fs = require('fs');
-    var mkdirp = require('mkdirp')
+    // var mkdirp = require('mkdirp')
 
     this.GetURL = function(_class, index, key, url){
         log('Also extracting from discovered URL %s', url);
