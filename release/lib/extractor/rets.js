@@ -27,6 +27,8 @@ var log = require('debug')('HoneyBadger:Extractor:RETS');
 /** core deps */
 var util = require('util');
 var url = require('url');
+var http = require('../extractor/http');
+var filesystem = require('../loader/filesystem');
 var librets = require('rets-client');
 var stream = require('stream');
 var EventEmitter = require('events').EventEmitter;
@@ -126,17 +128,83 @@ function RETS( options )
         if (options.target.options) {
             var extract = (options.target.options.extractURL === true) ? options.target.options.urlExtractKey : null;
             if (extract) {
-                log('Also extracting from discovered URL %s',extract);
             }
         }
 
         var request = client.searchQuery(qry, null, true);
 
     };
+    var fs = require('fs');
+    var mkdirp = require('mkdirp')
+
+    this.GetURL = function(_class, index, key, url){
+        log('Also extracting from discovered URL %s', url);
+        var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
+
+        var extract_opts = { source: { url: url } };
+        var loader_opts = { target: { path: basepath+'.jpg' } };
+
+        var $e = new http(extract_opts);
+        var $l = new filesystem(loader_opts);
+        $e.pipe($l);
+        $e.on('ready',function(){
+            // log('HTTP Sub-extractor ready');
+            $e.start();
+        });
+        
+        // fs.exists(basepath, function(exists){
+        //     if (!exists) mkdirp(basepath,function(err){
+
+        //         if (err) { console.trace(err); return; }
+
+        //         var extract_opts = { source: { url: url } };
+        //         var loader_opts = { target: { path: basepath+key+'.jpg' } };
+
+        //         var $e = new http(extract_opts);
+        //         var $l = new filesystem(loader_opts);
+        //         $e.pipe($l);
+        //         $e.on('ready',function(){
+        //             // log('HTTP Sub-extractor ready');
+        //             $e.start();
+        //         });
+
+        //     });
+        //     else {
+
+        //         var extract_opts = { source: { url: url } };
+        //         var loader_opts = { target: { path: basepath+key+'.jpg' } };
+
+        //         var $e = new http(extract_opts);
+        //         var $l = new filesystem(loader_opts);
+        //         $e.pipe($l);
+        //         $e.on('ready',function(){
+        //             // log('HTTP Sub-extractor ready');
+        //             $e.start();
+        //         });
+                
+        //     }
+        // });
+
+    };
+
+    this.GetObject = function(id){
+
+    };
 
     var beans = 0;
     var keeppushing = true;
+    var extractIndex = null;
     this._transform = function(chunk, encoding, callback){
+        beans++;
+        if (options.target.options && options.target.options.extractURL === true) {
+            var extract = options.target.options.urlExtractKey || null;
+            var record = chunk.toString('utf8').split('\t');
+            if (extractIndex === null && record.indexOf(extract) > -1) extractIndex = record.indexOf(extract);
+            else if (extractIndex !== null) {
+                process.nextTick(function(){$this.GetURL(record[4],record[8],record[3],record[extractIndex]);});
+            }
+        }
+
         // if (this._readableState.pipesCount > 0) log('READABLE>>>>>>>>>>>>>>>')
         // 
         // $this.emit('data', chunk); ?? .trim() ??

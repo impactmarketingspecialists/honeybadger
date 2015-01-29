@@ -26,6 +26,7 @@ var log = require('debug')('HoneyBadger:Loader:Filesystem');
 
 /** core deps */
 var fs = require('fs');
+var FileQueue = require('filequeue');
 var path = require('path');
 var util = require('util');
 var utilily = require('../utility');
@@ -45,8 +46,13 @@ function Filesystem( options ) {
 	var beans = 0;
 	var headers = [];
 	var target = path.resolve(options.target.path);
-	var fStream = fs.createWriteStream(target, { flags: 'w', encoding: 'utf8', mode: 0666 });
+	var fq = new FileQueue(100);
+	var fStream = fq.createWriteStream(target, { flags: 'w', encoding: 'utf8', mode: 0666 });
 	this.pipe(fStream);
+
+	this.on('end',function(){
+		fStream.end();
+	});
 
 	/** We are TOTALLY ASSUMING that chunks are records 
 	 *  coming from a CSV stream processor. That's probably not
@@ -57,8 +63,8 @@ function Filesystem( options ) {
 		beans++;
 		// log('Processed record', beans);
 
-		if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
-		callback();
+		// if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
+		callback(null, chunk);
 	};
 
 	this._flush = function(callback){
@@ -67,6 +73,6 @@ function Filesystem( options ) {
 	};
 
 	process.nextTick(function(){
-		setTimeout(function(){ $this.emit('ready'); }, 250);
+		$this.emit('ready');
 	});
 }
