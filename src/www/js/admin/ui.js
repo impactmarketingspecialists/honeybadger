@@ -1210,7 +1210,9 @@
 				res.target.filename = $('#ldr-ftp-filename').val();
 			break;
 			case "filesystem":
-				res.target.dsn = $('#ldr-filesystem-dsn').val();
+				res.target.basepath = $('#ldr-filesystem-basepath').val();
+				res.target.filename = $('#ldr-filesystem-filename').val();
+				res.target.path = res.target.basepath + res.target.filename;
 			break;
 			case "couchdb":
 			break;

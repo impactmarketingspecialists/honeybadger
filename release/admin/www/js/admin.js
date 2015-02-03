@@ -13748,7 +13748,9 @@ var Admin = (function($this,$){
 				res.target.filename = $('#ldr-ftp-filename').val();
 			break;
 			case "filesystem":
-				res.target.dsn = $('#ldr-filesystem-dsn').val();
+				res.target.basepath = $('#ldr-filesystem-basepath').val();
+				res.target.filename = $('#ldr-filesystem-filename').val();
+				res.target.path = res.target.basepath + res.target.filename;
 			break;
 			case "couchdb":
 			break;
@@ -14105,6 +14107,13 @@ var Admin = (function($this,$){
 				}
 				else if (item.value.target.type === 'ftp') {
 					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.dsn+'</td><td>'+item.value.status+'</td></tr>').click(function(){
+						showWizard('loaderWizard');
+						setupWizard('loaderWizard', item.value);
+					}));
+				}
+				else if (item.value.target.type === 'filesystem') {
+					console.log(item.value);
+					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.path+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 						showWizard('loaderWizard');
 						setupWizard('loaderWizard', item.value);
 					}));
