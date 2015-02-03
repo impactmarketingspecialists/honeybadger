@@ -44,6 +44,7 @@ function Filesystem( options ) {
 	log('Streaming to %s',options.target.path);
 
 	var beans = 0;
+	var bin = options.binary || false;
 	var headers = [];
 	var target = path.resolve(utility.tokenz(options.target.path));
 	var fq = new FileQueue(100);
@@ -60,15 +61,15 @@ function Filesystem( options ) {
 	 */
 	this._transform = function(chunk, encoding, callback) {
 		
-		beans++;
+		if (!bin) beans++;
 		// log('Processed record', beans);
 
-		if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
+		(!bin) ? this.push(chunk.join(',')+'\r\n') : this.push(chunk);
 		callback(null);
 	};
 
 	this._flush = function(callback){
-		log('Flushed '+beans+' lines to %s',target);
+		if (!bin) log('Flushed '+beans+' lines to %s',target);
 		callback();
 	};
 

@@ -143,7 +143,7 @@ function RETS( options )
         var basepath = '/media/f/data/MRMLS/images/'+key;
 
         var extract_opts = { source: { url: url } };
-        var loader_opts = { target: { path: basepath+'.jpg' } };
+        var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
 
         var $e = new http(extract_opts);
         var $l = new filesystem(loader_opts);
