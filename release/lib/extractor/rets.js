@@ -27,6 +27,8 @@ var log = require('debug')('HoneyBadger:Extractor:RETS');
 /** core deps */
 var util = require('util');
 var url = require('url');
+var fs = require('fs');
+// var mkdirp = require('mkdirp')
 var http = require('../extractor/http');
 var filesystem = require('../loader/filesystem');
 var librets = require('rets-client');
@@ -41,7 +43,13 @@ function RETS( options )
     EventEmitter.call(this);
     stream.Transform.call(this, {objectMode: true});
 
+    var beans = 0;
+    var sidebeans = 0;
+    var sidebeansComplete = 0;
+
     var uri = url.parse(options.source.uri);
+    var keeppushing = true;
+    var extractIndex = null;
 
     /**
      * I'm getting some weird session overlap
@@ -134,13 +142,11 @@ function RETS( options )
         var request = client.searchQuery(qry, null, true);
 
     };
-    var fs = require('fs');
-    // var mkdirp = require('mkdirp')
 
     this.GetURL = function(_class, index, key, url){
-        log('Also extracting from discovered URL %s', url);
+        // log('Also extracting from discovered URL %s', url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
-        var basepath = '/media/f/data/MRMLS/images/'+key;
+        var basepath = '/tmp/MRMLS/images/'+key;
 
         var extract_opts = { source: { url: url } };
         var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
@@ -150,7 +156,15 @@ function RETS( options )
         $e.pipe($l);
         $e.on('ready',function(){
             // log('HTTP Sub-extractor ready');
+            sidebeans++;
             $e.start();
+        });
+
+        $l.on('finish',function(){
+            sidebeansComplete++
+            if (sidebeansComplete == 1) log('Continued Side-Channel extraction: %s of %s records', sidebeansComplete, sidebeans);
+            if (sidebeansComplete % 100 == 0) log('Continued Side-Channel extraction: %s of %s records', sidebeansComplete, sidebeans);
+            if (sidebeans === sidebeansComplete) log('Completed Side-Channel Extraction with %s records',sidebeansComplete);
         });
         
         // fs.exists(basepath, function(exists){
@@ -192,11 +206,10 @@ function RETS( options )
 
     };
 
-    var beans = 0;
-    var keeppushing = true;
-    var extractIndex = null;
     this._transform = function(chunk, encoding, callback){
         beans++;
+
+        // We'll look for keys to create a side-channel extraction if needed
         if (options.target.options && options.target.options.extractURL === true) {
             var extract = options.target.options.urlExtractKey || null;
             var record = chunk.toString('utf8').split('\t');
