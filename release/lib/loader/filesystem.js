@@ -45,7 +45,7 @@ function Filesystem( options ) {
 
 	var beans = 0;
 	var headers = [];
-	var target = path.resolve(options.target.path);
+	var target = path.resolve(utility.tokenz(options.target.path));
 	var fq = new FileQueue(100);
 	var fStream = fq.createWriteStream(target, { flags: 'w', encoding: 'utf8', mode: 0666 });
 	this.pipe(fStream);
