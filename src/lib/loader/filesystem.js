@@ -63,8 +63,8 @@ function Filesystem( options ) {
 		beans++;
 		// log('Processed record', beans);
 
-		// if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
-		callback(null, chunk);
+		if (this._readableState.pipesCount > 0) this.push(chunk.join(',')+'\r\n');
+		callback(null);
 	};
 
 	this._flush = function(callback){

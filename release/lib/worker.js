@@ -134,8 +134,10 @@ function Worker(options) {
 
 				var loader = null;
 				if (loader_config.target.type == 'mysql')	var loader = new MySQL(loader_config);
-				else if (loader_config.target.type == 'file')	var loader = new Filesystem(loader_config);
+				else if (loader_config.target.type == 'filesystem')	var loader = new Filesystem(loader_config);
 				else if (loader_config.target.type == 'ftp')	var loader = new FTPLoader(loader_config);
+
+				if (!loader) { log('Loader unable to instantiate: %s',loader_config); return; }
 
 				loader.on('finish', function(){
 					log('Loader finished:', loader_config.name);
