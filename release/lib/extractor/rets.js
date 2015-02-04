@@ -108,45 +108,17 @@ function RETS( options )
             Class: options.target.class,
             Query: Query,
             Format: 'COMPACT-DECODED',
-            Limit: 10
+            Limit: 8000
         };
 
-        // $this->GetRETSOption('PropertyPhotoKey')
-        // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
-        // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
-
-        // client.searchQuery(qry, ondata, true);
-        // var csv = require('../helpers/csv');
-
-        // // Overwrite stream
-        // var csvStream = csv.parse('\u0009', '"', client);
-        // csvStream.on('headers',function(error, res){
-        //     log('Received headers from CSV helper');
-        //     $this.emit('readable');
-        // });
-
-        // csvStream.on('end',function(){
-        // });
-
-        // csvStream.on('finish',function(){
-        // });
-
         client.pipe($this);
-
-        if (options.target.options) {
-            var extract = (options.target.options.mediaExtract === true) ? options.target.options.mediaExtractKey : null;
-            if (extract) {
-            }
-        }
-
-        var request = client.searchQuery(qry, null, true);
-
+        client.searchQuery(qry, null, true);
     };
 
     this.GetURL = function(_class, index, key, url){
         log('Creating Side-Channel Extraction for ListKey: %s from %s', key, url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
-        var basepath = '/media/fdrive/data/MRMLS/images/'+key;
+        var basepath = '/tmp/MRMLS/images/'+key;
 
         var extract_opts = { source: { url: url } };
         var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
@@ -170,9 +142,13 @@ function RETS( options )
 
     this.GetObject = function(id){
 
+        // $this->GetRETSOption('PropertyPhotoKey')
+        // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
+        // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
     };
 
     this.MediaQueryGetURL = function(id){
+        log('Creating Side-Channel Extraction for ListKey: %s', id);
 
         var qry = {
             SearchType: 'Media',
@@ -182,8 +158,23 @@ function RETS( options )
             Limit: 1
         };
 
-        var request = client.searchQuery(qry, function(err,res){
-            console.log(err,res);
+        client.searchQuery(qry, function(err,res){
+            if (err) {
+                console.trace(err);
+                return;
+            }
+
+            if (!res || !res.columns || !res.records) {
+                log('No media found - skipping %s', id);
+                return;
+            }
+
+            var columns = res.columns.split('\t');
+            var mediaExtractKey = 'MediaURL';
+            var extractIndex = columns.indexOf(mediaExtractKey);
+            var record = res.records.split('\t');
+
+            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
         });
     };
 
@@ -194,6 +185,7 @@ function RETS( options )
         if (options.target.options && options.target.options.mediaExtract === true) {
             var strategy = options.target.options.mediaExtractStrategy || null;
             var extractKey = options.target.options.mediaExtractKey || null;
+
 
             if (!strategy || !extractKey) {
                 return callback(null,chunk);
@@ -214,6 +206,7 @@ function RETS( options )
                         $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "MediaGetURL":
+                        log(strategy);
                         $this.MediaQueryGetURL(record[extractIndex]);
                     break;
                     default:

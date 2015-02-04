@@ -108,7 +108,7 @@ function RETS( options )
             Class: options.target.class,
             Query: Query,
             Format: 'COMPACT-DECODED',
-            Limit: 10
+            Limit: 8000
         };
 
         client.pipe($this);
@@ -118,7 +118,7 @@ function RETS( options )
     this.GetURL = function(_class, index, key, url){
         log('Creating Side-Channel Extraction for ListKey: %s from %s', key, url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
-        var basepath = '/media/fdrive/data/MRMLS/images/'+key;
+        var basepath = '/tmp/MRMLS/images/'+key;
 
         var extract_opts = { source: { url: url } };
         var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
@@ -148,6 +148,7 @@ function RETS( options )
     };
 
     this.MediaQueryGetURL = function(id){
+        log('Creating Side-Channel Extraction for ListKey: %s', id);
 
         var qry = {
             SearchType: 'Media',
@@ -158,7 +159,22 @@ function RETS( options )
         };
 
         client.searchQuery(qry, function(err,res){
-            console.log(err,res);
+            if (err) {
+                console.trace(err);
+                return;
+            }
+
+            if (!res || !res.columns || !res.records) {
+                log('No media found - skipping %s', id);
+                return;
+            }
+
+            var columns = res.columns.split('\t');
+            var mediaExtractKey = 'MediaURL';
+            var extractIndex = columns.indexOf(mediaExtractKey);
+            var record = res.records.split('\t');
+
+            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
         });
     };
 
@@ -169,6 +185,7 @@ function RETS( options )
         if (options.target.options && options.target.options.mediaExtract === true) {
             var strategy = options.target.options.mediaExtractStrategy || null;
             var extractKey = options.target.options.mediaExtractKey || null;
+
 
             if (!strategy || !extractKey) {
                 return callback(null,chunk);
@@ -189,6 +206,7 @@ function RETS( options )
                         $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "MediaGetURL":
+                        log(strategy);
                         $this.MediaQueryGetURL(record[extractIndex]);
                     break;
                     default:
