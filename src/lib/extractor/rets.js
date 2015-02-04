@@ -172,8 +172,13 @@ function RETS( options )
             var columns = res.columns.split('\t');
             var mediaExtractKey = 'MediaURL';
             var extractIndex = columns.indexOf(mediaExtractKey);
-            var record = res.records.split('\t');
 
+            if (extractIndex < 0) {
+                log('Unable to find key to extract url - skipping %s', id);
+                return;
+            }
+            
+            var record = res.records.split('\t');
             $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
         });
     };
