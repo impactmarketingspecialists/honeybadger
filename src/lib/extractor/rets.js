@@ -111,36 +111,8 @@ function RETS( options )
             Limit: 10
         };
 
-        // $this->GetRETSOption('PropertyPhotoKey')
-        // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
-        // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
-
-        // client.searchQuery(qry, ondata, true);
-        // var csv = require('../helpers/csv');
-
-        // // Overwrite stream
-        // var csvStream = csv.parse('\u0009', '"', client);
-        // csvStream.on('headers',function(error, res){
-        //     log('Received headers from CSV helper');
-        //     $this.emit('readable');
-        // });
-
-        // csvStream.on('end',function(){
-        // });
-
-        // csvStream.on('finish',function(){
-        // });
-
         client.pipe($this);
-
-        if (options.target.options) {
-            var extract = (options.target.options.mediaExtract === true) ? options.target.options.mediaExtractKey : null;
-            if (extract) {
-            }
-        }
-
-        var request = client.searchQuery(qry, null, true);
-
+        client.searchQuery(qry, null, true);
     };
 
     this.GetURL = function(_class, index, key, url){
@@ -170,6 +142,9 @@ function RETS( options )
 
     this.GetObject = function(id){
 
+        // $this->GetRETSOption('PropertyPhotoKey')
+        // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
+        // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
     };
 
     this.MediaQueryGetURL = function(id){
@@ -182,7 +157,7 @@ function RETS( options )
             Limit: 1
         };
 
-        var request = client.searchQuery(qry, function(err,res){
+        client.searchQuery(qry, function(err,res){
             console.log(err,res);
         });
     };
