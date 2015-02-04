@@ -48,6 +48,10 @@ function Filesystem( options ) {
 	var headers = [];
 	var target = path.resolve(utility.tokenz(options.target.path));
 	var fq = new FileQueue(100);
+
+	// TODO: don't be a fool make the path first if you can
+    // fs.exists(basepath, function(exists){
+
 	var fStream = fq.createWriteStream(target, { flags: 'w', encoding: 'utf8', mode: 0666 });
 	this.pipe(fStream);
 

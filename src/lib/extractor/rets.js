@@ -166,43 +166,13 @@ function RETS( options )
             if (sidebeansComplete % 100 == 0) log('Continued Side-Channel extraction: %s of %s records', sidebeansComplete, sidebeans);
             if (sidebeans === sidebeansComplete) log('Completed Side-Channel Extraction with %s records',sidebeansComplete);
         });
-        
-        // fs.exists(basepath, function(exists){
-        //     if (!exists) mkdirp(basepath,function(err){
-
-        //         if (err) { console.trace(err); return; }
-
-        //         var extract_opts = { source: { url: url } };
-        //         var loader_opts = { target: { path: basepath+key+'.jpg' } };
-
-        //         var $e = new http(extract_opts);
-        //         var $l = new filesystem(loader_opts);
-        //         $e.pipe($l);
-        //         $e.on('ready',function(){
-        //             // log('HTTP Sub-extractor ready');
-        //             $e.start();
-        //         });
-
-        //     });
-        //     else {
-
-        //         var extract_opts = { source: { url: url } };
-        //         var loader_opts = { target: { path: basepath+key+'.jpg' } };
-
-        //         var $e = new http(extract_opts);
-        //         var $l = new filesystem(loader_opts);
-        //         $e.pipe($l);
-        //         $e.on('ready',function(){
-        //             // log('HTTP Sub-extractor ready');
-        //             $e.start();
-        //         });
-                
-        //     }
-        // });
-
     };
 
     this.GetObject = function(id){
+
+    };
+
+    this.MediaQueryGetURL = function(){
 
     };
 
@@ -211,11 +181,40 @@ function RETS( options )
 
         // We'll look for keys to create a side-channel extraction if needed
         if (options.target.options && options.target.options.mediaExtract === true) {
-            var extract = options.target.options.mediaExtractKey || null;
+            var strategy = options.target.options.mediaExtractStrategy || null;
+            var extractKey = options.target.options.mediaExtractKey || null;
+
+            if (!strategy || !extractKey) {
+                return callback(null,chunk);
+            }
+
+            // Let's split it inspect
             var record = chunk.toString('utf8').split('\t');
-            if (extractIndex === null && record.indexOf(extract) > -1) extractIndex = record.indexOf(extract);
+
+            // If if it's the first row it should contain the key/field name
+            if (extractIndex === null && record.indexOf(extractKey) > -1) extractIndex = record.indexOf(extractKey);
             else if (extractIndex !== null) {
-                process.nextTick(function(){$this.GetURL(record[4],record[8],record[3],record[extractIndex]);});
+                switch(strategy)
+                {
+                    case "GetURL":
+                        process.nextTick(function(){
+                            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
+                        });
+                    break;
+                    case "GetObject":
+                        process.nextTick(function(){
+                            $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
+                        });
+                    break;
+                    case "MediaGetURL"
+                        process.nextTick(function(){
+                            $this.MediaQueryGetURL(record[4],record[8],record[3],record[extractIndex]);
+                        });
+                    default:
+                        process.nextTick(function(){
+                            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
+                        });
+                }
             }
         }
 
@@ -223,12 +222,12 @@ function RETS( options )
         // 
         // $this.emit('data', chunk); ?? .trim() ??
         if (keeppushing) keeppushing = this.push(chunk.toString('utf8').split('\t'));
-        callback();
+        return callback(null);
     };
 
     this._flush = function(callback){
         log('Completed reading RETS resource');
-        callback();
+        return callback();
     };
 
     this.connect();
