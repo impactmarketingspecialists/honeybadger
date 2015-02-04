@@ -73,7 +73,8 @@
 
 					<p>Other RETS implementations use the GetObject call which directly downloads the media from the RETS server.</p>
 
-					<p>The Extract Key is the field that contains the URL for a GetURL strategy.</p>
+					<p>The Extract Key is the field that contains the URL for a GetURL strategy. For Media + GetURL, the Extract Key is the Key/Value
+					to be passed to the side-channel media query as variable <em>{ExtractKey}</em>.</p>
 					<div class="row form-group">
 						<div class="col-xs-6">
 							<label for="ext-rets-media-strategy">Media Extraction Strategy</label>
@@ -84,8 +85,18 @@
 							</select>
 						</div>
 						<div class="col-xs-6">
-							<label for="ext-rets-media-extractKey">Media Extract Key</label>
-							<input type="text" name="ext-rets-media-extractKey" id="ext-rets-media-extractKey" placeholder="MediaURL"/>
+							<label for="ext-rets-media-extractKey">Extract Key</label>
+							<input type="text" name="ext-rets-media-extractKey" id="ext-rets-media-extractKey" class="form-control" placeholder="MediaURL,ListingKey"/>
+						</div>
+					</div>
+					<div id="rets-media-query-options" class="row form-group">
+						<div class="col-xs-6">
+							<label for="ext-rets-media-query">Media Query</label>
+							<input type="text" name="ext-rets-media-query" id="ext-rets-media-query" class="form-control" placeholder="(ClassKey={ExtractKey}),(MediaOrder=0)"/>
+						</div>
+						<div class="col-xs-6">
+							<label for="ext-rets-media-query-extractKey">Media Extract Key</label>
+							<input type="text" name="ext-rets-media-query-extractKey" id="ext-rets-media-query-extractKey" class="form-control" placeholder="MediaURL"/>
 						</div>
 					</div>
 				</div>

@@ -49,7 +49,7 @@ Object.defineProperties(module.exports, {
 		writeable: true
 	},
 	tokenz: {
-		value: function tokenz(query) {
+		value: function tokenz(query, data) {
 
 		    var tkexp = /{(.*?)}/gi;
 		    var fnexp = /\((.*?)\)/;
@@ -80,7 +80,7 @@ Object.defineProperties(module.exports, {
 		            var fn = token.match(fnexp);
 		            var arg = null;
 
-		            if (fn.length) {
+		            if (fn && fn.length) {
 		                arg = fn[1];
 		                fn = token.substr(0,token.indexOf('('));
 
@@ -91,6 +91,11 @@ Object.defineProperties(module.exports, {
 		                        query = query.replace(item, val);
 		                    break;
 		                }
+		                return;
+		            }
+
+		            if (data && data[token]) {
+		            	query = query.replace(item, data[token]);
 		            }
 		        });
 		    }

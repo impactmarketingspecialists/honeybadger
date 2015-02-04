@@ -197,7 +197,6 @@
 					}));
 				}
 				else if (item.value.target.type === 'filesystem') {
-					console.log(item.value);
 					$('#loaderList > tbody').append($('<tr><td>'+item.key+'</td><td>'+item.value.target.path+'</td><td>'+item.value.status+'</td></tr>').click(function(){
 						showWizard('loaderWizard');
 						setupWizard('loaderWizard', item.value);

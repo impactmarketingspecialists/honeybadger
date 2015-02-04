@@ -127,7 +127,7 @@ function RETS( options )
         var $l = new filesystem(loader_opts);
         $e.pipe($l);
         $e.on('ready',function(){
-            log('HTTP Sub-extractor ready');
+            // log('HTTP Sub-extractor ready');
             sidebeans++;
             $e.start();
         });
@@ -150,10 +150,13 @@ function RETS( options )
     this.MediaQueryGetURL = function(id){
         log('Creating Side-Channel Extraction for ListKey: %s', id);
 
+        var query = utility.tokenz(options.target.options.mediaExtractQuery,{ExtractKey:id});
+        var mediaExtractKey = options.target.options.mediaQueryExtractKey;
+
         var qry = {
             SearchType: 'Media',
             Class: 'Media',
-            Query: '(ClassKey='+id+'),(MediaOrder=0)',
+            Query: query,
             Format: 'COMPACT-DECODED',
             Limit: 1
         };
@@ -170,7 +173,6 @@ function RETS( options )
             }
 
             var columns = res.columns.split('\t');
-            var mediaExtractKey = 'MediaURL';
             var extractIndex = columns.indexOf(mediaExtractKey);
 
             if (extractIndex < 0) {
@@ -211,7 +213,6 @@ function RETS( options )
                         $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "MediaGetURL":
-                        log(strategy);
                         $this.MediaQueryGetURL(record[extractIndex]);
                     break;
                     default:
