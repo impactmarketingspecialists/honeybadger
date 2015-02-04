@@ -943,6 +943,7 @@
 						$('#ext-rets-media').prop('checked',true);
 						$('#ext-rets-media-strategy').val(data.target.options.mediaExtractStrategy);
 						$('#ext-rets-media-extractKey').val(data.target.options.mediaExtractKey);
+						$('#ext-rets-media-target').val(data.target.options.mediaExtractTarget);
 						if (data.target.options.mediaExtractStrategy == 'MediaGetURL') {
 							$('#rets-media-query-options').show();
 							$('#ext-rets-media-query').val(data.target.options.mediaExtractQuery);
@@ -953,6 +954,7 @@
 						$('#ext-rets-media').prop('checked',false);
 						$('#ext-rets-media-strategy').val('');
 						$('#ext-rets-media-extractKey').val('');
+						$('#ext-rets-media-target').val('');
 					}
 				}
 			break;
@@ -1150,7 +1152,8 @@
 					extractor.target.options = {
 						mediaExtract: true,
 						mediaExtractStrategy: $('#ext-rets-media-strategy').val(),
-						mediaExtractKey: $('#ext-rets-media-extractKey').val()
+						mediaExtractKey: $('#ext-rets-media-extractKey').val(),
+						mediaExtractTarget: $('#ext-rets-media-target').val()
 					};
 					if(extractor.target.options.mediaExtractStrategy == 'MediaGetURL'){
 						extractor.target.options.mediaExtractQuery = $('#ext-rets-media-query').val();

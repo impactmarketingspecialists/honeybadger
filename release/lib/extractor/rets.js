@@ -50,6 +50,7 @@ function RETS( options )
     var uri = url.parse(options.source.uri);
     var keeppushing = true;
     var extractIndex = null;
+    var headers = [];
 
     /**
      * I'm getting some weird session overlap
@@ -115,13 +116,13 @@ function RETS( options )
         client.searchQuery(qry, null, true);
     };
 
-    this.GetURL = function(_class, index, key, url){
+    this.GetURL = function(_class, index, key, url, record){
         log('Creating Side-Channel Extraction for ListKey: %s from %s', key, url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
-        var basepath = '/tmp/MRMLS/images/'+key;
 
+        var filepath = utility.tokenz(options.target.options.mediaExtractTarget, record);
         var extract_opts = { source: { url: url } };
-        var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
+        var loader_opts = { binary:true, target: { path: filepath } };
 
         var $e = new http(extract_opts);
         var $l = new filesystem(loader_opts);
@@ -147,11 +148,12 @@ function RETS( options )
         // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
     };
 
-    this.MediaQueryGetURL = function(id){
-        log('Creating Side-Channel Extraction for ListKey: %s', id);
-
-        var query = utility.tokenz(options.target.options.mediaExtractQuery,{ExtractKey:id});
+    this.MediaQueryGetURL = function(record){
+        var id = record[options.target.options.mediaExtractKey]; // ListingKey
+        var query = utility.tokenz(options.target.options.mediaExtractQuery,record);
         var mediaExtractKey = options.target.options.mediaQueryExtractKey;
+
+        log('Creating Side-Channel Extraction for ListingKey: %s', id);
 
         var qry = {
             SearchType: 'Media',
@@ -174,14 +176,14 @@ function RETS( options )
 
             var columns = res.columns.split('\t');
             var extractIndex = columns.indexOf(mediaExtractKey);
+            var _media = res.records.split('\t');
 
             if (extractIndex < 0) {
                 log('Unable to find key to extract url - skipping %s', id);
                 return;
             }
             
-            var record = res.records.split('\t');
-            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
+            $this.GetURL(_media[4],_media[8],_media[3],_media[extractIndex],record);
         });
     };
 
@@ -201,6 +203,8 @@ function RETS( options )
             // Let's split it inspect
             var record = chunk.toString('utf8').split('\t');
 
+            if (beans == 1) headers = record;
+
             // If if it's the first row it should contain the key/field name
             if (extractIndex === null && record.indexOf(extractKey) > -1) extractIndex = record.indexOf(extractKey);
             else if (extractIndex !== null) {
@@ -213,7 +217,11 @@ function RETS( options )
                         $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "MediaGetURL":
-                        $this.MediaQueryGetURL(record[extractIndex]);
+                        var orecord = {};
+                        headers.forEach(function(item,index){
+                            orecord[item] = record[index];
+                        });
+                        $this.MediaQueryGetURL(orecord);
                     break;
                     default:
                         $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
