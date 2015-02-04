@@ -108,7 +108,7 @@ function RETS( options )
             Class: options.target.class,
             Query: Query,
             Format: 'COMPACT-DECODED',
-            Limit: 8000
+            Limit: 10
         };
 
         // $this->GetRETSOption('PropertyPhotoKey')
@@ -172,8 +172,19 @@ function RETS( options )
 
     };
 
-    this.MediaQueryGetURL = function(){
+    this.MediaQueryGetURL = function(id){
 
+        var qry = {
+            SearchType: 'Media',
+            Class: 'Media',
+            Query: '(ClassKey='+id+'),(MediaOrder=0)',
+            Format: 'COMPACT-DECODED',
+            Limit: 1
+        };
+
+        var request = client.searchQuery(qry, function(err,res){
+            console.log(err,res);
+        });
     };
 
     this._transform = function(chunk, encoding, callback){
@@ -197,23 +208,16 @@ function RETS( options )
                 switch(strategy)
                 {
                     case "GetURL":
-                        process.nextTick(function(){
-                            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
-                        });
+                        $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "GetObject":
-                        process.nextTick(function(){
-                            $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
-                        });
+                        $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
                     break;
-                    case "MediaGetURL"
-                        process.nextTick(function(){
-                            $this.MediaQueryGetURL(record[4],record[8],record[3],record[extractIndex]);
-                        });
+                    case "MediaGetURL":
+                        $this.MediaQueryGetURL(record[extractIndex]);
+                    break;
                     default:
-                        process.nextTick(function(){
-                            $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
-                        });
+                        $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
                 }
             }
         }
