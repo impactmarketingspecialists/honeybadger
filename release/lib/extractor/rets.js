@@ -144,7 +144,7 @@ function RETS( options )
     };
 
     this.GetURL = function(_class, index, key, url){
-        // log('Also extracting from discovered URL %s', url);
+        log('Creating Side-Channel Extraction for ListKey: %s from %s', key, url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
         var basepath = '/tmp/MRMLS/images/'+key;
 
@@ -155,7 +155,7 @@ function RETS( options )
         var $l = new filesystem(loader_opts);
         $e.pipe($l);
         $e.on('ready',function(){
-            // log('HTTP Sub-extractor ready');
+            log('HTTP Sub-extractor ready');
             sidebeans++;
             $e.start();
         });
