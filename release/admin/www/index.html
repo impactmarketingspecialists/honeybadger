@@ -438,6 +438,37 @@
 						</div>
 					</div>
 				</div>
+				<h4>
+					<div class="checkbox" style="display:inline">
+						<label for="ext-rets-media">
+							<input type="checkbox" id="ext-rets-media" checked> <strong>Media Extraction</strong>
+						</label>
+					</div>
+				</h4>
+				<div id="#rets-media-options">
+					<p>RETS property photos and other media can also be extracted in a side-channel.</p>
+
+					<p>Some RETS implementations require a standard <em>[Resource][Class][Query]</em> which returns Media records
+					- much like a query for listings or agents. The result set includes a field with a URL for downloading the media object.</p>
+
+					<p>Other RETS implementations use the GetObject call which directly downloads the media from the RETS server.</p>
+
+					<p>The Extract Key is the field that contains the URL for a GetURL strategy.</p>
+					<div class="row form-group">
+						<div class="col-xs-6">
+							<label for="ext-rets-media-strategy">Media Extraction Strategy</label>
+							<select name="ext-rets-media-strategy" id="ext-rets-media-strategy" class="form-control">
+								<option value="GetURL">GetURL</option>
+								<option value="GetObject">GetObject</option>
+								<option value="MediaGetURL">Media Query + GetURL</option>
+							</select>
+						</div>
+						<div class="col-xs-6">
+							<label for="ext-rets-media-extractKey">Media Extract Key</label>
+							<input type="text" name="ext-rets-media-extractKey" id="ext-rets-media-extractKey" placeholder="MediaURL"/>
+						</div>
+					</div>
+				</div>
 			</div>
       	</section>
       	<section id="ext-step-2" class="step">

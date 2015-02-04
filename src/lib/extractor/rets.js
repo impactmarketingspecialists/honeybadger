@@ -134,7 +134,7 @@ function RETS( options )
         client.pipe($this);
 
         if (options.target.options) {
-            var extract = (options.target.options.extractURL === true) ? options.target.options.urlExtractKey : null;
+            var extract = (options.target.options.mediaExtract === true) ? options.target.options.mediaExtractKey : null;
             if (extract) {
             }
         }
@@ -210,8 +210,8 @@ function RETS( options )
         beans++;
 
         // We'll look for keys to create a side-channel extraction if needed
-        if (options.target.options && options.target.options.extractURL === true) {
-            var extract = options.target.options.urlExtractKey || null;
+        if (options.target.options && options.target.options.mediaExtract === true) {
+            var extract = options.target.options.mediaExtractKey || null;
             var record = chunk.toString('utf8').split('\t');
             if (extractIndex === null && record.indexOf(extract) > -1) extractIndex = record.indexOf(extract);
             else if (extractIndex !== null) {

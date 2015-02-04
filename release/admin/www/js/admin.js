@@ -13471,6 +13471,16 @@ var Admin = (function($this,$){
 					 * Reset the RETS query to what the user had before
 					 */
 					$('#ext-rets-query').val(data.target.res);
+
+					if (data.target.options && data.target.options.mediaExtract == true) {
+						$('#ext-rets-media').prop('checked',true);
+						$('#ext-rets-media-strategy').val(data.target.options.mediaExtractStrategy);
+						$('#ext-rets-media-extractKey').val(data.target.options.mediaExtractKey);
+					} else {
+						$('#ext-rets-media').prop('checked',false);
+						$('#ext-rets-media-strategy').val('');
+						$('#ext-rets-media-extractKey').val('');
+					}
 				}
 			break;
 			case "transformWizard":
@@ -13663,6 +13673,13 @@ var Admin = (function($this,$){
 				}
 			break;
 			case "RETS":
+				if ($('#ext-rets-media').prop('checked')) {
+					extractor.target.options = {
+						mediaExtract: true,
+						mediaExtractStrategy: $('#ext-rets-media-strategy').val(),
+						mediaExtractKey: $('#ext-rets-media-extractKey').val()
+					}
+				}
 			break;
 		}
 
