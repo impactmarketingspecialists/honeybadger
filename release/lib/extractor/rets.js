@@ -108,7 +108,7 @@ function RETS( options )
             Class: options.target.class,
             Query: Query,
             Format: 'COMPACT-DECODED',
-            Limit: 5000
+            Limit: 8000
         };
 
         // $this->GetRETSOption('PropertyPhotoKey')
@@ -146,7 +146,7 @@ function RETS( options )
     this.GetURL = function(_class, index, key, url){
         log('Creating Side-Channel Extraction for ListKey: %s from %s', key, url);
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
-        var basepath = '/tmp/MRMLS/images/'+key;
+        var basepath = '/media/fdrive/data/MRMLS/images/'+key;
 
         var extract_opts = { source: { url: url } };
         var loader_opts = { binary:true, target: { path: basepath+'.jpg' } };
