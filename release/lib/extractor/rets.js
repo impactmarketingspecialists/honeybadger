@@ -197,7 +197,7 @@ function RETS( options )
 
 
             if (!strategy || !extractKey) {
-                return callback(null,chunk);
+                return callback(null,chunk.toString('utf8').split('\t'));
             }
 
             // Let's split it inspect
@@ -232,8 +232,8 @@ function RETS( options )
         // if (this._readableState.pipesCount > 0) log('READABLE>>>>>>>>>>>>>>>')
         // 
         // $this.emit('data', chunk); ?? .trim() ??
-        if (keeppushing) keeppushing = this.push(chunk.toString('utf8').split('\t'));
-        return callback(null);
+        // if (keeppushing) keeppushing = this.push();
+        return callback(null, chunk.toString('utf8').split('\t'));
     };
 
     this._flush = function(callback){
