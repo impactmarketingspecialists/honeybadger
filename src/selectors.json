@@ -182,7 +182,7 @@
       "limit": null,
       "summary": true,
       "columns": [],
-      "query":"SELECT * FROM market_update_listings WHERE ZipCode in (%s)"
+      "query":"SELECT * FROM market_update WHERE PostalCode in (%s)"
     }
   ]
 }
