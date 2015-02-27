@@ -156,11 +156,8 @@ function RETS( options )
         var $e = client.getObject('Property','Photo',id,'*',0);
         var $l = new filesystem(loader_opts);
         $e.pipe($l);
-        $e.on('ready',function(){
-            // log('HTTP Sub-extractor ready');
-            sidebeans++;
-            $e.start();
-        });
+
+        sidebeans++;
 
         $l.on('finish',function(){
             sidebeansComplete++
@@ -237,7 +234,7 @@ function RETS( options )
                 headers.forEach(function(item,index){
                     orecord[item] = record[index];
                 });
-                
+
                 switch(strategy)
                 {
                     case "GetURL":
