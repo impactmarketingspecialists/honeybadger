@@ -111,5 +111,20 @@ Object.defineProperties(module.exports, {
 		enumerable: true,
 		configurable: true,
 		writable: true
+	},
+	makePath: {
+		value: function makePath(filepath) {
+			var mkdirp = require('mkdirp');
+			var path = require('path');
+			var fs = require('fs');
+			var dirname = path.dirname(filepath);
+
+			if (fs.existsSync(dirname)) return true;
+
+			return mkdirp.sync(fullpath);
+		},
+		enumerable: true,
+		configurable: true,
+		writable: true
 	}
 });

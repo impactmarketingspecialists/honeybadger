@@ -49,6 +49,8 @@ function Filesystem( options ) {
 	var target = path.resolve(utility.tokenz(options.target.path));
 	var fq = new FileQueue(100);
 
+	utility.makePath(target);
+
 	// TODO: don't be a fool make the path first if you can
     // fs.exists(basepath, function(exists){
 
