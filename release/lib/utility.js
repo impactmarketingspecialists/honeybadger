@@ -121,7 +121,7 @@ Object.defineProperties(module.exports, {
 
 			if (fs.existsSync(dirname)) return true;
 
-			return mkdirp.sync(fullpath);
+			return mkdirp.sync(dirname);
 		},
 		enumerable: true,
 		configurable: true,
