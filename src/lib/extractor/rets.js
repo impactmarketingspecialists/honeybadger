@@ -141,11 +141,34 @@ function RETS( options )
         });
     };
 
-    this.GetObject = function(id){
+    this.GetObject = function(id, record){
 
         // $this->GetRETSOption('PropertyPhotoKey')
         // GetObject($strResourceType, $strDataType, $intResourceID, $intPhotoNumber='*', $bLocation=0)
         // GetObject('Property', 'Photo', 'PropertyPhotoKey,PropertyPhotoKey,PropertyPhotoKey', '*', 0)
+        
+        log('Creating Side-Channel Extraction for ListKey: %s', id);
+        // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
+
+        var filepath = utility.tokenz(options.target.options.mediaExtractTarget, record);
+        var loader_opts = { binary:true, target: { path: filepath } };
+
+        var $e = client.getObject('Property','Photo',id,'*',0);
+        var $l = new filesystem(loader_opts);
+        $e.pipe($l);
+        $e.on('ready',function(){
+            // log('HTTP Sub-extractor ready');
+            sidebeans++;
+            $e.start();
+        });
+
+        $l.on('finish',function(){
+            sidebeansComplete++
+            if (sidebeansComplete == 1) log('Continued Side-Channel extraction: %s of %s records', sidebeansComplete, sidebeans);
+            if (sidebeansComplete % 100 == 0) log('Continued Side-Channel extraction: %s of %s records', sidebeansComplete, sidebeans);
+            if (sidebeans === sidebeansComplete) log('Completed Side-Channel Extraction with %s records',sidebeansComplete);
+        });
+
     };
 
     this.MediaQueryGetURL = function(record){
@@ -208,19 +231,22 @@ function RETS( options )
             // If if it's the first row it should contain the key/field name
             if (extractIndex === null && record.indexOf(extractKey) > -1) extractIndex = record.indexOf(extractKey);
             else if (extractIndex !== null) {
+
+                // Create a nice object for the record
+                var orecord = {};
+                headers.forEach(function(item,index){
+                    orecord[item] = record[index];
+                });
+                
                 switch(strategy)
                 {
                     case "GetURL":
                         $this.GetURL(record[4],record[8],record[3],record[extractIndex]);
                     break;
                     case "GetObject":
-                        $this.GetObject(record[4],record[8],record[3],record[extractIndex]);
+                        $this.GetObject(record[extractIndex], orecord);
                     break;
                     case "MediaGetURL":
-                        var orecord = {};
-                        headers.forEach(function(item,index){
-                            orecord[item] = record[index];
-                        });
                         $this.MediaQueryGetURL(orecord);
                     break;
                     default:
