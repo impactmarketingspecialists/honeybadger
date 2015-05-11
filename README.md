@@ -21,8 +21,19 @@ The `honeybadger` package is itself split into 3 packages:
 
 # Contributing
 
+Contributions are welcomed from the greater community via GitHub pull request. For questions or help contributing
+please create an issue.
+
+## Maintainer(s)
+
+@dermidgen
+
 # Versioning
+
+Honey Badger is maintained under [the Semantic Versioning guidelines](http://semver.org/).
 
 # Related Projects
 
-# Copyright and License
+# License
+Code released under [the MIT license](https://github.com/impactmarketingspecialists/honeybadger/blob/master/LICENSE). 
+Docs released under [Creative Commons](https://github.com/impactmarketingspecialists/honeybadger/blob/master/docs/LICENSE).
