@@ -4,7 +4,8 @@
   "description": "Extract, Transform and Load for Nodejs",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "mocha test/index",
+    "dev": "DEBUG=HoneyBadger* nodemon -q index"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
     "streaming",
     "bigdata",
     "csv",
+    "rets",
+    "ftp",
     "mysql"
   ],
   "author": "Danny Graham",
@@ -29,5 +32,8 @@
   "homepage": "https://github.com/impactmarketingspecialists/honeybadger",
   "dependencies": {
     "honeybadger-admin": "git://github.com/dermidgen/honeybadger-admin.git"
+  },
+  "devDependencies": {
+    "nodemon": "^1.3.7"
   }
 }
