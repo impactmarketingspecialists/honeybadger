@@ -26,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/impactmarketingspecialists/honeybadger/issues"
   },
-  "homepage": "https://github.com/impactmarketingspecialists/honeybadger"
+  "homepage": "https://github.com/impactmarketingspecialists/honeybadger",
+  "dependencies": {
+    "honeybadger-admin": "git://github.com/dermidgen/honeybadger-admin.git"
+  }
 }
