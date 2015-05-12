@@ -2,10 +2,10 @@
   "name": "honeybadger",
   "version": "1.0.0",
   "description": "Extract, Transform and Load for Nodejs",
-  "main": "index.js",
+  "main": "honeybadger.js",
   "scripts": {
     "test": "mocha test/index",
-    "dev": "DEBUG=HoneyBadger* nodemon -q index"
+    "dev": "DEBUG=HoneyBadger* nodemon -q honeybadger"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/impactmarketingspecialists/honeybadger",
   "dependencies": {
+    "honeybadger-service": "git://github.com/dermidgen/honeybadger-service.git",
     "honeybadger-admin": "git://github.com/dermidgen/honeybadger-admin.git"
   },
   "devDependencies": {
