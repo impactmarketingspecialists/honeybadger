@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/impactmarketingspecialists/honeybadger.git"
+    "url": "https://github.com/dermidgen/honeybadger.git"
   },
   "keywords": [
     "ETL",
@@ -27,9 +27,9 @@
   "author": "Danny Graham",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/impactmarketingspecialists/honeybadger/issues"
+    "url": "https://github.com/dermidgen/honeybadger/issues"
   },
-  "homepage": "https://github.com/impactmarketingspecialists/honeybadger",
+  "homepage": "https://github.com/dermidgen/honeybadger",
   "dependencies": {
     "honeybadger-service": "git://github.com/dermidgen/honeybadger-service.git",
     "honeybadger-admin": "git://github.com/dermidgen/honeybadger-admin.git"
