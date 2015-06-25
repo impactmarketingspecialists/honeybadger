@@ -4,11 +4,11 @@ This project seeks to provide a simple set of tools libraries for expressing and
 
 The `honeybadger` package is itself split into 3 packages:
 
-*	[`honeybadger-etl`](https://github.com/impactmarketingspecialists/honeybadger-etl),
+*	[`honeybadger-etl`](https://github.com/dermidgen/honeybadger-etl),
 	independent libraries for implementing ETL in Node.js Streams
-*	[`honeybadger-service`](https://github.com/impactmarketingspecialists/honeybadger-service),
+*	[`honeybadger-service`](https://github.com/dermidgen/honeybadger-service),
 	core Node.js services, workers and scheduling for automated ETL solutions
-*	[`honeybadger-admin`](https://github.com/impactmarketingspecialists/honeybadger-admin),
+*	[`honeybadger-admin`](https://github.com/dermidgen/honeybadger-admin),
 	a browser-based Solution Designer, System Admin and Reporting for Honey Badger services.
 
 ## Documentation
@@ -35,5 +35,5 @@ Honey Badger is maintained under [the Semantic Versioning guidelines](http://sem
 # Related Projects
 
 # License
-Code released under [the MIT license](https://github.com/impactmarketingspecialists/honeybadger/blob/master/LICENSE). 
-Docs released under [Creative Commons](https://github.com/impactmarketingspecialists/honeybadger/blob/master/docs/LICENSE).
+Code released under [the MIT license](https://github.com/dermidgen/honeybadger/blob/master/LICENSE). 
+Docs released under [Creative Commons](https://github.com/dermidgen/honeybadger/blob/master/docs/LICENSE).
