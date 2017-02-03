@@ -121,7 +121,7 @@ function RETS( options )
         // var basepath = '/home/dgraham/tmp/mlsphotos/'+key+'-'+index+'-'+_class+'';
 
         var filepath = utility.tokenz(options.target.options.mediaExtractTarget, record);
-        var extract_opts = { source: { url: url } };
+        var extract_opts = { source: { url: url + '?preset=X-Large'} };
         var loader_opts = { binary:true, target: { path: filepath } };
 
         var $e = new http(extract_opts);
